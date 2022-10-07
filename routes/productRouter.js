@@ -352,7 +352,9 @@ router.get(
     const isNumber = /^\d/.test(payload);
     let query = {};
     if (!isNumber) {
-      query = { name: { $regex: new RegExp("^" + payload + ".*", "i") } };
+      // query = { name: { $regex: new RegExp("^" + payload + ".*", "i") } };
+      query = { name: { $regex: new RegExp(payload + ".*?", "i") } };
+
       // query = { name:  payload  };
     } else {
       query = {
