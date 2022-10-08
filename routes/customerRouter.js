@@ -111,7 +111,7 @@ customerRouter.get(
       _id: 1,
       name: 1,
       phone: 1,
-      point: 1,
+      // point: 1,
     });
     res.send(customers);
     // console.log(customers);

@@ -73,6 +73,10 @@ const saleSchema = mongoose.Schema(
     },
     discount: { type: Number, require: true },
     billerId: { type: mongoose.Types.ObjectId, require: true, ref: "User" },
+    delivery: {
+      address: { type: String },
+      phone: { type: String },
+    },
     customerId: {
       type: mongoose.Types.ObjectId,
       require: true,
