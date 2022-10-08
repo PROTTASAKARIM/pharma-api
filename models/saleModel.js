@@ -47,7 +47,11 @@ const saleSchema = mongoose.Schema(
       grossTotalRound: { type: Number },
       point: { type: Number },
     },
-    returnInvoice: { type: mongoose.Types.ObjectId, ref: "Sale" },
+    returnInvoice: {
+      type: mongoose.Types.ObjectId,
+      ref: "Sale",
+      default: null,
+    },
     paidAmount: new mongoose.Schema({
       cash: { type: Number },
       mfs: {
@@ -88,6 +92,13 @@ const saleSchema = mongoose.Schema(
     timestamps: true,
   }
 );
-
+// saleSchema.options.toJSON = {
+//   transform(zipRequestDocument, ret, options) {
+//     // eslint-disable-line no-unused-vars
+//     if (!ret.returnInvoice) {
+//       ret.returnInvoice = {};
+//     }
+//   },
+// };
 const Sale = new mongoose.model("Sale", saleSchema);
 module.exports = Sale;
