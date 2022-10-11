@@ -168,7 +168,7 @@ saleRouter.get(
       ? endOfDay(new Date(req.params.end))
       : endOfDay(new Date.now());
     // console.log(start, end, new Date());
-    const day = parseInt(1);
+    // const day = parseInt(1);
     try {
       const sales = await Sale.aggregate([
         {
@@ -284,7 +284,7 @@ saleRouter.get(
     const id = req.params.id;
     const sales = await Sale.find({ _id: id, status: "complete" })
       .populate("billerId", "name")
-      .populate("customerId", { phone: 1, name: 1 })
+      .populate("customerId", { phone: 1, name: 1, point: 1 })
       .populate("returnInvoice", "invoiceId");
     res.send(sales[0]);
     // // res.send('removed');
@@ -299,7 +299,7 @@ saleRouter.get(
     const id = req.params.id;
     const sales = await Sale.find({ invoiceId: id, status: "complete" })
       .populate("billerId", "name")
-      .populate("customerId", { phone: 1, name: 1 });
+      .populate("customerId", { phone: 1, name: 1, point: 1 });
     res.send(sales[0]);
     // // res.send('removed');
     // console.log(sales);

@@ -104,18 +104,68 @@ customerRouter.get(
 );
 
 // GET ALL CUSTOMER DW
+// customerRouter.get(
+//   "/dw",
+//   expressAsyncHandler(async (req, res) => {
+//     const customers = await Customer.find({ status: "active" }).select({
+//       _id: 1,
+//       name: 1,
+//       phone: 1,
+//       point: 1,
+//     });
+//     res.send(customers);
+//     // console.log(customers);
+//     // // res.send('removed');
+//   })
+// );
+
+// CUSTOMER SRARCH
 customerRouter.get(
-  "/dw",
+  "/search/:q",
   expressAsyncHandler(async (req, res) => {
-    const customers = await Customer.find({ status: "active" }).select({
-      _id: 1,
-      name: 1,
-      phone: 1,
-      point: 1,
-    });
-    res.send(customers);
-    // console.log(customers);
-    // // res.send('removed');
+    // let payload = req.query?.q?.trim().toString().toLocaleLowerCase();
+    const payload = req.params?.q?.trim().toString().toLocaleLowerCase();
+    console.log(payload);
+
+    const isNumber = /^\d/.test(payload);
+    console.log(isNumber);
+    let query = {};
+    if (!isNumber) {
+      query = {
+        $or: [
+          { name: { $regex: new RegExp("\\b" + payload + ".*", "i") } },
+          { email: { $regex: new RegExp("^" + payload + ".*", "i") } },
+        ],
+      };
+    } else {
+      // if number search in ean and article code
+      query = {
+        phone: {
+          $regex: RegExp("^" + payload + ".*", "i"),
+        },
+      };
+    }
+    console.log(query);
+
+    try {
+      const search = await Customer.find(query)
+        .select({
+          _id: 1,
+          name: 1,
+          email: 1,
+          phone: 1,
+          point: 1,
+        })
+        .limit(10);
+      if (payload === "") {
+        res.send([]);
+      } else {
+        console.log(search);
+        res.send(search);
+      }
+    } catch (err) {
+      console.log(err);
+    }
   })
 );
 
@@ -125,6 +175,24 @@ customerRouter.get(
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     const customers = await Customer.find({ _id: id, status: "active" });
+    res.send(customers[0]);
+    // // res.send('removed');
+    // console.log(customers);
+  })
+);
+// GET ONE customers
+customerRouter.get(
+  "/select/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const customers = await Customer.find({ _id: id, status: "active" }).select(
+      {
+        _id: 1,
+        name: 1,
+        phone: 1,
+        point: 1,
+      }
+    );
     res.send(customers[0]);
     // // res.send('removed');
     // console.log(customers);

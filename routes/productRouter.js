@@ -353,7 +353,12 @@ router.get(
     let query = {};
     if (!isNumber) {
       // query = { name: { $regex: new RegExp("^" + payload + ".*", "i") } };
-      query = { name: { $regex: new RegExp(payload + ".*?", "i") } };
+      query = { name: { $regex: new RegExp("\\b" + payload + ".*?", "i") } };
+      // name: { $regex: new RegExp(`/\b${payload}[^\b]*?\b/gi`, "i") },
+      // query = {
+      //   name: { $regex: new RegExp("\\b" + payload + "\\w+  ", "i") },
+      //   // name: { $regex: new RegExp(payload + `/\b${payload}[^\b]*?w+/g`, "i") },
+      // };
 
       // query = { name:  payload  };
     } else {
@@ -364,6 +369,9 @@ router.get(
         ],
       };
     }
+    console.log(query);
+
+    console.log(payload);
 
     const search = await Product.find(query)
       .select({
@@ -376,7 +384,7 @@ router.get(
         priceList: 1,
       })
       .populate("priceList", { mrp: 1, tp: 1, supplier: 1 })
-      .limit(5);
+      .limit(10);
     if (payload === "") {
       res.send([]);
     } else {
