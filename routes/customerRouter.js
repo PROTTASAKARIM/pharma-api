@@ -104,20 +104,20 @@ customerRouter.get(
 );
 
 // GET ALL CUSTOMER DW
-// customerRouter.get(
-//   "/dw",
-//   expressAsyncHandler(async (req, res) => {
-//     const customers = await Customer.find({ status: "active" }).select({
-//       _id: 1,
-//       name: 1,
-//       phone: 1,
-//       point: 1,
-//     });
-//     res.send(customers);
-//     // console.log(customers);
-//     // // res.send('removed');
-//   })
-// );
+customerRouter.get(
+  "/dw",
+  expressAsyncHandler(async (req, res) => {
+    const customers = await Customer.find({ status: "active" }).select({
+      _id: 1,
+      name: 1,
+      phone: 1,
+      // point: 1,
+    });
+    res.send(customers);
+    // console.log(customers);
+    // // res.send('removed');
+  })
+);
 
 // CUSTOMER SRARCH
 customerRouter.get(
@@ -227,6 +227,7 @@ customerRouter.post(
             .status(500)
             .json({ message: "There was a server side error", error: err });
         } else {
+          console.log(customer);
           res.status(200).json({
             message: "Customer is created Successfully",
             id: customer._id,

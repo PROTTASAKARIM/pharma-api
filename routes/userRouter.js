@@ -143,6 +143,7 @@ userRouter.post(
 userRouter.put(
   "/:id",
   expressAsyncHandler(async (req, res) => {
+    console.log(req);
     const id = req.params.id;
     let update = req.body;
     if (update.password) {
