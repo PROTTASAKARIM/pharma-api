@@ -471,6 +471,67 @@ router.delete(
     }
   })
 );
+
+// PRODUCT PHOTO UPLOAD
+// Upload Endpoint
+router.post(
+  "/upload/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+
+    const appRoot = process.env.PWD;
+    if (req.files === null) {
+      return res.status(400).json({ msg: "No file uploaded" });
+    }
+
+    const file = req.files.file;
+    const name = file.name.split(".");
+    const ext = name[1];
+    const time = Date.now();
+    const fileName = `${id}-${time}.${ext}`;
+    console.log(`../uploads/${fileName}`);
+
+    file.mv(`${appRoot}/uploads/product/${fileName}`, async (err) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send(err);
+      } else {
+        await Product.updateOne(
+          { _id: id },
+          { $set: { photo: `/uploads/product/${fileName}` } }
+        )
+          .then((response) => {
+            // res.send(response);
+            res.json({
+              fileName: fileName,
+              filePath: `/uploads/product/${fileName}`,
+            });
+          })
+          .catch((err) => {
+            res.send(err);
+          });
+      }
+    });
+  })
+);
+
+// UPDATE PRODUCT PHOTO FIELD
+// router.post("/emptyPhoto", async (req, res) => {
+//   try {
+//     const hi = await Product.updateMany(
+//       { product_type: "standard" },
+//       { $set: { photo: "" } }
+//     );
+//     res.send(hi);
+//     // await Product.find({ product_type: "standard" }).update({
+//     //   $set: { photo: "" },
+//     console.log(hi);
+//     // });
+//   } catch (err) {
+//     console.log("err");
+//   }
+// });
+
 // // DELETE ALL
 // router.get(
 //   "/del-all",

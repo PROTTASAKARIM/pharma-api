@@ -25,7 +25,7 @@ const productSchema = mongoose.Schema(
     featured: { type: Boolean, require: true, default: false },
     shipping_method: { type: String, require: true },
     hide_website: { type: Boolean, require: true },
-    photo: { type: String, require: true },
+    photo: { type: String },
     status: { type: String, enum: ["active", "inactive"] },
   },
   {

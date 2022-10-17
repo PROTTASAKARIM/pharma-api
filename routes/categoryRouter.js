@@ -254,43 +254,46 @@ categoryRouter.delete(
 
 // CATEGORY PHOTO UPLOAD
 // Upload Endpoint
-categoryRouter.post("/upload/:id", async (req, res) => {
-  const id = req.params.id;
+categoryRouter.post(
+  "/upload/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
 
-  const appRoot = process.env.PWD;
-  if (req.files === null) {
-    return res.status(400).json({ msg: "No file uploaded" });
-  }
-
-  const file = req.files.file;
-  const name = file.name.split(".");
-  const ext = name[1];
-  const time = Date.now();
-  const fileName = `${id}-${time}.${ext}`;
-  console.log(`../uploads/${fileName}`);
-
-  file.mv(`${appRoot}/uploads/category/${fileName}`, async (err) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).send(err);
-    } else {
-      await Category.updateOne(
-        { _id: id },
-        { $set: { photo: `/uploads/category/${fileName}` } }
-      )
-        .then((response) => {
-          // res.send(response);
-          res.json({
-            fileName: fileName,
-            filePath: `/uploads/category/${fileName}`,
-          });
-        })
-        .catch((err) => {
-          res.send(err);
-        });
+    const appRoot = process.env.PWD;
+    if (req.files === null) {
+      return res.status(400).json({ msg: "No file uploaded" });
     }
-  });
-});
+
+    const file = req.files.file;
+    const name = file.name.split(".");
+    const ext = name[1];
+    const time = Date.now();
+    const fileName = `${id}-${time}.${ext}`;
+    console.log(`../uploads/${fileName}`);
+
+    file.mv(`${appRoot}/uploads/category/${fileName}`, async (err) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send(err);
+      } else {
+        await Category.updateOne(
+          { _id: id },
+          { $set: { photo: `/uploads/category/${fileName}` } }
+        )
+          .then((response) => {
+            // res.send(response);
+            res.json({
+              fileName: fileName,
+              filePath: `/uploads/category/${fileName}`,
+            });
+          })
+          .catch((err) => {
+            res.send(err);
+          });
+      }
+    });
+  })
+);
 // categoryRouter.post(
 //   "/photo/:id",
 //   upload.single("photo"),
