@@ -36,7 +36,7 @@ unitRouter.get(
     const units = await Unit.find({ _id: id, status: "active" });
     res.send(units[0]);
     // // res.send('removed');
-    console.log(units);
+    // console.log(units);
   })
 );
 
@@ -79,6 +79,7 @@ unitRouter.put(
   "/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
+    console.log(req.body);
     const update = req.body;
     try {
       await Unit.updateOne({ _id: id }, { $set: update })

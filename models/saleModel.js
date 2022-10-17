@@ -75,6 +75,7 @@ const saleSchema = mongoose.Schema(
       old: { type: Number },
       new: { type: Number },
     },
+    todayPoint: { type: Number },
     discount: { type: Number, require: true },
     billerId: { type: mongoose.Types.ObjectId, require: true, ref: "User" },
     delivery: {
