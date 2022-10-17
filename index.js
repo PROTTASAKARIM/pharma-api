@@ -21,6 +21,7 @@ const tpnRouter = require("./routes/tpnRouter");
 const companyRouter = require("./routes/companyRouter");
 const damageRouter = require("./routes/damageRouter");
 const multer = require("multer");
+const fileUpload = require("express-fileupload");
 
 require("dotenv").config();
 const PORT = process.env.PORT || 5001;
@@ -50,6 +51,7 @@ mongoose
   .catch((err) => console.log(err));
 
 // application router
+app.use(fileUpload());
 app.use("/api/product", productRouter);
 app.use("/api/user", userRouter);
 app.use("/api/category", categoryRouter);
@@ -68,7 +70,7 @@ app.use("/api/rtv", rtvRouter);
 app.use("/api/tpn", tpnRouter);
 app.use("/api/company", companyRouter);
 app.use("/api/damage", damageRouter);
-
+app.use("/uploads", express.static("uploads"));
 // Home
 app.get("/", async (req, res) => {
   res.sendFile(path.join(__dirname + "/template/home.html"));

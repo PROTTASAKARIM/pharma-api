@@ -15,9 +15,7 @@ const router = express.Router();
 const expressAsyncHandler = require("express-async-handler");
 const Category = require("../models/categoryModel");
 const upload = require("../middlewares/fileUploader");
-
 const categoryRouter = express.Router();
-
 // COUNT Category
 categoryRouter.get(
   "/count",
@@ -255,11 +253,60 @@ categoryRouter.delete(
 );
 
 // CATEGORY PHOTO UPLOAD
-categoryRouter.post("/photo", upload.single("c_photo"), (req, res) => {
-  res.send(req.file);
+// Upload Endpoint
+categoryRouter.post("/upload/:id", async (req, res) => {
+  const id = req.params.id;
+
+  const appRoot = process.env.PWD;
+  if (req.files === null) {
+    return res.status(400).json({ msg: "No file uploaded" });
+  }
+
+  const file = req.files.file;
+  const name = file.name.split(".");
+  const ext = name[1];
+  const time = Date.now();
+  const fileName = `${id}-${time}.${ext}`;
+  console.log(`../uploads/${fileName}`);
+
+  file.mv(`${appRoot}/uploads/category/${fileName}`, async (err) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send(err);
+    } else {
+      await Category.updateOne(
+        { _id: id },
+        { $set: { photo: `/uploads/category/${fileName}` } }
+      )
+        .then((response) => {
+          // res.send(response);
+          res.json({
+            fileName: fileName,
+            filePath: `/uploads/category/${fileName}`,
+          });
+        })
+        .catch((err) => {
+          res.send(err);
+        });
+    }
+  });
 });
+// categoryRouter.post(
+//   "/photo/:id",
+//   upload.single("photo"),
+//   expressAsyncHandler(async (req, res) => {
+//     // res.send({ req, res });
+//     // const id = req.params.id;
+//     console.log(id);
+//     try {
+//       // console.log(req.body.file);
+//     } catch (err) {
+//       res.send(err);
+//     }
+//   })
+// );
 // CATEGORY PHOTO UPLOAD
-categoryRouter.post("/doc", upload.single("doc"), (req, res) => {
+categoryRouter.post("/doc", upload.single("doc"), async (req, res) => {
   res.send(req.file);
 });
 

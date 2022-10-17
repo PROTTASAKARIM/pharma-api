@@ -121,6 +121,7 @@ saleRouter.get(
 saleRouter.get(
   "/exportArticale/:start/:end",
   expressAsyncHandler(async (req, res) => {
+    const q = req.query.q;
     const start = req.params.start
       ? startOfDay(new Date(req.params.start))
       : startOfDay(new Date.now());
@@ -128,31 +129,67 @@ saleRouter.get(
       ? endOfDay(new Date(req.params.end))
       : endOfDay(new Date.now());
     // console.log(start, end, new Date());
-    const sales = await Sale.find({
-      status: "complete",
-      createdAt: { $gte: start, $lte: end },
-    }).select({
-      invoiceId: 1,
-      // totalItem: 1,
-      // grossTotalRound: 1,
-      // total: 1,
-      // vat: 1,
-      // status: 1,
-      // paidAmount: 1,
-      // billerId: 1,
-      // totalReceived: 1,
-      // createdAt: 1,
-      // changeAmount: 1,
-      // customerId: 1,
-      products: 1,
-      // tp:1
-    });
-    // .populate("billerId", "name")
-    // .populate("customerId", "phone");
 
-    res.send(sales);
-    console.log(sales);
+    // const sales = await Sale.find({
+    //   status: "complete",
+    //   createdAt: { $gte: start, $lte: end },
+    // }).select({
+    //   invoiceId: 1,
+    //   // totalItem: 1,
+    //   // grossTotalRound: 1,
+    //   // total: 1,
+    //   // vat: 1,
+    //   // status: 1,
+    //   // paidAmount: 1,
+    //   // billerId: 1,
+    //   // totalReceived: 1,
+    //   createdAt: 1,
+    //   // changeAmount: 1,
+    //   // customerId: 1,
+    //   products: 1,
+    //   // tp:1
+    // });
+    // // .populate("billerId", "name")
+    // // .populate("customerId", "phone");
+
+    // res.send(sales);
+    // console.log(sales);
     // // res.send('removed');
+
+    try {
+      const sales = await Sale.aggregate([
+        {
+          $match: {
+            $and: [
+              {
+                status: "complete",
+              },
+              {
+                createdAt: {
+                  $gt: start,
+                  $lt: end,
+                },
+              },
+            ],
+          },
+        },
+        {
+          $project: {
+            invoiceId: 1,
+            "products.article_code": 1,
+            "products.name": 1,
+            "products.tp": 1,
+            "products.mrp": 1,
+            "products.qty": 1,
+            "products.vat": 1,
+          },
+        },
+      ]);
+      console.log(sales);
+      res.send(sales);
+    } catch (err) {
+      console.log(err);
+    }
   })
 );
 
@@ -311,6 +348,7 @@ saleRouter.post(
   "/",
   generatePosId,
   expressAsyncHandler(async (req, res) => {
+    console.log("body", req.body);
     const newSale = new Sale(req.body);
     console.log("newSale", newSale);
     try {
@@ -371,6 +409,25 @@ saleRouter.put(
     }
   })
 );
+// Temporary del ONE Sale
+saleRouter.put(
+  "deletetemp/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params._id;
+    const update = req.body;
+    try {
+      await Sale.updateOne({ _id: id }, { $set: update })
+        .then((response) => {
+          res.send(response);
+        })
+        .catch((err) => {
+          res.send(err);
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  })
+);
 
 // DELETE ONE Sale
 saleRouter.delete(
@@ -390,7 +447,6 @@ saleRouter.delete(
     }
   })
 );
-
 // SALES AGGREGATION
 saleRouter.get(
   "todaySale",
