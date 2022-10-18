@@ -33,7 +33,7 @@ supplierRouter.get(
     const suppliers = await Supplier.find({});
     res.send(suppliers);
     // // res.send('removed');
-    // console.log(suppliers);
+    console.log(suppliers);
   })
 );
 
@@ -164,15 +164,15 @@ supplierRouter.get(
     const currentPage = page + 0;
 
     let query = {};
-    let grn = [];
+    let suppliers = [];
     // const size = parseInt(req.query.size);
-    console.log("page:", currentPage, "size:", size, "search:", queryString);
-    console.log(typeof queryString);
+    // console.log("page:", currentPage, "size:", size, "search:", queryString);
+    // console.log(typeof queryString);
 
     //check if search or the pagenation
 
     if (queryString) {
-      console.log("== query");
+      // console.log("== query");
 
       console.log("search:", query);
       // query = { grnNo: { $regex: new RegExp(queryString + ".*?", "i") } };
@@ -192,37 +192,39 @@ supplierRouter.get(
           ],
         };
       }
-      console.log(query);
+      // console.log(query);
 
-      grn = await Supplier.find(query)
+      suppliers = await Supplier.find(query)
         .select({
           name: 1,
           email: 1,
           code: 1,
           company: 1,
+          phone: 1,
         })
         .limit(50);
       // .populate("userId", "name")
       // .populate("poNo", "poNo")
       // // .populate("supplier", { company: 1, email: 1, phone: 1, address: 1 })
       // .populate("warehouse", "name");
-      res.status(200).json(grn);
+      res.status(200).json(suppliers);
     } else {
       console.log("no query");
 
       // regular pagination
       query = {};
 
-      grn = await Supplier.find(query).select({
+      suppliers = await Supplier.find(query).select({
         name: 1,
         email: 1,
         code: 1,
         company: 1,
+        phone: 1,
       });
       // .limit(size)
       // .skip(size * page)
       // .populate("warehouse", "name");
-      res.status(200).json(grn);
+      res.status(200).json(suppliers);
       console.log("done:", query);
     }
   })
