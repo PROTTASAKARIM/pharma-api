@@ -37,6 +37,17 @@ customerRouter.get(
     // // res.send('removed');
   })
 );
+// GET customers by phone
+customerRouter.get(
+  "/phone/:phone",
+  expressAsyncHandler(async (req, res) => {
+    const phone = req.params.phone;
+    const customers = await Customer.find({ phone: phone });
+    res.send(customers);
+    // console.log(customers);
+    // // res.send('removed');
+  })
+);
 
 // GET ALL CUSTOMER WITH PAGENATION & SEARCH
 customerRouter.get(
