@@ -13,6 +13,7 @@ const priceSchema = mongoose.Schema(
       ref: "Warehouse",
       require: true,
     },
+    inventoryId: { type: mongoose.Types.ObjectId, ref: "Price", require: true },
     tp: { type: Number, require: true },
     mrp: { type: Number, require: true },
     order: { type: String },

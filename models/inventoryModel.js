@@ -9,6 +9,11 @@ const inventorySchema = mongoose.Schema(
       ref: "Warehouse",
       require: true,
     },
+    priceTable: {
+      type: mongoose.Types.ObjectId,
+      ref: "Price",
+      require: true,
+    },
     currentQty: { type: mongoose.Types.Decimal128, require: true },
     openingQty: { type: mongoose.Types.Decimal128, require: true },
     totalQty: { type: mongoose.Types.Decimal128, require: true },
