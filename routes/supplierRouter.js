@@ -30,7 +30,27 @@ supplierRouter.get(
 supplierRouter.get(
   "/",
   expressAsyncHandler(async (req, res) => {
-    const suppliers = await Supplier.find({});
+    const suppliers = await Supplier.find({
+      status: "active",
+    }).select({
+      name: 1,
+      email: 1,
+      code: 1,
+      company: 1,
+      phone: 1,
+      products: 1,
+    });
+    // .populate("products")
+    // .populate({
+    //   path: "products.id",
+    //   populate: {
+    //     path: "priceList",
+    //     model: "Price",
+    //   },
+    // })
+    // .exec();
+    // .populate("Product.id");
+    // .populate("Product.id", { name: 1, article_code: 1, priceList: 1 });
     res.send(suppliers);
     // // res.send('removed');
     console.log(suppliers);

@@ -274,10 +274,41 @@ router.get(
   "/code/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
-    const products = await Product.find({ article_code: id });
-    res.send(products);
+    const products = await Product.find({ article_code: id })
+      .select({
+        _id: 1,
+        name: 1,
+        ean: 1,
+        vat: 1,
+        unit: 1,
+        article_code: 1,
+        priceList: 1,
+      })
+      .populate("priceList", { mrp: 1, tp: 1, _id: 0 });
+    res.send(products[0]);
   })
 );
+
+// GET MANY PRODUCT BY ARTICLE CODE
+router.post(
+  "/acode/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.data;
+    const products = await Product.find({ article_code: id })
+      .select({
+        _id: 1,
+        name: 1,
+        ean: 1,
+        vat: 1,
+        unit: 1,
+        article_code: 1,
+        priceList: 1,
+      })
+      .populate("priceList", { mrp: 1, tp: 1, _id: 0 });
+    res.send(products[0]);
+  })
+);
+
 // GET PRODUCT BY category
 router.get(
   "/category/:id",

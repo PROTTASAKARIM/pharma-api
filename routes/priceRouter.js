@@ -39,6 +39,7 @@ priceRouter.get(
     console.log(prices);
   })
 );
+
 // GET prices By Product Article Code
 priceRouter.get(
   "/product/:id",
@@ -52,6 +53,7 @@ priceRouter.get(
     // console.log("product:", prices);
   })
 );
+
 // CREATE ONE Price
 priceRouter.post(
   "/",
