@@ -2,18 +2,25 @@ const mongoose = require("mongoose");
 
 const inventorySchema = mongoose.Schema(
   {
-    product: { type: mongoose.Types.ObjectId, ref: "Product", require: true },
-    supplier: { type: mongoose.Types.ObjectId, ref: "Supplier", require: true },
+    article_code: { type: String, require: true, unique: true }, //article_code
     warehouse: {
       type: mongoose.Types.ObjectId,
       ref: "Warehouse",
       require: true,
     },
-    priceTable: {
-      type: mongoose.Types.ObjectId,
-      ref: "Price",
-      require: true,
-    },
+    priceTable: [
+      {
+        type: Map,
+        of: new mongoose.Schema({
+          id: { type: mongoose.Types.ObjectId, ref: "Price" },
+          currentQty: { type: Number },
+          openingQty: { type: Number },
+          totalQty: { type: Number },
+          soldQty: { type: Number },
+        }),
+      },
+    ],
+    name: { type: String, require: true },
     currentQty: { type: Number, require: true },
     openingQty: { type: Number, require: true },
     totalQty: { type: Number, require: true },

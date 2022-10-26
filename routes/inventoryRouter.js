@@ -23,7 +23,7 @@ inventoryRouter.get(
   expressAsyncHandler(async (req, res) => {
     const inventories = await Inventory.find({ status: "active" });
     res.send(inventories);
-    // // res.send('removed');
+    // console.log(inventories);
     console.log(inventories);
   })
 );
@@ -45,15 +45,19 @@ inventoryRouter.post(
   "/",
   expressAsyncHandler(async (req, res) => {
     const newInventory = new Inventory(req.body);
+    console.log(newInventory);
     try {
       await newInventory.save();
       res.status(200).json({
+        status: true,
         message: "Inventory is created Successfully",
       });
     } catch (err) {
-      res
-        .status(500)
-        .json({ message: "There was a server side error", error: err });
+      res.status(500).json({
+        status: false,
+        message: "There was a server side error",
+        error: err,
+      });
     }
   })
 );
@@ -112,5 +116,21 @@ inventoryRouter.delete(
     }
   })
 );
+
+// DELETE ALL
+// inventoryRouter.get(
+//   "/delete-all",
+//   expressAsyncHandler(async (req, res) => {
+//     try {
+//       await Inventory.remove((response) => {
+//         res.send(response);
+//       }).catch((err) => {
+//         res.send(err);
+//       });
+//     } catch (error) {
+//       console.error(error);
+//     }
+//   })
+// );
 
 module.exports = inventoryRouter;
