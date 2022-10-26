@@ -2,14 +2,23 @@ const mongoose = require("mongoose");
 
 const inventoryCountSchema = mongoose.Schema(
   {
-    product: { type: mongoose.Types.ObjectId, ref: "Product", require: true },
+    article_code: {
+      type: mongoose.Types.ObjectId,
+      ref: "Product",
+      require: true,
+    },
     warehouse: {
       type: mongoose.Types.ObjectId,
       ref: "Warehouse",
       require: true,
     },
-    qty: { type: mongoose.Types.Decimal128, require: true },
-    inventoryBy: { type: mongoose.Types.ObjectId, ref: "User" },
+    priceTable: {
+      type: mongoose.Types.ObjectId,
+      ref: "Price",
+      require: true,
+    },
+    qty: { type: Number, require: true },
+    userId: { type: mongoose.Types.ObjectId, ref: "User" },
     status: { type: String, enum: ["active", "inactive"] },
   },
   {

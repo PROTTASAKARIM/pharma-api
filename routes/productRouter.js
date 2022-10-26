@@ -243,9 +243,12 @@ router.get(
         article_code: 1,
         priceList: 1,
         category: 1,
+        master_category: 1,
       })
       .populate("category", "name")
-      .populate("priceList");
+      .populate("master_category", "name")
+      .populate("priceList", { mrp: 1, tp: 1, supplier: 1, _id: 1 });
+    // .populate("priceList");
     res.send(products[0]);
   })
 );
@@ -360,6 +363,7 @@ router.get(
         ean: 1,
         unit: 1,
         article_code: 1,
+        photo: 1,
         priceList: 1,
         category: 1,
       })
@@ -419,6 +423,7 @@ router.get(
     if (payload === "") {
       res.send([]);
     } else {
+      console.log(search);
       res.send(search);
     }
   })

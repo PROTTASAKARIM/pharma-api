@@ -14,6 +14,7 @@ const expressAsyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 const InventoryCount = require("../models/inventoryCountModel");
 const checklogin = require("../middlewares/checkLogin");
+const { isObjectIdOrHexString } = require("mongoose");
 
 const inventoryCountRouter = express.Router();
 
@@ -25,6 +26,35 @@ inventoryCountRouter.get(
     res.send(InventoryCounts);
     // // res.send('removed');
     console.log(InventoryCounts);
+  })
+);
+// GET ALL InventoryCounts
+inventoryCountRouter.get(
+  "/byUser/:userId",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.userId ? req.params.userId : "";
+    console.log(id);
+    const InventoryCounts = await InventoryCount.find({
+      userId: id,
+      status: "active",
+    })
+      .select({
+        _id: 1,
+        qty: 1,
+        article_code: 1,
+        priceList: 1,
+        createdAt: 1,
+      })
+      .populate("article_code", {
+        name: 1,
+        article_code: 1,
+        Unit: 1,
+        _id: 0,
+      })
+      .populate("priceTable", { mrp: 1, tp: 1, supplier: 1, _id: 0 });
+    res.send(InventoryCounts);
+    // // res.send('removed');
+    // console.log(InventoryCounts);
   })
 );
 
