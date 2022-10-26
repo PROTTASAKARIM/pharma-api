@@ -28,6 +28,139 @@ inventoryRouter.get(
   })
 );
 
+// COUNT Inventory
+inventoryRouter.get(
+  "/count",
+  expressAsyncHandler(async (req, res) => {
+    const total = await Inventory.countDocuments({});
+    res.status(200).json(total);
+  })
+);
+
+// GET ALL INVENTORY WITH PAGENATION & SEARCH
+inventoryRouter.get(
+  "/all/:page/:size",
+  expressAsyncHandler(async (req, res) => {
+    const page = parseInt(req.params.page);
+    const size = parseInt(req.params.size);
+    const queryString = req.query?.q?.trim().toString().toLocaleLowerCase();
+    const currentPage = page + 0;
+
+    let query = {};
+    let inventory = [];
+    // const size = parseInt(req.query.size);
+    console.log("page:", currentPage, "size:", size, "search:", queryString);
+    // console.log(typeof queryString);
+
+    try {
+      if (queryString) {
+        const isNumber = /^\d/.test(queryString);
+        if (!isNumber) {
+          // if text then search name
+          query = { name: { $regex: new RegExp(queryString + ".*?", "i") } };
+          // query = { name:  queryString  };
+        } else {
+          // if number search in ean and article code
+          query = {
+            article_code: { $regex: RegExp("^" + queryString + ".*", "i") },
+          };
+        }
+      }
+      // query = {};
+      inventory = await Inventory.find(query)
+        .select({
+          _id: 1,
+          name: 1,
+          article_code: 1,
+          priceTable: 1,
+          currentQty: 1,
+          openingQty: 1,
+          totalQty: 1,
+          soldQty: 1,
+        })
+        .limit(size)
+        .skip(size * page)
+        .populate("priceTable");
+      res.status(200).json(inventory);
+      // }
+    } catch (err) {
+      res.status(500).json({ error: err });
+    }
+
+    // res.status(200).json({ page, size, queryString });
+    // try {
+    // } catch (err) {
+    //   res.send(err);
+    // }
+
+    // //check if search or the pagenation
+    // // try {
+    // //   if (queryString) {
+    // //     // console.log("== query");
+
+    // //     console.log("search:", query);
+    // //     // search check if num or string
+    // //     const isNumber = /^\d/.test(queryString);
+    // //     console.log(isNumber);
+    // //     if (!isNumber) {
+    // //       // if text then search name
+    // //       query = { name: { $regex: new RegExp(queryString + ".*?", "i") } };
+    // //       // query = { name:  queryString  };
+    // //     } else {
+    // //       // if number search in ean and article code
+    // //       query = {
+    // //         article_code: { $regex: RegExp("^" + queryString + ".*", "i") },
+    // //       };
+    // //     }
+    // //     console.log(query);
+
+    // //     Inventory = await Inventory.find(query)
+    // //       .select({
+    // //         _id: 1,
+    // //         name: 1,
+    // //         article_code: 1,
+    // //         priceList: 1,
+    // //         currentQty: 1,
+    // //         openingQty: 1,
+    // //         totalQty: 1,
+    // //         soldQty: 1,
+    // //       })
+    // //       .limit(100);
+    // //     // .populate("category", "name")
+    // //     // .populate("priceList");
+    // //     res.status(200).json(Inventory);
+    // //   } else {
+    // //     console.log("no query");
+
+    // // regular pagination
+    // query = {};
+
+    // Inventory = await Inventory.find(query)
+    //   // .select({
+    //   //   _id: 1,
+    //   //   name: 1,
+    //   //   article_code: 1,
+    //   //   priceList: 1,
+    //   //   currentQty: 1,
+    //   //   openingQty: 1,
+    //   //   totalQty: 1,
+    //   //   soldQty: 1,
+    //   // })
+    //   .limit(size)
+    //   .skip(size * page);
+    // // .populate("category", "name")
+    // // .populate("priceList");
+    // res.status(200).json(Inventory);
+
+    // console.log("done:", query);
+    // }
+    //   // const inventory = await Inventory.find({ status: "active" });
+    // } catch (err) {
+    //   res.status(500).json({ status: "error", err: err });
+    // }
+  })
+);
+
 // GET ONE inventories
 inventoryRouter.get(
   "/:id",

@@ -44,7 +44,7 @@ router.get(
     const page = parseInt(req.params.page);
     const size = parseInt(req.params.size);
     const queryString = req.query?.q?.trim().toString().toLocaleLowerCase();
-    const currentPage = page + 0;
+    const currentPage = parseInt(page) + 0;
 
     let query = {};
     let product = [];
