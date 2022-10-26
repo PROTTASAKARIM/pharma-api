@@ -22,7 +22,20 @@ const inventoryCountRouter = express.Router();
 inventoryCountRouter.get(
   "/",
   expressAsyncHandler(async (req, res) => {
-    const InventoryCounts = await InventoryCount.find({ status: "active" });
+    const InventoryCounts = await InventoryCount.find({
+      status: "active",
+    })
+      .select({
+        article_code: 1,
+        priceTable: 1,
+        qty: 1,
+        status: 1,
+        userId: 1,
+        createdAt: 1,
+      })
+      .populate("article_code", { name: 1, article_code: 1 })
+      .populate("userId", "name")
+      .populate("priceTable", { mrp: 1, _id: 1 });
     res.send(InventoryCounts);
     // // res.send('removed');
     console.log(InventoryCounts);
