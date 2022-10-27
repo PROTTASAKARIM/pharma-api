@@ -29,6 +29,7 @@ inventoryCountRouter.get(
         article_code: 1,
         priceTable: 1,
         qty: 1,
+        warehouse: 1,
         status: 1,
         userId: 1,
         createdAt: 1,
