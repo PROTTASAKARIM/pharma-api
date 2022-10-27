@@ -38,7 +38,7 @@ inventoryCountRouter.get(
       .populate("priceTable", { mrp: 1, _id: 1 });
     res.send(InventoryCounts);
     // // res.send('removed');
-    console.log(InventoryCounts);
+    // console.log(InventoryCounts);
   })
 );
 // GET ALL InventoryCounts

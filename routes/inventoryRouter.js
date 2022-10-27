@@ -86,78 +86,6 @@ inventoryRouter.get(
     } catch (err) {
       res.status(500).json({ error: err });
     }
-
-    // res.status(200).json({ page, size, queryString });
-    // try {
-    // } catch (err) {
-    //   res.send(err);
-    // }
-
-    // //check if search or the pagenation
-    // // try {
-    // //   if (queryString) {
-    // //     // console.log("== query");
-
-    // //     console.log("search:", query);
-    // //     // search check if num or string
-    // //     const isNumber = /^\d/.test(queryString);
-    // //     console.log(isNumber);
-    // //     if (!isNumber) {
-    // //       // if text then search name
-    // //       query = { name: { $regex: new RegExp(queryString + ".*?", "i") } };
-    // //       // query = { name:  queryString  };
-    // //     } else {
-    // //       // if number search in ean and article code
-    // //       query = {
-    // //         article_code: { $regex: RegExp("^" + queryString + ".*", "i") },
-    // //       };
-    // //     }
-    // //     console.log(query);
-
-    // //     Inventory = await Inventory.find(query)
-    // //       .select({
-    // //         _id: 1,
-    // //         name: 1,
-    // //         article_code: 1,
-    // //         priceList: 1,
-    // //         currentQty: 1,
-    // //         openingQty: 1,
-    // //         totalQty: 1,
-    // //         soldQty: 1,
-    // //       })
-    // //       .limit(100);
-    // //     // .populate("category", "name")
-    // //     // .populate("priceList");
-    // //     res.status(200).json(Inventory);
-    // //   } else {
-    // //     console.log("no query");
-
-    // // regular pagination
-    // query = {};
-
-    // Inventory = await Inventory.find(query)
-    //   // .select({
-    //   //   _id: 1,
-    //   //   name: 1,
-    //   //   article_code: 1,
-    //   //   priceList: 1,
-    //   //   currentQty: 1,
-    //   //   openingQty: 1,
-    //   //   totalQty: 1,
-    //   //   soldQty: 1,
-    //   // })
-    //   .limit(size)
-    //   .skip(size * page);
-    // // .populate("category", "name")
-    // // .populate("priceList");
-    // res.status(200).json(Inventory);
-
-    // console.log("done:", query);
-    // }
-    //   // const inventory = await Inventory.find({ status: "active" });
-    // } catch (err) {
-    //   res.status(500).json({ status: "error", err: err });
-    // }
   })
 );
 
@@ -168,8 +96,25 @@ inventoryRouter.get(
     const id = req.params.id;
     const inventories = await Inventory.find({ _id: id, status: "active" });
     res.send(inventories[0]);
-    // // res.send('removed');
     console.log(inventories);
+  })
+);
+// GET ONE BY Article Code
+inventoryRouter.get(
+  "/article_code/:article_code",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.article_code;
+    try {
+      const inventory = await Inventory.find({
+        article_code: id,
+        status: "active",
+      });
+      res.status(200).json(inventory[0]);
+    } catch (err) {
+      res.status(500).json(err);
+    }
+    // res.send(id);
+    console.log(id);
   })
 );
 
@@ -194,6 +139,27 @@ inventoryRouter.post(
     }
   })
 );
+// // CREATE ONE Inventory
+// inventoryRouter.post(
+//   "/price",
+//   expressAsyncHandler(async (req, res) => {
+//     const article_code = req.body.article_code;
+
+//     console.log(req.body);
+
+//     try {
+//       // GET INVENTORY BY ARTICLE CODE
+//       const selectedInventory = await Inventory.find({
+//         article_code: article_code,
+//         status: "active",
+//       });
+
+//       res.status(200).json(selectedInventory);
+//     } catch (err) {
+//       res.status(500).json({ err });
+//     }
+//   })
+// );
 
 // CREATE MULTI inventories
 inventoryRouter.post(
