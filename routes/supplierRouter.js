@@ -47,10 +47,10 @@ supplierRouter.get(
     //     path: "priceList",
     //     model: "Price",
     //   },
-    // })
+    // });
     // .exec();
     // .populate("Product.id");
-    // .populate("Product.id", { name: 1, article_code: 1, priceList: 1 });
+    // .populate("Products.id", { name: 1, article_code: 1, priceList: 1 });
     res.send(suppliers);
     // // res.send('removed');
     console.log(suppliers);
@@ -67,19 +67,100 @@ supplierRouter.get(
   })
 );
 
-// GET ONE suppliers
+// GET ONE SUPPLIER FOR UPDATE
 supplierRouter.get(
   "/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
-    const suppliers = await Supplier.find({
-      _id: id,
-      status: "active",
-    });
-    // }).populate("Product.id", "name", "ean", "article_code", "unit");
-    res.send(suppliers[0]);
-    // // res.send('removed');
-    console.log(suppliers);
+    try {
+      const suppliers = await Supplier.find({
+        _id: id,
+        status: "active",
+      })
+        .select({
+          name: 1,
+          email: 1,
+          code: 1,
+          company: 1,
+          phone: 1,
+          products: 1,
+        })
+        .populate("products")
+        .populate({
+          path: "products.id",
+          model: "Product",
+          populate: {
+            path: "priceList",
+            model: "Price",
+          },
+        });
+      // populate();
+      // }).populate("Product.id", "name", "ean", "article_code", "unit");
+      // console.log(suppliers[0].products.length > 0);
+      // suppliers[0].products.length > 0 &&
+      //   (await suppliers.populate("products").populate({
+      //     path: "products.id",
+      //     model: "Product",
+      //     populate: {
+      //       path: "priceList",
+      //       model: "Price",
+      //     },
+      //   }));
+
+      res.send(suppliers[0]);
+      console.log("removed");
+      // console.log(suppliers);
+    } catch (err) {
+      res.send(err);
+    }
+  })
+);
+
+// GET ONE SUPPLIER BY ID
+supplierRouter.get(
+  "/update/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    try {
+      const suppliers = await Supplier.find({
+        _id: id,
+        status: "active",
+      }).select({
+        name: 1,
+        email: 1,
+        code: 1,
+        company: 1,
+        phone: 1,
+        products: 1,
+      });
+      // .populate("products")
+      // .populate({
+      //   path: "products.id",
+      //   model: "Product",
+      //   depopulate: {
+      //     path: "priceList",
+      //     model: "Price",
+      //   },
+      // });
+      // populate();
+      // }).populate("Product.id", "name", "ean", "article_code", "unit");
+      // console.log(suppliers[0].products.length > 0);
+      // suppliers[0].products.length > 0 &&
+      //   (await suppliers.populate("products").populate({
+      //     path: "products.id",
+      //     model: "Product",
+      //     populate: {
+      //       path: "priceList",
+      //       model: "Price",
+      //     },
+      //   }));
+
+      res.send(suppliers[0]);
+      console.log("removed");
+      // console.log(suppliers);
+    } catch (err) {
+      res.send(err);
+    }
   })
 );
 

@@ -267,7 +267,7 @@ router.get(
         article_code: 1,
         priceList: 1,
       })
-      .populate("priceList", { mrp: 1, tp: 1, supplier: 1, _id: 0 });
+      .populate("priceList", { mrp: 1, tp: 1, supplier: 1, _id: 1 });
     res.send(products[0]);
   })
 );
