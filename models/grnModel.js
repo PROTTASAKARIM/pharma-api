@@ -19,6 +19,7 @@ const grnSchema = mongoose.Schema(
             ref: "Product",
             require: true,
           },
+          priceId: { type: Number, ref: "Price", require: true },
           tp: { type: Number, default: 0, require: true },
           mrp: { type: Number, default: 0, require: true },
           tax: { type: Number, default: 0, require: true },

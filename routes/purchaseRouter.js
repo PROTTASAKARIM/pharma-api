@@ -60,6 +60,28 @@ purchaseRouter.get(
   })
 );
 
+// GET ONE Purchases
+purchaseRouter.get(
+  "/grn/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const Purchases = await Purchase.find({ _id: id })
+      // .populate("supplier", { company: 1, email: 1, phone: 1, address: 1 })
+      // .populate("warehouse", "name")
+      .populate("userId", "name")
+      .populate({
+        path: "products",
+        populate: {
+          path: "priceId",
+          model: "Price",
+        },
+      });
+    res.send(Purchases[0]);
+    // // res.send('removed');
+    console.log(Purchases);
+  })
+);
+
 // CREATE ONE Purchase
 purchaseRouter.post(
   "/",
