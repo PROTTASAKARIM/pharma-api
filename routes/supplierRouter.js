@@ -173,7 +173,7 @@ supplierRouter.get(
       // _id: id,
       status: "active",
     });
-    console.log(code);
+    // console.log(code);
     // }).populate("Product.id", "name", "ean", "article_code", "unit");
     res.send(suppliers);
     // // res.send('removed');

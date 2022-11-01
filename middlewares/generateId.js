@@ -51,7 +51,7 @@ const generateGrnId = async (req, res, next) => {
   const current = number.substring(number.length - 4);
   const date = format(new Date(new Date()), "MMddyyyy");
   const newId = process.env.ID_PREFIX + "-GRN-" + date + "-" + current;
-  console.log(newId);
+  // console.log(newId);
   req.body.grnNo = newId;
   console.log(newId);
   next();

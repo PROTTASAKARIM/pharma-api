@@ -14,11 +14,12 @@ const grnSchema = mongoose.Schema(
       {
         type: Map,
         of: new mongoose.Schema({
-          code: {
+          id: {
             type: mongoose.Types.ObjectId,
             ref: "Product",
             require: true,
           },
+          newPrice: { type: Boolean },
           priceId: { type: Number, ref: "Price", require: true },
           tp: { type: Number, default: 0, require: true },
           mrp: { type: Number, default: 0, require: true },
@@ -38,6 +39,7 @@ const grnSchema = mongoose.Schema(
     doc: { type: String },
     totalItem: { type: Number, default: 0, require: true },
     total: { type: Number, default: 0, require: true },
+    grossTotal: { type: Number, default: 0, require: true },
     discount: { type: Number, default: 0, require: true },
     tax: { type: Number, default: 0, require: true },
     userId: { type: mongoose.Types.ObjectId, ref: "User", require: true },

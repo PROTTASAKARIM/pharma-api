@@ -87,10 +87,16 @@ grnRouter.post(
     const newGrn = new Grn(req.body);
     console.log(newGrn);
     try {
-      await newGrn.save();
-      res.status(200).json({
-        message: "Grn is created Successfully",
-      });
+      const result = await newGrn.save();
+
+      console.log("result", result);
+      if (result) {
+        res.status(200).json({
+          data: result,
+          message: "Grn is created Successfully",
+          status: "success",
+        });
+      }
     } catch (err) {
       res
         .status(500)

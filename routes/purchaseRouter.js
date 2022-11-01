@@ -66,7 +66,7 @@ purchaseRouter.get(
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     const Purchases = await Purchase.find({ _id: id })
-      // .populate("supplier", { company: 1, email: 1, phone: 1, address: 1 })
+      .populate("supplier", { company: 1, email: 1, phone: 1, address: 1 })
       // .populate("warehouse", "name")
       .populate("userId", "name")
       .populate({
