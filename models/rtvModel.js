@@ -37,8 +37,6 @@ const rtvSchema = mongoose.Schema(
     doc: { type: String },
     totalItem: { type: Number, default: 0, require: true },
     total: { type: Number, default: 0, require: true },
-    discount: { type: Number, default: 0, require: true },
-    tax: { type: Number, default: 0, require: true },
     userId: { type: mongoose.Types.ObjectId, ref: "User", require: true },
     status: {
       type: String,

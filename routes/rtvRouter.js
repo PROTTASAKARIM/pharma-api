@@ -34,7 +34,6 @@ rtvRouter.get(
   expressAsyncHandler(async (req, res) => {
     const rtvs = await Rtv.find({})
       .select({
-        grnNo: 1,
         rtvNo: 1,
         userId: 1,
         totalItem: 1,
@@ -43,7 +42,6 @@ rtvRouter.get(
         status: 1,
         createdAt: 1,
       })
-      .populate("grnNo", "grnNo")
       .populate("supplier", { company: 1 })
       .populate("warehouse", "name")
       .populate("userId", "name");
@@ -59,22 +57,20 @@ rtvRouter.get(
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     const rtvs = await Rtv.find({ _id: id })
-      // .select({
-      //   grnNo: 1,
-      //   rtvNo: 1,
-      //   userId: 1,
-      //   totalItem: 1,
-      //   supplier: 1,
-      //   total: 1,
-      //   status: 1,
-      //   createdAt: 1,
-      // })
-      .populate("grnNo", "grnNo")
+      .select({
+        rtvNo: 1,
+        userId: 1,
+        totalItem: 1,
+        products: 1,
+        supplier: 1,
+        total: 1,
+        status: 1,
+        createdAt: 1,
+      })
       .populate("supplier", { company: 1, email: 1, phone: 1, address: 1 })
       .populate("warehouse", "name")
       .populate("userId", "name");
     res.send(rtvs[0]);
-    // // res.send('removed');
     console.log(rtvs);
   })
 );
@@ -86,8 +82,10 @@ rtvRouter.post(
   expressAsyncHandler(async (req, res) => {
     const newRtv = new Rtv(req.body);
     try {
-      await newRtv.save();
+      const rtv = await newRtv.save();
+      console.log(rtv);
       res.status(200).json({
+        data: rtv,
         message: "Rtv is created Successfully",
       });
     } catch (err) {
@@ -180,7 +178,6 @@ rtvRouter.get(
 
       rtv = await Rtv.find(query)
         .select({
-          grnNo: 1,
           rtvNo: 1,
           userId: 1,
           totalItem: 1,
@@ -189,7 +186,6 @@ rtvRouter.get(
           status: 1,
           createdAt: 1,
         })
-        .populate("grnNo", "grnNo")
         .populate("supplier", { company: 1 })
         .populate("warehouse", "name")
         .populate("userId", "name");
@@ -202,7 +198,7 @@ rtvRouter.get(
 
       rtv = await Rtv.find(query)
         .select({
-          grnNo: 1,
+          // grnNo: 1,
           rtvNo: 1,
           userId: 1,
           totalItem: 1,
@@ -211,13 +207,13 @@ rtvRouter.get(
           status: 1,
           createdAt: 1,
         })
-        .populate("grnNo", "grnNo")
+        // .populate("grnNo", "grnNo")
         .populate("supplier", { company: 1 })
         .populate("warehouse", "name")
         .populate("userId", "name");
 
-      res.status(200).json(rtv);
       console.log("done:", query);
+      res.status(200).json(rtv);
     }
   })
 );
