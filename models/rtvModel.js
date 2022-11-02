@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 const rtvSchema = mongoose.Schema(
   {
     rtvNo: { type: String, require: true },
-    grnNo: { type: mongoose.Types.ObjectId, ref: "Grn", require: true },
     supplier: { type: mongoose.Types.ObjectId, ref: "Supplier", require: true },
     warehouse: { type: mongoose.Types.ObjectId, ref: "Warehouse" },
     products: [
@@ -17,6 +16,11 @@ const rtvSchema = mongoose.Schema(
           },
           tp: { type: Number, default: 0, require: true },
           mrp: { type: Number, default: 0, require: true },
+          priceId: {
+            type: mongoose.Types.ObjectId,
+            ref: "Price",
+            require: true,
+          },
           tax: { type: Number, default: 0, require: true },
           qty: { type: Number, default: 0, require: true },
           unit: { type: mongoose.Types.ObjectId, ref: "Unit", require: true },

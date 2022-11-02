@@ -49,21 +49,23 @@ inventoryRouter.get(
     let query = {};
     let inventory = [];
     // const size = parseInt(req.query.size);
-    console.log("page:", currentPage, "size:", size, "search:", queryString);
+    // console.log("page:", currentPage, "size:", size, "search:", queryString);
     // console.log(typeof queryString);
 
     try {
       if (queryString) {
         const isNumber = /^\d/.test(queryString);
-        if (!isNumber) {
-          // if text then search name
-          query = { name: { $regex: new RegExp(queryString + ".*?", "i") } };
-          // query = { name:  queryString  };
-        } else {
+        console.log(isNumber);
+        if (isNumber) {
           // if number search in ean and article code
           query = {
-            article_code: { $regex: RegExp("^" + queryString + ".*", "i") },
+            article_code: {
+              $regex: RegExp("^" + queryString + ".*?", "i"),
+            },
           };
+        } else {
+          // if text then search name
+          query = { name: { $regex: new RegExp(queryString + ".*?", "i") } };
         }
       }
       // query = {};
@@ -81,6 +83,8 @@ inventoryRouter.get(
         .limit(size)
         .skip(size * page)
         .populate("priceTable");
+
+      console.log(inventory);
       res.status(200).json(inventory);
       // }
     } catch (err) {
@@ -127,6 +131,7 @@ inventoryRouter.post(
     try {
       await newInventory.save();
       res.status(200).json({
+        data: newInventory,
         status: true,
         message: "Inventory is created Successfully",
       });
