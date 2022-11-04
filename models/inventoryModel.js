@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const inventorySchema = mongoose.Schema(
   {
-    article_code: { type: String, require: true, unique: true }, //article_code
+    article_code: { type: Number, require: true, unique: true }, //article_code
     warehouse: {
       type: mongoose.Types.ObjectId,
       ref: "Warehouse",

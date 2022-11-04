@@ -44,32 +44,61 @@ inventoryRouter.get(
     const page = parseInt(req.params.page);
     const size = parseInt(req.params.size);
     const queryString = req.query?.q?.trim().toString().toLocaleLowerCase();
-    const currentPage = page + 0;
+    const currentPage = parseInt(page) + 0;
 
     let query = {};
-    let inventory = [];
+    let product = [];
     // const size = parseInt(req.query.size);
-    // console.log("page:", currentPage, "size:", size, "search:", queryString);
-    // console.log(typeof queryString);
+    console.log("page:", currentPage, "size:", size, "search:", queryString);
+    console.log(typeof queryString);
 
-    try {
-      if (queryString) {
-        const isNumber = /^\d/.test(queryString);
-        console.log(isNumber);
-        if (isNumber) {
-          // if number search in ean and article code
-          query = {
-            article_code: {
-              $regex: RegExp("^" + queryString + ".*?", "i"),
-            },
-          };
-        } else {
-          // if text then search name
-          query = { name: { $regex: new RegExp(queryString + ".*?", "i") } };
-        }
+    //check if search or the pagenation
+
+    if (queryString) {
+      console.log("== query");
+
+      console.log("search:", query);
+      // search check if num or string
+      const isNumber = /^\d/.test(queryString);
+      console.log(isNumber);
+      if (!isNumber) {
+        // if text then search name
+        query = {
+          name: { $regex: new RegExp("^" + queryString + ".*?", "i") },
+        };
+        // query = { name:  queryString  };
+      } else {
+        // if number search in ean and article code
+        query = {
+          article_code: {
+            $regex: RegExp("^" + queryString, "x"),
+          },
+        };
       }
+      console.log(query);
+
+      product = await Inventory.find(query)
+        .select({
+          _id: 1,
+          name: 1,
+          article_code: 1,
+          priceTable: 1,
+          currentQty: 1,
+          openingQty: 1,
+          totalQty: 1,
+          soldQty: 1,
+        })
+        .limit(100);
+      // .populate("category", "name")
+      // .populate("priceList");
+      res.status(200).json(product);
+    } else {
+      //   console.log("no query");
+
+      // regular pagination
       // query = {};
-      inventory = await Inventory.find(query)
+
+      product = await Inventory.find(query)
         .select({
           _id: 1,
           name: 1,
@@ -81,14 +110,10 @@ inventoryRouter.get(
           soldQty: 1,
         })
         .limit(size)
-        .skip(size * page)
-        .populate("priceTable");
-
-      console.log(inventory);
-      res.status(200).json(inventory);
-      // }
-    } catch (err) {
-      res.status(500).json({ error: err });
+        .skip(size * page);
+      // .populate("priceList");
+      res.status(200).json(product);
+      console.log("done:", query);
     }
   })
 );
