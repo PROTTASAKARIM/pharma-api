@@ -64,18 +64,19 @@ inventoryRouter.get(
       if (!isNumber) {
         // if text then search name
         query = {
-          name: { $regex: new RegExp("^" + queryString + ".*?", "i") },
+          name: { $regex: new RegExp(".*" + queryString + ".*?", "i") },
         };
         // query = { name:  queryString  };
       } else {
+        // console.log("num");
         // if number search in ean and article code
         query = {
           article_code: {
-            $regex: RegExp("^" + queryString, "x"),
+            $regex: RegExp(queryString + ".*", "i"),
           },
         };
       }
-      console.log(query);
+      console.log("qry", query);
 
       product = await Inventory.find(query)
         .select({
@@ -91,6 +92,7 @@ inventoryRouter.get(
         .limit(100);
       // .populate("category", "name")
       // .populate("priceList");
+      console.log("res", product);
       res.status(200).json(product);
     } else {
       //   console.log("no query");
@@ -123,9 +125,41 @@ inventoryRouter.get(
   "/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
-    const inventories = await Inventory.find({ _id: id, status: "active" });
-    res.send(inventories[0]);
+    const inventories = await Inventory.find({
+      _id: id,
+      status: "active",
+    })
+      .select({
+        _id: 1,
+        name: 1,
+        article_code: 1,
+        warehouse: 1,
+        priceTable: 1,
+        currentQty: 1,
+        openingQty: 1,
+        totalQty: 1,
+        soldQty: 1,
+      })
+      // .populate("warehouse", "name")
+      .populate({
+        path: "priceTable",
+        populate: {
+          path: "id",
+          model: "Price",
+          populate: [
+            {
+              path: "supplier",
+              select: "company",
+            },
+            {
+              path: "warehouse",
+              select: "name",
+            },
+          ],
+        },
+      });
     console.log(inventories);
+    res.send(inventories[0]);
   })
 );
 // GET ONE BY Article Code

@@ -63,7 +63,9 @@ router.get(
       console.log(isNumber);
       if (!isNumber) {
         // if text then search name
-        query = { name: { $regex: new RegExp(queryString + ".*?", "i") } };
+        query = {
+          name: { $regex: new RegExp(".*" + queryString + ".*?", "i") },
+        };
         // query = { name:  queryString  };
       } else {
         // if number search in ean and article code
@@ -90,7 +92,7 @@ router.get(
           priceList: 1,
           category: 1,
         })
-        .limit(50)
+        .limit(100)
         .populate("category", "name")
         .populate("priceList");
       res.status(200).json(product);
