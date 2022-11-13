@@ -5,7 +5,7 @@ const warehouseSchema = mongoose.Schema(
     name: { type: String, require: true },
     code: { type: String, require: true, unique: true },
     address: { type: String, require: true },
-    company: { type: mongoose.Types.ObjectId, ref: "Company", require: true },
+    company: { type: String },
     type: { type: String, enum: ["Outlet", "Warehouse"] },
     phone: { type: String },
     status: { type: String, enum: ["active", "inactive"] },
