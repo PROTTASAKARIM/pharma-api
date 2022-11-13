@@ -20,7 +20,7 @@ const brandRouter = express.Router();
 brandRouter.get(
   "/",
   expressAsyncHandler(async (req, res) => {
-    const brands = await Brand.find({ status: "active" });
+    const brands = await Brand.find({});
     res.send(brands);
     // // res.send('removed');
     console.log(brands);
@@ -44,6 +44,7 @@ brandRouter.post(
   "/",
   expressAsyncHandler(async (req, res) => {
     const newBrand = new Brand(req.body);
+
     try {
       await newBrand.save();
       res.status(200).json({
