@@ -34,6 +34,11 @@ const saleSchema = mongoose.Schema(
           id: { type: mongoose.Types.ObjectId, require: true, ref: "Products" },
           tp: { type: Number, require: true },
           mrp: { type: Number, require: true },
+          priceId: {
+            type: mongoose.Types.ObjectId,
+            require: true,
+            ref: "Price",
+          },
           supplier: {
             type: String,
             require: true,
