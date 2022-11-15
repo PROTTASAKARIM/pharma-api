@@ -44,7 +44,10 @@ app.use(express.json());
 app.use(express.static(__dirname + "/template"));
 
 const dbUrl = `mongodb+srv://pos-tester:vgQJZDIxungr8ywt@cluster0.3sihhom.mongodb.net/?retryWrites=true&w=majority`;
-// database connection
+// const dbUrl = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.3sihhom.mongodb.net/?retryWrites=true&w=majority`;
+// // mongodb+srv://pos-tester:vgQJZDIxungr8ywt@cluster0.3sihhom.mongodb.net/?retryWrites=true&w=majority
+// >>>>>>> dea21c9557a582a7209a1e311336c33a1def74ef
+// // database connection
 mongoose
   .connect(dbUrl)
   .then(() => console.log("connection successful"))
