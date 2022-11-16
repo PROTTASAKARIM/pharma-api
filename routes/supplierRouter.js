@@ -57,6 +57,21 @@ supplierRouter.get(
   })
 );
 
+supplierRouter.get(
+  "/export",
+  expressAsyncHandler(async (req, res) => {
+    const suppliers = await Supplier.find({
+      status: "active",
+    }).select({
+      _id: 1,
+      name: 1,
+      code: 1,
+    });
+    res.send(suppliers);
+    console.log(suppliers);
+  })
+);
+
 // GET Count suppliers
 supplierRouter.get(
   "/count",

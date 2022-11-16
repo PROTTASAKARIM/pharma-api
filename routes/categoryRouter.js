@@ -102,6 +102,24 @@ categoryRouter.get(
   })
 );
 
+categoryRouter.get(
+  "/export",
+  expressAsyncHandler(async (req, res) => {
+    const categories = await Category.find({}).select({
+      _id: 1,
+      name: 1,
+      code: 1,
+      mcId: 1
+    });
+    res.send(categories);
+    // // res.send('removed');
+    // console.log(categories);
+  })
+);
+
+
+
+
 // GET ALL CATEGORY BY GROUP
 categoryRouter.get(
   "/group/:group",

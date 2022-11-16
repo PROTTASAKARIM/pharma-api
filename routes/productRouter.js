@@ -24,6 +24,21 @@ router.get(
     res.status(200).json(total);
   })
 );
+
+
+router.get(
+  "/export",
+  expressAsyncHandler(async (req, res) => {
+    const products = await Product.find().select({
+      _id: 1,
+      name: 1,
+      article_code: 1,
+      unit: 1
+    });
+    res.status(200).json(products)
+  })
+);
+
 // GET PRODUCT PRICE
 router.get(
   "/price/:id",
