@@ -17,6 +17,8 @@ const inventorySchema = mongoose.Schema(
           openingQty: { type: Number },
           totalQty: { type: Number },
           soldQty: { type: Number },
+          damageQty: { type: Number },
+          rtvQty: { type: Number },
         }),
       },
     ],
@@ -25,6 +27,8 @@ const inventorySchema = mongoose.Schema(
     openingQty: { type: Number, require: true },
     totalQty: { type: Number, require: true },
     soldQty: { type: Number, require: true },
+    damageQty: { type: Number, require: true },
+    rtvQty: { type: Number, require: true },
     status: { type: String, enum: ["active", "inactive"] },
   },
   {

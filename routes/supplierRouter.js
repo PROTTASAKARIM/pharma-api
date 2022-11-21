@@ -66,6 +66,7 @@ supplierRouter.get(
       _id: 1,
       name: 1,
       code: 1,
+      company: 1,
     });
     res.send(suppliers);
     console.log(suppliers);
