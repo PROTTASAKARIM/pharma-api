@@ -55,6 +55,10 @@ inventoryRouter.get(
               path: "warehouse",
               select: "name",
             },
+            {
+              path: "supplier",
+              select: "name",
+            },
           ],
         },
       })
