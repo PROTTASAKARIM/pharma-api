@@ -57,7 +57,8 @@ inventoryRouter.get(
             },
           ],
         },
-      });
+      })
+      .populate("warehouse", "name");
     res.send(inventories);
     // console.log(inventories);
     console.log(inventories);
