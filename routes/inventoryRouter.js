@@ -43,11 +43,12 @@ inventoryRouter.get(
         damageQty: 1,
         rtvQty: 1,
         soldQty: 1,
+        createdAt: 1,
       })
       .populate({
         path: "priceTable",
         populate: {
-          path: "_id",
+          path: "id",
           model: "Price",
           populate: [
             {
