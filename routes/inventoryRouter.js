@@ -87,6 +87,8 @@ inventoryRouter.get(
           currentQty: 1,
           openingQty: 1,
           totalQty: 1,
+          damageQty: 1,
+          rtvQty: 1,
           soldQty: 1,
         })
         .limit(100);
@@ -109,6 +111,8 @@ inventoryRouter.get(
           currentQty: 1,
           openingQty: 1,
           totalQty: 1,
+          damageQty: 1,
+          rtvQty: 1,
           soldQty: 1,
         })
         .limit(size)
