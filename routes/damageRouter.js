@@ -50,12 +50,13 @@ damageRouter.get(
         _id: 1,
         product: 1,
         warehouse: 1,
+        priceId: 1,
         userId: 1,
         qty: 1,
         reason: 1,
         createdAt: 1,
       })
-      .populate("product", "name")
+      .populate("product", { name: 1, article_code: 1 })
       .populate("warehouse", "name")
       .populate("userId", "name");
     res.send(damages[0]);
