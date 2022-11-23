@@ -274,7 +274,7 @@ router.get(
   "/pro-details/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
-    const products = await Product.find({ _id: id })
+    const products = await Product.find({ article_code: id })
       .select({
         _id: 1,
         name: 1,
