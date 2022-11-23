@@ -25,7 +25,6 @@ router.get(
   })
 );
 
-
 router.get(
   "/export",
   expressAsyncHandler(async (req, res) => {
@@ -33,9 +32,9 @@ router.get(
       _id: 1,
       name: 1,
       article_code: 1,
-      unit: 1
+      unit: 1,
     });
-    res.status(200).json(products)
+    res.status(200).json(products);
   })
 );
 
@@ -265,6 +264,25 @@ router.get(
       .populate("category", "name")
       .populate("master_category", "name")
       .populate("priceList", { mrp: 1, tp: 1, supplier: 1, _id: 1 });
+    // .populate("priceList");
+    res.send(products[0]);
+  })
+);
+
+// GET PRODUCT DETAILS FOR PURCHASE PRODUCT IMPORT
+router.get(
+  "/pro-details/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const products = await Product.find({ _id: id })
+      .select({
+        _id: 1,
+        name: 1,
+        unit: 1,
+        article_code: 1,
+        priceList: 1,
+      })
+      .populate("priceList", { mrp: 1, tp: 1, _id: 1 });
     // .populate("priceList");
     res.send(products[0]);
   })
