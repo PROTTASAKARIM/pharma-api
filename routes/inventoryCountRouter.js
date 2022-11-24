@@ -47,7 +47,7 @@ inventoryCountRouter.get(
           },
           {
             path: "supplier",
-            select: "name",
+            select: "company",
           },
         ],
       });
