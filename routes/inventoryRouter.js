@@ -28,6 +28,47 @@ inventoryRouter.get(
   })
 );
 
+// GET ALL inventories for export
+inventoryRouter.get(
+  "/export",
+  expressAsyncHandler(async (req, res) => {
+    const inventories = await Inventory.find({ status: "active" })
+      .select({
+        name: 1,
+        article_code: 1,
+        priceTable: 1,
+        currentQty: 1,
+        priceTable: 1,
+        warehouse: 1,
+        damageQty: 1,
+        rtvQty: 1,
+        soldQty: 1,
+        createdAt: 1,
+      })
+      .populate({
+        path: "priceTable",
+        populate: {
+          path: "id",
+          model: "Price",
+          populate: [
+            {
+              path: "warehouse",
+              select: "name",
+            },
+            {
+              path: "supplier",
+              select: "name",
+            },
+          ],
+        },
+      })
+      .populate("warehouse", "name");
+    res.send(inventories);
+    // console.log(inventories);
+    console.log(inventories);
+  })
+);
+
 // COUNT Inventory
 inventoryRouter.get(
   "/count",
@@ -87,6 +128,8 @@ inventoryRouter.get(
           currentQty: 1,
           openingQty: 1,
           totalQty: 1,
+          damageQty: 1,
+          rtvQty: 1,
           soldQty: 1,
         })
         .limit(100);
@@ -109,6 +152,8 @@ inventoryRouter.get(
           currentQty: 1,
           openingQty: 1,
           totalQty: 1,
+          damageQty: 1,
+          rtvQty: 1,
           soldQty: 1,
         })
         .limit(size)
