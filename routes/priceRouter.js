@@ -66,6 +66,7 @@ priceRouter.post(
       console.log(savePrice); //when success it print.
       console.log("after save");
       res.status(200).json({
+        status: "success",
         message: "Price is created Successfully",
         id: savePrice._id,
       });
