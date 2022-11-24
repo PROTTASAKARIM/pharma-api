@@ -36,7 +36,23 @@ inventoryCountRouter.get(
       })
       .populate("article_code", { name: 1, article_code: 1 })
       .populate("userId", "name")
-      .populate("priceTable", { mrp: 1, _id: 1 });
+      .populate({
+        path: "priceTable",
+        populate: {
+          path: "id",
+          model: "Price",
+          populate: [
+            {
+              path: "warehouse",
+              select: "name",
+            },
+            {
+              path: "supplier",
+              select: "name",
+            },
+          ],
+        },
+      });
     res.send(InventoryCounts);
     // // res.send('removed');
     // console.log(InventoryCounts);
