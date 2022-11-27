@@ -79,7 +79,9 @@ inventoryCountRouter.get(
         Unit: 1,
         _id: 0,
       })
-      .populate("priceTable", { mrp: 1, tp: 1, supplier: 1, _id: 0 });
+      .populate("priceTable", { mrp: 1, tp: 1, supplier: 1, _id: 0 })
+      .sort({ createdAt: -1 });
+
     res.send(InventoryCounts);
     // // res.send('removed');
     // console.log(InventoryCounts);
