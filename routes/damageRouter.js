@@ -56,6 +56,9 @@ damageRouter.get(
         createdAt: 1,
       })
       .populate("product", "name")
+      .populate("product", "article_code")
+      .populate("product", "priceList")
+      // .populate("price", "tp")
       .populate("warehouse", "name")
       .populate("userId", "name");
     res.send(damages[0]);

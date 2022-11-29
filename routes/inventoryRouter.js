@@ -88,6 +88,8 @@ inventoryRouter.get(
           openingQty: 1,
           totalQty: 1,
           soldQty: 1,
+          damageQty: 1,
+          rtvQty: 1,
         })
         .limit(100);
       // .populate("category", "name")
@@ -110,6 +112,8 @@ inventoryRouter.get(
           openingQty: 1,
           totalQty: 1,
           soldQty: 1,
+          damageQty: 1,
+          rtvQty: 1,
         })
         .limit(size)
         .skip(size * page);
@@ -139,6 +143,8 @@ inventoryRouter.get(
         openingQty: 1,
         totalQty: 1,
         soldQty: 1,
+        damageQty: 1,
+        rtvQty: 1,
       })
       // .populate("warehouse", "name")
       .populate({

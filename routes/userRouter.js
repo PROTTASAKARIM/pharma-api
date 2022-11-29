@@ -193,7 +193,7 @@ userRouter.post(
   expressAsyncHandler(async (req, res) => {
     try {
       const hashPassword = await bcrypt.hash(req.body.password, 10);
-
+      console.log(hashPassword)
       const newUser = new User({
         name: req.body.name,
         email: req.body.email,
