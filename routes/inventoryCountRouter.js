@@ -36,10 +36,24 @@ inventoryCountRouter.get(
       })
       .populate("article_code", { name: 1, article_code: 1 })
       .populate("userId", "name")
-      .populate("priceTable", { mrp: 1, _id: 1 });
+      // .populate("priceTable");
+      .populate({
+        path: "priceTable",
+        model: "Price",
+        populate: [
+          {
+            path: "warehouse",
+            select: "name",
+          },
+          {
+            path: "supplier",
+            select: "company",
+          },
+        ],
+      });
+    // console.log(InventoryCounts);
     res.send(InventoryCounts);
     // // res.send('removed');
-    // console.log(InventoryCounts);
   })
 );
 // GET ALL InventoryCounts
@@ -65,7 +79,10 @@ inventoryCountRouter.get(
         Unit: 1,
         _id: 0,
       })
-      .populate("priceTable", { mrp: 1, tp: 1, supplier: 1, _id: 0 });
+      .populate("priceTable", { mrp: 1, tp: 1, supplier: 1, _id: 0 })
+      .sort({ createdAt: -1 })
+      .limit(10);
+
     res.send(InventoryCounts);
     // // res.send('removed');
     // console.log(InventoryCounts);

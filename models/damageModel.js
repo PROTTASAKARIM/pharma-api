@@ -10,6 +10,7 @@ const damageSchema = mongoose.Schema(
     },
     qty: { type: Number, require: true },
     reason: { type: String },
+    priceId: { type: mongoose.Types.ObjectId, ref: "Price" },
     userId: { type: mongoose.Types.ObjectId, ref: "User", require: true },
     status: {
       type: String,
