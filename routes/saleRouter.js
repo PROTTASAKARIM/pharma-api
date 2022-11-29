@@ -389,12 +389,16 @@ saleRouter.post(
   generatePosId,
   expressAsyncHandler(async (req, res) => {
     console.log("body", req.body);
-    const newSale = new Sale(req.body);
+    let newSale = {};
+    if (req.body.products.length > 0) {
+      newSale = new Sale(req.body);
+    }
+
     console.log("newSale", newSale);
     try {
       await newSale.save((err, sale) => {
         if (err) {
-          // console.log("err:", res, err);
+          console.log("err:", res, err);
           res
             .status(500)
             .json({ message: "There was a server side error", error: err });
@@ -403,6 +407,7 @@ saleRouter.post(
           res.status(200).json({
             message: "Sale is created Successfully",
             data: sale,
+            status: 200,
           });
         }
       });
