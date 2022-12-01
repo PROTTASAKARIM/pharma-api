@@ -43,8 +43,8 @@ app.use(
 app.use(express.json());
 app.use(express.static(__dirname + "/template"));
 
-const dbUrl = `mongodb+srv://pos-tester:vgQJZDIxungr8ywt@cluster0.3sihhom.mongodb.net/?retryWrites=true&w=majority`;
-// const dbUrl = `mongodb+srv://posdb-user:IOK6faeoehDttV7o@cluster0.jmnaf.mongodb.net/pos-api-v1?retryWrites=true&w=majority`;
+// const dbUrl = `mongodb+srv://pos-tester:vgQJZDIxungr8ywt@cluster0.3sihhom.mongodb.net/?retryWrites=true&w=majority`;
+const dbUrl = `mongodb+srv://posdb-user:IOK6faeoehDttV7o@cluster0.jmnaf.mongodb.net/pos-api-v1?retryWrites=true&w=majority`;
 // const dbUrl = `mongodb+srv://tcm:rXWmC6cp4Q3FZ2ef@cluster0.0s2yh4f.mongodb.net/?retryWrites=true&w=majority`;
 // const dbUrl = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.3sihhom.mongodb.net/?retryWrites=true&w=majority`;
 
