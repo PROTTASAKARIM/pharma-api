@@ -37,6 +37,27 @@ customerRouter.get(
     // // res.send('removed');
   })
 );
+// GET ALL customers
+customerRouter.get(
+  "/export",
+  expressAsyncHandler(async (req, res) => {
+    const customers = await Customer.find({}).select({
+      name: 1,
+      email: 1,
+      username: 1,
+      membership: 1,
+      address: 1,
+      point: 1,
+      phone: 1,
+      status: 1
+    });
+    res.send(customers);
+    // console.log(customers);
+    // // res.send('removed');
+  })
+);
+
+
 // GET customers by phone
 customerRouter.get(
   "/phone/:phone",
