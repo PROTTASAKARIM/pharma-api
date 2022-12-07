@@ -233,6 +233,34 @@ router.get(
   })
 );
 
+// GET ONE PRODUCT inventory
+router.get(
+  "/inventory/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    try {
+      const product = await Product.aggregate(
+        [
+          {
+            '$lookup': {
+              'from': 'inventory',
+              'localField': 'article_code',
+              'foreignField': 'article_code',
+              'as': 'common'
+            }
+          }, {
+            '$match': {
+              'article_code': id
+            }
+          }
+        ]
+      )
+      res.send(product);
+    } catch (err) {
+      console.log(err);
+    }
+  })
+);
 // GET ONE PRODUCT
 router.get(
   "/:id",
