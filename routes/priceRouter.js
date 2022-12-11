@@ -27,6 +27,22 @@ priceRouter.get(
     console.log(prices);
   })
 );
+// GET ALL prices
+priceRouter.get(
+  "/export",
+  expressAsyncHandler(async (req, res) => {
+    const prices = await Price.find({})
+      // .select({
+      //   article_code: 1,
+      //   tp: 1,
+      //   mrp: 1
+      // })
+      .populate("article_code", { article_code: 1 });
+    res.send(prices);
+    // // res.send('removed');
+    console.log(prices);
+  })
+);
 
 // GET ONE prices
 priceRouter.get(

@@ -39,6 +39,20 @@ damageRouter.get(
     console.log(damages);
   })
 );
+// GET ALL damages
+damageRouter.get(
+  "/export",
+  expressAsyncHandler(async (req, res) => {
+    const damages = await Damage.find({})
+      .populate("product", { name: 1, article_code: 1 })
+      .populate("warehouse", "name")
+      .populate("userId", "name");
+
+    res.send(damages);
+    // // res.send('removed');
+    console.log(damages);
+  })
+);
 
 // GET ONE damages
 damageRouter.get(
@@ -56,6 +70,9 @@ damageRouter.get(
         reason: 1,
         createdAt: 1,
       })
+      .populate("product", "name")
+      .populate("product", "article_code")
+      .populate("product", "priceList")
       .populate("product", { name: 1, article_code: 1 })
       .populate("warehouse", "name")
       .populate("userId", "name");

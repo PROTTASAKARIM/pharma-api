@@ -45,7 +45,7 @@ inventoryRouter.get(
         soldQty: 1,
         createdAt: 1,
       })
-      .populate({
+      .populate("priceTable", {
         path: "priceTable",
         populate: {
           path: "id",
@@ -131,6 +131,8 @@ inventoryRouter.get(
           damageQty: 1,
           rtvQty: 1,
           soldQty: 1,
+          damageQty: 1,
+          rtvQty: 1,
         })
         .limit(100);
       // .populate("category", "name")
@@ -155,6 +157,8 @@ inventoryRouter.get(
           damageQty: 1,
           rtvQty: 1,
           soldQty: 1,
+          damageQty: 1,
+          rtvQty: 1,
         })
         .limit(size)
         .skip(size * page);
@@ -184,6 +188,8 @@ inventoryRouter.get(
         openingQty: 1,
         totalQty: 1,
         soldQty: 1,
+        damageQty: 1,
+        rtvQty: 1,
       })
       // .populate("warehouse", "name")
       .populate({
@@ -225,6 +231,8 @@ inventoryRouter.get(
     console.log(id);
   })
 );
+
+
 
 // CREATE ONE Inventory
 inventoryRouter.post(
