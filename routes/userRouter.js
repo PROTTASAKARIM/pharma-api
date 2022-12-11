@@ -286,7 +286,7 @@ userRouter.post(
         });
       }
     } catch (err) {
-      res.status(500).json({
+      res.status(404).json({
         status: false,
         error: err,
       });
