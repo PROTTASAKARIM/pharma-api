@@ -42,6 +42,7 @@ const grnSchema = mongoose.Schema(
     grossTotal: { type: Number, default: 0, require: true },
     discount: { type: Number, default: 0, require: true },
     tax: { type: Number, default: 0, require: true },
+    shipping_cost: { type: Number, default: 0 },
     userId: { type: mongoose.Types.ObjectId, ref: "User", require: true },
     status: {
       type: String,

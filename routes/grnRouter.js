@@ -32,6 +32,7 @@ grnRouter.get(
         total: 1,
         status: 1,
         createdAt: 1,
+        shipping_cost: 1,
       })
       .populate("poNo", "poNo")
       .populate("supplier", "company")
@@ -68,6 +69,7 @@ grnRouter.get(
         total: 1,
         status: 1,
         createdAt: 1,
+        shipping_cost: 1
       })
       .populate("poNo", "poNo")
       .populate("supplier", { company: 1, email: 1, phone: 1, address: 1 })
@@ -197,6 +199,7 @@ grnRouter.get(
           total: 1,
           status: 1,
           createdAt: 1,
+          shipping_cost: 1
         })
         .populate("poNo", "poNo")
         .populate("supplier", { company: 1, email: 1, phone: 1, address: 1 })
@@ -222,6 +225,7 @@ grnRouter.get(
           total: 1,
           status: 1,
           createdAt: 1,
+          shipping_cost: 1
         })
         .populate("poNo", "poNo")
         .populate("supplier", { company: 1, email: 1, phone: 1, address: 1 })
