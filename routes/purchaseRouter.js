@@ -32,6 +32,8 @@ purchaseRouter.get(
         total: 1,
         status: 1,
         createdAt: 1,
+        shipping_cost: 1,
+        note: 1,
       })
       .populate("supplier", "name")
       .populate("warehouse", "name")
@@ -212,6 +214,8 @@ purchaseRouter.get(
           total: 1,
           status: 1,
           createdAt: 1,
+          shipping_cost: 1,
+          note: 1,
         })
         .limit(50)
         .populate("supplier", "name")
@@ -234,6 +238,8 @@ purchaseRouter.get(
           total: 1,
           status: 1,
           createdAt: 1,
+          shipping_cost: 1,
+          note: 1,
         })
         .limit(size)
         .skip(size * page)
