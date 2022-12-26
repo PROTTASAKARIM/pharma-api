@@ -100,12 +100,12 @@ const generateDamageId = async (req, res, next) => {
     createdAt: { $gte: startOfDay(new Date()), $lte: endOfDay(new Date()) },
   });
 
-  const lastId = await Damage.findOne(
+  const lastId = await Damage.find(
     {
-      createdAt: { $gte: startOfDay(new Date()), $lte: endOfDay(new Date()) },
-    }
-    // { sort: { _id: -1 } }
-  );
+      // createdAt: { $gte: startOfDay(new Date()), $lte: endOfDay(new Date()) },
+    },
+    { sort: { _id: -1 } }
+  ).limit(1);
 
   console.log(lastId);
 
