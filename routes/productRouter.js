@@ -176,6 +176,20 @@ router.get(
 );
 
 // GET ALL PRODUCTS BY CATEGORY
+router.get(
+  "/pro",
+  expressAsyncHandler(async (req, res) => {
+    const products = await Product.find({
+      priceList: { $exists: true, $not: { $size: 0 } },
+    }).select({
+      article_code: 1,
+      name: 1,
+      priceList: 1,
+    });
+    res.send(products);
+  })
+);
+// GET ALL PRODUCTS BY CATEGORY
 // router.get(
 //   "/category/:category",
 //   expressAsyncHandler(async (req, res) => {
@@ -239,22 +253,21 @@ router.get(
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     try {
-      const product = await Product.aggregate(
-        [
-          {
-            '$lookup': {
-              'from': 'inventory',
-              'localField': 'article_code',
-              'foreignField': 'article_code',
-              'as': 'common'
-            }
-          }, {
-            '$match': {
-              'article_code': id
-            }
-          }
-        ]
-      )
+      const product = await Product.aggregate([
+        {
+          $lookup: {
+            from: "inventory",
+            localField: "article_code",
+            foreignField: "article_code",
+            as: "common",
+          },
+        },
+        {
+          $match: {
+            article_code: id,
+          },
+        },
+      ]);
       res.send(product);
     } catch (err) {
       console.log(err);
