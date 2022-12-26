@@ -1,4 +1,5 @@
 const { format, startOfDay, endOfDay } = require("date-fns");
+const Damage = require("../models/damageModel");
 const Grn = require("../models/grnModel");
 const Purchase = require("../models/purchaseModel");
 const Rtv = require("../models/rtvModel");
@@ -91,10 +92,37 @@ const generateTpnId = async (req, res, next) => {
   next();
 };
 
+// Generate Damage Id
+const generateDamageId = async (req, res, next) => {
+  // TODO:: todays total
+
+  const todayTotal = await Damage.countDocuments({
+    createdAt: { $gte: startOfDay(new Date()), $lte: endOfDay(new Date()) },
+  });
+
+  const lastId = await Damage.findOne(
+    {
+      createdAt: { $gte: startOfDay(new Date()), $lte: endOfDay(new Date()) },
+    }
+    // { sort: { _id: -1 } }
+  );
+
+  console.log(lastId);
+
+  // const number = ("000" + (todayTotal + 1)).toString();
+  // const current = number.substring(number.length - 4);
+  // const date = format(new Date(new Date()), "MMddyyyy");
+  // const newId = process.env.ID_PREFIX + "-DMG-" + date + "-" + current;
+  // console.log(newId);
+  // req.body.damageNo = newId;
+  // next();
+};
+
 module.exports = {
   generatePosId,
   generatePoId,
   generateGrnId,
   generateRtvId,
   generateTpnId,
+  generateDamageId,
 };

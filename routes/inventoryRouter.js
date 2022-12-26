@@ -34,16 +34,17 @@ inventoryRouter.get(
   expressAsyncHandler(async (req, res) => {
     const inventories = await Inventory.find({ status: "active" })
       .select({
+        _id: 1,
         name: 1,
         article_code: 1,
+        warehouse: 1,
         priceTable: 1,
         currentQty: 1,
-        priceTable: 1,
-        warehouse: 1,
+        openingQty: 1,
+        totalQty: 1,
+        soldQty: 1,
         damageQty: 1,
         rtvQty: 1,
-        soldQty: 1,
-        createdAt: 1,
       })
       .populate("priceTable", {
         path: "priceTable",
@@ -52,20 +53,18 @@ inventoryRouter.get(
           model: "Price",
           populate: [
             {
-              path: "warehouse",
-              select: "name",
+              path: "supplier",
+              select: "company",
             },
             {
-              path: "supplier",
+              path: "warehouse",
               select: "name",
             },
           ],
         },
-      })
-      .populate("warehouse", "name");
-    res.send(inventories);
-    // console.log(inventories);
+      });
     console.log(inventories);
+    res.send(inventories);
   })
 );
 
@@ -209,7 +208,7 @@ inventoryRouter.get(
           ],
         },
       });
-    console.log(inventories);
+    // console.log(inventories);
     res.send(inventories[0]);
   })
 );
@@ -231,8 +230,6 @@ inventoryRouter.get(
     console.log(id);
   })
 );
-
-
 
 // CREATE ONE Inventory
 inventoryRouter.post(

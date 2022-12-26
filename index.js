@@ -51,7 +51,6 @@ const dbUrl = `mongodb+srv://pos-tester:vgQJZDIxungr8ywt@cluster0.3sihhom.mongod
 
 console.log(dbUrl);
 // // mongodb+srv://pos-tester:vgQJZDIxungr8ywt@cluster0.3sihhom.mongodb.net/?retryWrites=true&w=majority
-// >>>>>>> dea21c9557a582a7209a1e311336c33a1def74ef
 // // database connection
 mongoose
   .connect(dbUrl)
