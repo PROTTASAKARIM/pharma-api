@@ -14,12 +14,14 @@ const expressAsyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 const Damage = require("../models/damageModel");
 const checklogin = require("../middlewares/checkLogin");
+const { generateDamageId } = require("../middlewares/generateId");
 
 const damageRouter = express.Router();
 
 // GET ALL damages
 damageRouter.get(
   "/",
+  generateDamageId,
   expressAsyncHandler(async (req, res) => {
     const damages = await Damage.find({})
       .select({
