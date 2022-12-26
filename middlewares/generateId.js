@@ -92,7 +92,7 @@ const generateTpnId = async (req, res, next) => {
   next();
 };
 
-// Generate Grn Id
+// Generate Damage Id
 const generateDamageId = async (req, res, next) => {
   // TODO:: todays total
 
@@ -100,13 +100,22 @@ const generateDamageId = async (req, res, next) => {
     createdAt: { $gte: startOfDay(new Date()), $lte: endOfDay(new Date()) },
   });
 
-  const number = ("000" + (todayTotal + 1)).toString();
-  const current = number.substring(number.length - 4);
-  const date = format(new Date(new Date()), "MMddyyyy");
-  const newId = process.env.ID_PREFIX + "-DMG-" + date + "-" + current;
-  console.log(newId);
-  req.body.damageNo = newId;
-  next();
+  const lastId = await Damage.findOne(
+    {
+      createdAt: { $gte: startOfDay(new Date()), $lte: endOfDay(new Date()) },
+    }
+    // { sort: { _id: -1 } }
+  );
+
+  console.log(lastId);
+
+  // const number = ("000" + (todayTotal + 1)).toString();
+  // const current = number.substring(number.length - 4);
+  // const date = format(new Date(new Date()), "MMddyyyy");
+  // const newId = process.env.ID_PREFIX + "-DMG-" + date + "-" + current;
+  // console.log(newId);
+  // req.body.damageNo = newId;
+  // next();
 };
 
 module.exports = {
