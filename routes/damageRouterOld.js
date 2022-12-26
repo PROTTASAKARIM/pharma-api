@@ -14,14 +14,12 @@ const expressAsyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 const Damage = require("../models/damageModel");
 const checklogin = require("../middlewares/checkLogin");
-const { generateDamageId } = require("../middlewares/generateId");
 
 const damageRouter = express.Router();
 
 // GET ALL damages
 damageRouter.get(
   "/",
-  generateDamageId,
   expressAsyncHandler(async (req, res) => {
     const damages = await Damage.find({})
       .select({
@@ -46,7 +44,7 @@ damageRouter.get(
   "/export",
   expressAsyncHandler(async (req, res) => {
     const damages = await Damage.find({})
-      .populate("products", { name: 1, article_code: 1 })
+      .populate("product", { name: 1, article_code: 1 })
       .populate("warehouse", "name")
       .populate("userId", "name");
 
@@ -64,18 +62,18 @@ damageRouter.get(
     const damages = await Damage.find({ _id: id })
       .select({
         _id: 1,
-        products: 1,
+        product: 1,
         warehouse: 1,
-        note: 1,
+        priceId: 1,
         userId: 1,
-        total: 1,
-        totalItem: 1,
+        qty: 1,
+        reason: 1,
         createdAt: 1,
       })
-      .populate("products", "name")
-      .populate("products", "article_code")
-      .populate("products", "priceList")
-      .populate("products", { name: 1, article_code: 1 })
+      .populate("product", "name")
+      .populate("product", "article_code")
+      .populate("product", "priceList")
+      .populate("product", { name: 1, article_code: 1 })
       .populate("warehouse", "name")
       .populate("userId", "name");
     res.send(damages[0]);
