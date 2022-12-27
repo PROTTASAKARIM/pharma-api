@@ -26,23 +26,36 @@ const updateInventoryOutOnDamageIn = async (req, res, next) => {
                 console.log("PriceTable", success.priceTable)
 
                 if (success.priceTable.length > 0) {
+                    console.log("priceid", priceId)
+                    console.log("pricetable", success.priceTable)
+
+                    const checked = success.priceTable.map((p) => console.log("p.id", p));
+                    // const checked = success.priceTable.filter((p) => p.id === priceId);
+                    const rest = success.priceTable.filter((p) => p.id !== priceId);
+
+                    console.log("checked", checked)
+                    // if (checked?.length > 0) {
+                    // } else {
+
+                    // }
 
                 } else {
-                    const newPrice = {
-                        id: priceId,
-                        openingQty: -Number(qty),
-                        currentQty: -Number(qty),
-                        totalQty: -Number(qty),
-                        soldQty: 0,
-                        damageQty: Number(qty),
-                        rtvQty: 0,
-                    }
-                    const priceTableNew = success.priceTable.push(newPrice)
                     inventory = {
                         article_code: article_code,
                         name: name,
                         warehouse: "62b5b575b4facb87eef3b47c",
-                        priceTable: priceTableNew,
+                        priceTable: [
+                            ...success.priceTable,
+                            {
+                                id: priceId,
+                                openingQty: -Number(qty),
+                                currentQty: -Number(qty),
+                                totalQty: -Number(qty),
+                                soldQty: 0,
+                                damageQty: Number(qty),
+                                rtvQty: 0,
+                            },
+                        ],
                         openingQty: -Number(qty),
                         currentQty: -Number(qty),
                         totalQty: -Number(qty),
@@ -50,8 +63,7 @@ const updateInventoryOutOnDamageIn = async (req, res, next) => {
                         damageQty: Number(qty),
                         rtvQty: 0,
                         status: "active",
-                    }
-                    console.log("new price inventory", inventory)
+                    };
 
                 }
             }
