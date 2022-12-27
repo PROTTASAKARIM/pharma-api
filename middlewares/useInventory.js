@@ -28,16 +28,45 @@ const updateInventoryOutOnDamageIn = async (req, res, next) => {
                 if (success.priceTable.length > 0) {
                     console.log("priceid", priceId)
                     console.log("pricetable", success.priceTable)
+                    // const prices = success.priceTable
+                    // const prices = success.priceTable[0].get('id')
+                    // prices.forEach((value, key) => {
+                    //     console.log(`${key}: ${value}`);
+                    // });
+                    // console.log("Prices", prices)
+                    // console.log("Prices-id", prices.get('id'))
+                    // console.log("prices", prices)
 
-                    const checked = success.priceTable.map((p) => console.log("p.id", p));
-                    // const checked = success.priceTable.filter((p) => p.id === priceId);
-                    const rest = success.priceTable.filter((p) => p.id !== priceId);
+                    const checked = success.priceTable.filter((p) => p.get('id') === priceId);
+                    const rest = success.priceTable.filter((p) => p.get('id') !== priceId);
 
-                    console.log("checked", checked)
-                    // if (checked?.length > 0) {
-                    // } else {
+                    console.log("checked", checked[0])
+                    console.log("checkedid", checked[0].get('id'))
+                    console.log("rest", rest)
+                    if (checked?.length > 0) {
+                        console.log(checked, "exist", qty, Number(checked[0].get('currentQty')));
 
-                    // }
+                        inventory = {
+                            // ...success,
+                            priceTable: [
+                                // ...rest,
+                                {
+                                    // ...checked[0],
+                                    currentQty: Number(checked[0].get('currentQty')) - Number(qty),
+                                    damageQty: Number(checked[0].get('damageQty')) + Number(qty),
+                                    // ...checked,
+                                    // currentQty: Number(checked.currentQty) - Number(qty),
+                                    // damageQty: Number(checked.damageQty) + Number(qty),
+                                },
+                            ],
+                            currentQty: Number(success.currentQty) - Number(qty),
+                            damageQty: Number(success.damageQty) + Number(qty),
+                        };
+                        console.log("inventory", inventory)
+
+                    } else {
+
+                    }
 
                 } else {
                     inventory = {
