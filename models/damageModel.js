@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const damageSchema = mongoose.Schema(
   {
+    damageNo: { type: String, require: true },
     products: [
       {
         type: Map,
