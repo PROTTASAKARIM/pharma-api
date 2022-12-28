@@ -15,14 +15,16 @@ const jwt = require("jsonwebtoken");
 const Damage = require("../models/damageModel");
 const checklogin = require("../middlewares/checkLogin");
 const { generateDamageId } = require("../middlewares/generateId");
+const { updateInventoryOutOnDamageIn } = require("../middlewares/useInventory");
 
 const damageRouter = express.Router();
 
 // GET ALL damages
 damageRouter.get(
   "/",
-  generateDamageId,
+  // updateInventoryOutOnDamageIn,
   expressAsyncHandler(async (req, res) => {
+    // console.log(req.body.damageNo)
     const damages = await Damage.find({})
       .select({
         _id: 1,
@@ -87,18 +89,21 @@ damageRouter.get(
 // CREATE ONE Damage
 damageRouter.post(
   "/",
+  generateDamageId,
+  updateInventoryOutOnDamageIn,
   expressAsyncHandler(async (req, res) => {
     const newDamage = new Damage(req.body);
-    try {
-      await newDamage.save();
-      res.status(200).json({
-        message: "Damage is created Successfully",
-      });
-    } catch (err) {
-      res
-        .status(500)
-        .json({ message: "There was a server side error", error: err });
-    }
+    // try {
+    //   await newDamage.save();
+    //   res.status(200).json({
+    //     message: "Damage is created Successfully",
+    //   });
+    // } catch (err) {
+    //   res
+    //     .status(500)
+    //     .json({ message: "There was a server side error", error: err });
+    // }
+    console.log(req.body)
   })
 );
 

@@ -100,6 +100,7 @@ const generateDamageId = async (req, res, next) => {
     createdAt: { $gte: startOfDay(new Date()), $lte: endOfDay(new Date()) },
   });
 
+
   const lastId = await Damage.find(
     {
       // createdAt: { $gte: startOfDay(new Date()), $lte: endOfDay(new Date()) },
@@ -116,6 +117,7 @@ const generateDamageId = async (req, res, next) => {
   // console.log(newId);
   // req.body.damageNo = newId;
   // next();
+
 };
 
 module.exports = {
