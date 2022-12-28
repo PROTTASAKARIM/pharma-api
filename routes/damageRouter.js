@@ -93,6 +93,9 @@ damageRouter.post(
   updateInventoryOutOnDamageIn,
   expressAsyncHandler(async (req, res) => {
     const newDamage = new Damage(req.body);
+
+    // console.log("Damage", newDamage);
+
     // try {
     //   await newDamage.save();
     //   res.status(200).json({
@@ -103,7 +106,7 @@ damageRouter.post(
     //     .status(500)
     //     .json({ message: "There was a server side error", error: err });
     // }
-    console.log(req.body)
+    // console.log(req.body)
   })
 );
 
