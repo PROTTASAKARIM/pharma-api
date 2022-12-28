@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 
-const inventorySchema = mongoose.Schema(
+// const priceTable
+
+const inventorySchema = new mongoose.Schema(
   {
     article_code: { type: String, require: true, unique: true }, //article_code
     warehouse: {

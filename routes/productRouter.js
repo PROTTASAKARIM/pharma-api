@@ -480,9 +480,9 @@ router.get(
         ],
       };
     }
-    console.log(query);
+    // console.log(query);
 
-    console.log(payload);
+    // console.log(payload);
 
     const search = await Product.find(query)
       .select({
@@ -499,7 +499,7 @@ router.get(
     if (payload === "") {
       res.send([]);
     } else {
-      console.log(search);
+      // console.log(search);
       res.send(search);
     }
   })
