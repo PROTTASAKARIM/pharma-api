@@ -15,6 +15,8 @@ const jwt = require("jsonwebtoken");
 const Rtv = require("../models/rtvModel");
 const checklogin = require("../middlewares/checkLogin");
 const { generateRtvId } = require("../middlewares/generateId");
+const { updateInventoryOutOnRTVIn,
+  updateInventoryINOnRTVOut } = require("../middlewares/useInventory");
 
 const rtvRouter = express.Router();
 
@@ -79,6 +81,7 @@ rtvRouter.get(
 rtvRouter.post(
   "/",
   generateRtvId,
+  updateInventoryOutOnRTVIn,
   expressAsyncHandler(async (req, res) => {
     const newRtv = new Rtv(req.body);
     try {
@@ -135,6 +138,7 @@ rtvRouter.put(
 // DELETE ONE Rtv
 rtvRouter.delete(
   "/:id",
+  updateInventoryINOnRTVOut,
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     try {

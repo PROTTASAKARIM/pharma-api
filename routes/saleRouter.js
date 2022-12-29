@@ -18,6 +18,8 @@ const Sale = require("../models/saleModel");
 const checklogin = require("../middlewares/checkLogin");
 const { generatePosId } = require("../middlewares/generateId");
 const { startOfDay, endOfDay } = require("date-fns");
+const { updateInventoryInOnSaleDel,
+  updateInventoryOutOnSaleIn } = require("../middlewares/useInventory");
 
 const saleRouter = express.Router();
 
@@ -387,6 +389,7 @@ saleRouter.get(
 saleRouter.post(
   "/",
   generatePosId,
+  updateInventoryOutOnSaleIn,
   expressAsyncHandler(async (req, res) => {
     console.log("body", req.body);
     let newSale = {};
@@ -477,6 +480,7 @@ saleRouter.put(
 // DELETE ONE Sale
 saleRouter.delete(
   "/:id",
+  updateInventoryInOnSaleDel,
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     try {

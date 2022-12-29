@@ -15,7 +15,7 @@ const jwt = require("jsonwebtoken");
 const Damage = require("../models/damageModel");
 const checklogin = require("../middlewares/checkLogin");
 const { generateDamageId } = require("../middlewares/generateId");
-const { updateInventoryOutOnDamageIn } = require("../middlewares/useInventory");
+const { updateInventoryOutOnDamageIn, updateInventoryInOnDamageOut } = require("../middlewares/useInventory");
 
 const damageRouter = express.Router();
 
@@ -33,8 +33,11 @@ damageRouter.get(
         reason: 1,
         userId: 1,
         qty: 1,
+        damageNo: 1,
+        createdAt: 1,
+        note: 1
       })
-      .populate("product", "name")
+      .populate("products", "name")
       .populate("warehouse", "name")
       .populate("userId", "name");
 
@@ -92,21 +95,21 @@ damageRouter.post(
   generateDamageId,
   updateInventoryOutOnDamageIn,
   expressAsyncHandler(async (req, res) => {
+    console.log(req.body)
     const newDamage = new Damage(req.body);
 
-    // console.log("Damage", newDamage);
+    console.log("Damage", newDamage);
 
-    // try {
-    //   await newDamage.save();
-    //   res.status(200).json({
-    //     message: "Damage is created Successfully",
-    //   });
-    // } catch (err) {
-    //   res
-    //     .status(500)
-    //     .json({ message: "There was a server side error", error: err });
-    // }
-    // console.log(req.body)
+    try {
+      await newDamage.save();
+      res.status(200).json({
+        message: "Damage is created Successfully",
+      });
+    } catch (err) {
+      res
+        .status(500)
+        .json({ message: "There was a server side error", error: err });
+    }
   })
 );
 
@@ -149,6 +152,7 @@ damageRouter.put(
 // DELETE ONE Damage
 damageRouter.delete(
   "/:id",
+  updateInventoryInOnDamageOut,
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     try {
