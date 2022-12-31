@@ -35,7 +35,9 @@ damageRouter.get(
         qty: 1,
         damageNo: 1,
         createdAt: 1,
-        note: 1
+        note: 1,
+        total: 1,
+        totalItem: 1
       })
       .populate("products", "name")
       .populate("warehouse", "name")
@@ -69,13 +71,16 @@ damageRouter.get(
     const damages = await Damage.find({ _id: id })
       .select({
         _id: 1,
-        products: 1,
+        product: 1,
         warehouse: 1,
-        note: 1,
+        reason: 1,
         userId: 1,
-        total: 1,
-        totalItem: 1,
+        qty: 1,
+        damageNo: 1,
         createdAt: 1,
+        note: 1,
+        total: 1,
+        totalItem: 1
       })
       .populate("products", "name")
       .populate("products", "article_code")
