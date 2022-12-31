@@ -42,7 +42,7 @@ grnRouter.get(
       .populate("userId", "name");
     res.send(grns);
     // // res.send('removed');
-    console.log(grns);
+    // console.log(grns);
   })
 );
 
@@ -81,7 +81,7 @@ grnRouter.get(
       .populate("userId", "name");
     res.send(grns[0]);
     // // res.send('removed');
-    console.log(grns);
+    // console.log(grns);
   })
 );
 
@@ -213,7 +213,7 @@ grnRouter.get(
         .populate("userId", "name");
       res.status(200).json(grn);
     } else {
-      console.log("no query");
+      // console.log("no query");
 
       // regular pagination
       query = {};
@@ -239,7 +239,7 @@ grnRouter.get(
         .populate("warehouse", "name")
         .populate("userId", "name");
       res.status(200).json(grn);
-      console.log("done:", query);
+      // console.log("done:", query);
     }
   })
 );

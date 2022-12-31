@@ -392,11 +392,7 @@ saleRouter.post(
   updateInventoryOutOnSaleIn,
   expressAsyncHandler(async (req, res) => {
     console.log("body", req.body);
-    let newSale = {};
-    if (req.body.products.length > 0) {
-      newSale = new Sale(req.body);
-    }
-
+    let newSale = new Sale(req.body);
     console.log("newSale", newSale);
     try {
       await newSale.save((err, sale) => {
@@ -441,6 +437,7 @@ saleRouter.post(
 // UPDATE ONE Sale
 saleRouter.put(
   "/:id",
+  updateInventoryInOnSaleDel,
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     const update = req.body;
@@ -460,6 +457,7 @@ saleRouter.put(
 // Temporary del ONE Sale
 saleRouter.put(
   "deletetemp/:id",
+  // updateInventoryInOnSaleDel,
   expressAsyncHandler(async (req, res) => {
     const id = req.params._id;
     const update = req.body;
@@ -483,17 +481,17 @@ saleRouter.delete(
   updateInventoryInOnSaleDel,
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
-    try {
-      await Sale.deleteOne({ _id: id })
-        .then((response) => {
-          res.send(response);
-        })
-        .catch((err) => {
-          res.send(err);
-        });
-    } catch (error) {
-      console.error(error);
-    }
+    // try {
+    //   await Sale.deleteOne({ _id: id })
+    //     .then((response) => {
+    //       res.send(response);
+    //     })
+    //     .catch((err) => {
+    //       res.send(err);
+    //     });
+    // } catch (error) {
+    //   console.error(error);
+    // }
   })
 );
 // SALES AGGREGATION
