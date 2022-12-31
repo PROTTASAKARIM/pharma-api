@@ -58,7 +58,7 @@ const updateInventoryOutOnDamageIn = async (req, res, next) => {
             console.log("checked", checked[0].get("damageQty"));
 
             inventory = {
-              //   ...success,
+              ...success,
               priceTable: [
                 // ...rest,
                 {
