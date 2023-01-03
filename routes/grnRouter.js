@@ -15,6 +15,8 @@ const jwt = require("jsonwebtoken");
 const Grn = require("../models/grnModel"); // Goods Recieve Note
 const checklogin = require("../middlewares/checkLogin");
 const { generateGrnId } = require("../middlewares/generateId");
+const { updateInventoryInOnGRNIn,
+  updateInventoryOutOnGRNDel } = require("../middlewares/useInventory");
 
 const grnRouter = express.Router();
 
@@ -40,7 +42,7 @@ grnRouter.get(
       .populate("userId", "name");
     res.send(grns);
     // // res.send('removed');
-    console.log(grns);
+    // console.log(grns);
   })
 );
 
@@ -79,7 +81,7 @@ grnRouter.get(
       .populate("userId", "name");
     res.send(grns[0]);
     // // res.send('removed');
-    console.log(grns);
+    // console.log(grns);
   })
 );
 
@@ -87,6 +89,7 @@ grnRouter.get(
 grnRouter.post(
   "/",
   generateGrnId,
+  updateInventoryInOnGRNIn,
   expressAsyncHandler(async (req, res) => {
     const newGrn = new Grn(req.body);
     console.log(newGrn);
@@ -210,7 +213,7 @@ grnRouter.get(
         .populate("userId", "name");
       res.status(200).json(grn);
     } else {
-      console.log("no query");
+      // console.log("no query");
 
       // regular pagination
       query = {};
@@ -236,7 +239,7 @@ grnRouter.get(
         .populate("warehouse", "name")
         .populate("userId", "name");
       res.status(200).json(grn);
-      console.log("done:", query);
+      // console.log("done:", query);
     }
   })
 );
@@ -244,6 +247,7 @@ grnRouter.get(
 // DELETE ONE Grn
 grnRouter.delete(
   "/:id",
+  updateInventoryOutOnGRNDel,
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     try {

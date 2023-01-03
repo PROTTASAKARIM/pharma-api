@@ -322,6 +322,7 @@ router.get(
         unit: 1,
         article_code: 1,
         priceList: 1,
+        ean: 1,
       })
       .populate("priceList", { mrp: 1, tp: 1, _id: 1 });
     // .populate("priceList");
@@ -342,6 +343,7 @@ router.get(
         unit: 1,
         article_code: 1,
         priceList: 1,
+        ean: 1,
       })
       .populate("priceList", { mrp: 1, tp: 1, supplier: 1, _id: 1 });
     res.send(products[0]);
