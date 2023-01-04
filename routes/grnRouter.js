@@ -17,6 +17,7 @@ const checklogin = require("../middlewares/checkLogin");
 const { generateGrnId } = require("../middlewares/generateId");
 const { updateInventoryInOnGRNIn,
   updateInventoryOutOnGRNDel } = require("../middlewares/useInventory");
+const { handleNewPrice } = require("../middlewares/handlePrice");
 
 const grnRouter = express.Router();
 
@@ -90,25 +91,28 @@ grnRouter.post(
   "/",
   generateGrnId,
   updateInventoryInOnGRNIn,
+  handleNewPrice,
   expressAsyncHandler(async (req, res) => {
-    const newGrn = new Grn(req.body);
-    console.log(newGrn);
-    try {
-      const result = await newGrn.save();
+    console.log('New:', req.body.grnData)
 
-      console.log("result", result);
-      if (result) {
-        res.status(200).json({
-          data: result,
-          message: "Grn is created Successfully",
-          status: "success",
-        });
-      }
-    } catch (err) {
-      res
-        .status(500)
-        .json({ message: "There was a server side error", error: err });
-    }
+    //   const newGrn = new Grn(req.body);
+    //   console.log(newGrn);
+    //   try {
+    //     const result = await newGrn.save();
+
+    //     console.log("result", result);
+    //     if (result) {
+    //       res.status(200).json({
+    //         data: result,
+    //         message: "Grn is created Successfully",
+    //         status: "success",
+    //       });
+    //     }
+    //   } catch (err) {
+    //     res
+    //       .status(500)
+    //       .json({ message: "There was a server side error", error: err });
+    //   }
   })
 );
 
