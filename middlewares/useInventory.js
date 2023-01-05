@@ -187,10 +187,10 @@ const updateInventoryOutOnDamageIn = async (req, res, next) => {
                 }
                 // res.send(inventory)
                 // console.log("id", id)
-                console.log("inventory final", inventory);
+                // console.log("inventory final", inventory);
                 const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
                 if (update) {
-                    console.log("update", update)
+                    // console.log("update", update)
                 }
             });
         } else {
@@ -212,11 +212,11 @@ const updateInventoryInOnDamageOut = async (req, res, next) => {
     //     createdAt: { $gte: startOfDay(new Date()), $lte: endOfDay(new Date()) },
     // });
     const id = req.params.id;
-    console.log("damage delete", id)
+    // console.log("damage delete", id)
     const damageData = await Damage.find({ _id: id })
-    console.log("damage Data", damageData)
+    // console.log("damage Data", damageData)
     const products = damageData[0].products;
-    console.log("inventory Products", products);
+    // console.log("inventory Products", products);
 
     try {
         if (products.length > 0) {
@@ -243,7 +243,7 @@ const updateInventoryInOnDamageOut = async (req, res, next) => {
                 }
 
                 // const { id, article_code, qty, priceId, name } = product;
-                console.log(article_code);
+                // console.log(article_code);
                 let inventory = {};
                 const success = await Inventory.findOne({ article_code: article_code });
 
@@ -407,10 +407,10 @@ const updateInventoryInOnDamageOut = async (req, res, next) => {
                 }
                 // res.send(inventory)
                 // console.log("id", id)
-                console.log("inventory final", inventory);
+                // console.log("inventory final", inventory);
                 const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
                 if (update) {
-                    console.log("update", update)
+                    // console.log("update", update)
                 }
             });
         } else {
@@ -440,18 +440,18 @@ const updateInventoryOutOnRTVIn = async (req, res, next) => {
             products.map(async (product) => {
                 // console.log("single product", product);
                 const { article_code, qty, priceId, name } = product;
-                console.log(article_code);
+                // console.log(article_code);
                 let inventory = {};
                 const success = await Inventory.findOne({ article_code: article_code });
 
                 if (success) {
-                    console.log("success", success);
+                    // console.log("success", success);
                     // res.send(success)
-                    console.log("PriceTable", success.priceTable);
+                    // console.log("PriceTable", success.priceTable);
 
                     if (success.priceTable.length > 0) {
-                        console.log("priceid", priceId);
-                        console.log("pricetable", success.priceTable);
+                        // console.log("priceid", priceId);
+                        // console.log("pricetable", success.priceTable);
                         // const prices = success.priceTable
                         // const prices = success.priceTable[0].get('id')
                         // prices.forEach((value, key) => {
@@ -469,19 +469,19 @@ const updateInventoryOutOnRTVIn = async (req, res, next) => {
                         );
 
                         //   console.log("checked", qty);
-                        console.log("checked", checked[0]);
+                        // console.log("checked", checked[0]);
                         // console.log("checkedid", checked[0].get("id"));
-                        console.log("rest", rest);
+                        // console.log("rest", rest);
                         if (checked?.length > 0) {
-                            console.log(
-                                checked,
-                                "exist",
-                                qty,
-                                Number(checked[0].get("currentQty"))
-                            );
+                            // console.log(
+                            //     checked,
+                            //     "exist",
+                            //     qty,
+                            //     Number(checked[0].get("currentQty"))
+                            // );
 
                             // const d = new Date.parse(success.createdAt);
-                            console.log("date", success.createdAt)
+                            // console.log("date", success.createdAt)
 
 
                             inventory = {
@@ -512,7 +512,7 @@ const updateInventoryOutOnRTVIn = async (req, res, next) => {
                                 ]
 
                             }
-                            console.log("inventory", inventory);
+                            // console.log("inventory", inventory);
                         } else {
                             inventory = {
                                 name: success.name,
@@ -542,7 +542,7 @@ const updateInventoryOutOnRTVIn = async (req, res, next) => {
                                 ]
 
                             }
-                            console.log("inventory", inventory);
+                            // console.log("inventory", inventory);
                         }
                     } else {
                         inventory = {
@@ -625,11 +625,11 @@ const updateInventoryINOnRTVOut = async (req, res, next) => {
     //     createdAt: { $gte: startOfDay(new Date()), $lte: endOfDay(new Date()) },
     // });
     const id = req.params.id;
-    console.log("rtv delete", id)
+    // console.log("rtv delete", id)
     const rtvData = await Rtv.find({ _id: id })
-    console.log("rtv Data", rtvData)
+    // console.log("rtv Data", rtvData)
     const products = rtvData[0].products;
-    console.log("inventory Products", products);
+    // console.log("inventory Products", products);
 
     // const products = await req.body.products;
 
@@ -639,7 +639,7 @@ const updateInventoryINOnRTVOut = async (req, res, next) => {
         if (products.length > 0) {
             products.map(async (product) => {
                 // console.log("single product", product);
-                console.log("single product", product);
+                // console.log("single product", product);
                 const id = product.get("id");
                 const name = product.get("name");
                 const article_code = product.get("article_code");
@@ -661,18 +661,18 @@ const updateInventoryINOnRTVOut = async (req, res, next) => {
                 }
 
                 // const { article_code, qty, priceId, name } = product;
-                console.log(article_code);
+                // console.log(article_code);
                 let inventory = {};
                 const success = await Inventory.findOne({ article_code: article_code });
 
                 if (success) {
-                    console.log("success", success);
+                    // console.log("success", success);
                     // res.send(success)
-                    console.log("PriceTable", success.priceTable);
+                    // console.log("PriceTable", success.priceTable);
 
                     if (success.priceTable.length > 0) {
-                        console.log("priceid", priceId);
-                        console.log("pricetable", success.priceTable);
+                        // console.log("priceid", priceId);
+                        // console.log("pricetable", success.priceTable);
                         // const prices = success.priceTable
                         // const prices = success.priceTable[0].get('id')
                         // prices.forEach((value, key) => {
@@ -690,19 +690,19 @@ const updateInventoryINOnRTVOut = async (req, res, next) => {
                         );
 
                         //   console.log("checked", qty);
-                        console.log("checked", checked[0]);
+                        // console.log("checked", checked[0]);
                         // console.log("checkedid", checked[0].get("id"));
-                        console.log("rest", rest);
+                        // console.log("rest", rest);
                         if (checked?.length > 0) {
-                            console.log(
-                                checked,
-                                "exist",
-                                qty,
-                                Number(checked[0].get("currentQty"))
-                            );
+                            // console.log(
+                            //     checked,
+                            //     "exist",
+                            //     qty,
+                            //     Number(checked[0].get("currentQty"))
+                            // );
 
                             // const d = new Date.parse(success.createdAt);
-                            console.log("date", success.createdAt)
+                            // console.log("date", success.createdAt)
 
 
                             inventory = {
@@ -734,7 +734,7 @@ const updateInventoryINOnRTVOut = async (req, res, next) => {
                                 ]
 
                             }
-                            console.log("inventory", inventory);
+                            // console.log("inventory", inventory);
                         } else {
                             inventory = {
                                 name: success.name,
@@ -764,7 +764,7 @@ const updateInventoryINOnRTVOut = async (req, res, next) => {
                                 ]
 
                             }
-                            console.log("inventory", inventory);
+                            // console.log("inventory", inventory);
                         }
                     } else {
                         inventory = {
@@ -827,7 +827,7 @@ const updateInventoryINOnRTVOut = async (req, res, next) => {
                 // res.send(inventory)
                 const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
                 if (update) {
-                    console.log("update", update)
+                    // console.log("update", update)
                 }
             });
         } else {
@@ -844,20 +844,20 @@ const updateInventoryINOnRTVOut = async (req, res, next) => {
 // Generate Sale Del -> inventory in
 const updateInventoryInOnSaleDel = async (req, res, next) => {
     // TODO:: todays total
-    console.log(req.body)
+    // console.log(req.body)
     // const todayTotal = await Damage.countDocuments({
     //     createdAt: { $gte: startOfDay(new Date()), $lte: endOfDay(new Date()) },
     // });
     try {
         // const products = await req.body.products;
         const id = req.params.id;
-        console.log("Sale delete", id)
+        // console.log("Sale delete", id)
         const saleData = await Sale.find({ _id: id })
-        console.log("Sale Data", saleData)
+        // console.log("Sale Data", saleData)
         const products = saleData[0].products;
         const returnProducts = saleData[0].returnProducts;
-        console.log("sale Products", products);
-        console.log("return Products", returnProducts);
+        // console.log("sale Products", products);
+        // console.log("return Products", returnProducts);
 
         // console.log("inventory Products", products);
 
@@ -892,7 +892,7 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
                 if (success) {
                     // console.log("success", success);
                     // res.send(success)
-                    console.log("PriceTable", success.priceTable);
+                    // console.log("PriceTable", success.priceTable);
 
                     if (success.priceTable.length > 0) {
                         // console.log("priceid", priceId);
@@ -916,7 +916,7 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
                         //   console.log("checked", qty);
                         // console.log("checked", checked[0]);
                         // console.log("checkedid", checked[0].get("id"));
-                        console.log("rest", rest);
+                        // console.log("rest", rest);
                         if (checked?.length > 0) {
                             // console.log(
                             //     checked,
@@ -1052,7 +1052,7 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
                 // console.log("inventory final", inventory);
                 const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
                 if (update) {
-                    console.log("update", update)
+                    // console.log("update", update)
                 }
             });
         }
@@ -1080,18 +1080,18 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
                     priceId: priceId,
                     tp: tp,
                 }
-                console.log("return newProduct", newProduct)
+                // console.log("return newProduct", newProduct)
                 let inventory = {};
                 const success = await Inventory.findOne({ article_code: article_code });
 
                 if (success) {
-                    console.log("return success", success);
+                    // console.log("return success", success);
                     // res.send(success)
-                    console.log("return PriceTable", success.priceTable);
+                    // console.log("return PriceTable", success.priceTable);
 
                     if (success.priceTable.length > 0) {
-                        console.log("return priceid", priceId);
-                        console.log("return pricetable", success.priceTable);
+                        // console.log("return priceid", priceId);
+                        // console.log("return pricetable", success.priceTable);
                         // const prices = success.priceTable
                         // const prices = success.priceTable[0].get('id')
                         // prices.forEach((value, key) => {
@@ -1109,19 +1109,19 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
                         );
 
                         //   console.log("checked", qty);
-                        console.log("return checked", checked[0]);
+                        // console.log("return checked", checked[0]);
                         // console.log("checkedid", checked[0].get("id"));
-                        console.log("return rest", rest);
+                        // console.log("return rest", rest);
                         if (checked?.length > 0) {
-                            console.log(
-                                checked,
-                                "exist",
-                                qty,
-                                Number(checked[0].get("currentQty"))
-                            );
+                            // console.log(
+                            // checked,
+                            // "exist",
+                            // qty,
+                            // Number(checked[0].get("currentQty"))
+                            // );
 
                             // const d = new Date.parse(success.createdAt);
-                            console.log("return date", success.createdAt)
+                            // console.log("return date", success.createdAt)
 
 
                             inventory = {
@@ -1152,7 +1152,7 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
                                 ]
 
                             }
-                            console.log("return inventory", inventory);
+                            // console.log("return inventory", inventory);
                         } else {
                             inventory = {
                                 name: success.name,
@@ -1182,7 +1182,7 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
                                 ]
 
                             }
-                            console.log("return inventory", inventory);
+                            // console.log("return inventory", inventory);
                         }
                     } else {
                         inventory = {
@@ -1244,10 +1244,10 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
                     };
                 }
                 // res.send(inventory)
-                console.log(" return inventory final", inventory);
+                // console.log(" return inventory final", inventory);
                 const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
                 if (update) {
-                    console.log("return update", update)
+                    // console.log("return update", update)
                 }
             });
         }
@@ -1275,18 +1275,18 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
             products.map(async (product) => {
                 // console.log("single product", product);
                 const { article_code, qty, priceId, name } = product;
-                console.log(article_code);
+                // console.log(article_code);
                 let inventory = {};
                 const success = await Inventory.findOne({ article_code: article_code });
 
                 if (success) {
-                    console.log("success", success);
+                    // console.log("success", success);
                     // res.send(success)
-                    console.log("PriceTable", success.priceTable);
+                    // console.log("PriceTable", success.priceTable);
 
                     if (success.priceTable.length > 0) {
-                        console.log("priceid", priceId);
-                        console.log("pricetable", success.priceTable);
+                        // console.log("priceid", priceId);
+                        // console.log("pricetable", success.priceTable);
                         const checked = success.priceTable.filter(
                             (p) => p.get("id") === priceId
                         );
@@ -1295,19 +1295,19 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
                         );
 
                         //   console.log("checked", qty);
-                        console.log("checked", checked[0]);
+                        // console.log("checked", checked[0]);
                         // console.log("checkedid", checked[0].get("id"));
-                        console.log("rest", rest);
+                        // console.log("rest", rest);
                         if (checked?.length > 0) {
-                            console.log(
-                                checked,
-                                "exist",
-                                qty,
-                                Number(checked[0].get("currentQty"))
-                            );
+                            // console.log(
+                            // checked,
+                            // "exist",
+                            // qty,
+                            // Number(checked[0].get("currentQty"))
+                            // );
 
                             // const d = new Date.parse(success.createdAt);
-                            console.log("date", success.createdAt)
+                            // console.log("date", success.createdAt)
 
 
                             inventory = {
@@ -1339,7 +1339,7 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
                                 ]
 
                             }
-                            console.log("inventory", inventory);
+                            // console.log("inventory", inventory);
                         } else {
                             inventory = {
                                 name: success.name,
@@ -1369,7 +1369,7 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
                                 ]
 
                             }
-                            console.log("inventory", inventory);
+                            // console.log("inventory", inventory);
                         }
                     } else {
                         inventory = {
@@ -1431,10 +1431,10 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
                 }
                 // res.send(inventory)
                 // res.send(inventory)
-                console.log("inventory final", inventory);
+                // console.log("inventory final", inventory);
                 const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
                 if (update) {
-                    console.log("update", update)
+                    // console.log("update", update)
                 }
             });
         }
@@ -1444,18 +1444,18 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
             returnProducts.map(async (product) => {
                 // console.log("single product", product);
                 const { article_code, qty, priceId, name } = product;
-                console.log(article_code);
+                // console.log(article_code);
                 let inventory = {};
                 const success = await Inventory.findOne({ article_code: article_code });
 
                 if (success) {
-                    console.log("success", success);
+                    // console.log("success", success);
                     // res.send(success)
-                    console.log("PriceTable", success.priceTable);
+                    // console.log("PriceTable", success.priceTable);
 
                     if (success.priceTable.length > 0) {
-                        console.log("priceid", priceId);
-                        console.log("pricetable", success.priceTable);
+                        // console.log("priceid", priceId);
+                        // console.log("pricetable", success.priceTable);
                         const checked = success.priceTable.filter(
                             (p) => p.get("id") === priceId
                         );
@@ -1464,19 +1464,19 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
                         );
 
                         //   console.log("checked", qty);
-                        console.log("checked", checked[0]);
+                        // console.log("checked", checked[0]);
                         // console.log("checkedid", checked[0].get("id"));
-                        console.log("rest", rest);
+                        // console.log("rest", rest);
                         if (checked?.length > 0) {
-                            console.log(
-                                checked,
-                                "exist",
-                                qty,
-                                Number(checked[0].get("currentQty"))
-                            );
+                            // console.log(
+                            //     checked,
+                            //     "exist",
+                            //     qty,
+                            //     Number(checked[0].get("currentQty"))
+                            // );
 
                             // const d = new Date.parse(success.createdAt);
-                            console.log("date", success.createdAt)
+                            // console.log("date", success.createdAt)
 
 
                             inventory = {
@@ -1508,7 +1508,7 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
                                 ]
 
                             }
-                            console.log("inventory", inventory);
+                            // console.log("inventory", inventory);
                         } else {
                             inventory = {
                                 name: success.name,
@@ -1538,7 +1538,7 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
                                 ]
 
                             }
-                            console.log("inventory", inventory);
+                            // console.log("inventory", inventory);
                         }
                     } else {
                         inventory = {
@@ -1600,10 +1600,10 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
                 }
                 // res.send(inventory)
                 // res.send(inventory)
-                console.log("inventory final", inventory);
+                // console.log("inventory final", inventory);
                 const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
                 if (update) {
-                    console.log("update", update)
+                    // console.log("update", update)
                 }
             });
         }
@@ -1628,24 +1628,24 @@ const updateInventoryInOnGRNIn = async (req, res, next) => {
     try {
         const products = await req.body.products;
 
-        console.log("req Products", products);
+        // console.log("req Products", products);
 
         if (products.length > 0) {
             products.map(async (product) => {
                 // console.log("single product", product);
                 const { _id, article_code, qty, priceId, name } = product;
-                console.log(article_code);
+                // console.log(article_code);
                 let inventory = {};
                 const success = await Inventory.findOne({ article_code: article_code });
 
                 if (success) {
-                    console.log("success", success);
+                    // console.log("success", success);
                     // res.send(success)
-                    console.log("PriceTable", success.priceTable);
+                    // console.log("PriceTable", success.priceTable);
 
                     if (success.priceTable.length > 0) {
-                        console.log("priceid", priceId);
-                        console.log("pricetable", success.priceTable);
+                        // console.log("priceid", priceId);
+                        // console.log("pricetable", success.priceTable);
                         // const prices = success.priceTable
                         // const prices = success.priceTable[0].get('id')
                         // prices.forEach((value, key) => {
@@ -1663,20 +1663,20 @@ const updateInventoryInOnGRNIn = async (req, res, next) => {
                         );
 
                         //   console.log("checked", qty);
-                        console.log("checked", checked[0]);
+                        // console.log("checked", checked[0]);
                         // console.log("checkedid", checked[0].get("id"));
-                        console.log("rest", rest);
+                        // console.log("rest", rest);
                         if (checked?.length > 0) {
-                            console.log(
-                                checked,
-                                "exist",
-                                qty,
-                                Number(checked[0].get("currentQty"))
-                            );
+                            // console.log(
+                            //     checked,
+                            //     "exist",
+                            //     qty,
+                            //     Number(checked[0].get("currentQty"))
+                            // );
 
                             // const d = new Date.parse(success.createdAt);
-                            console.log("date", success.createdAt)
-                            console.log("qty", qty)
+                            // console.log("date", success.createdAt)
+                            // console.log("qty", qty)
 
 
                             inventory = {
@@ -1707,7 +1707,7 @@ const updateInventoryInOnGRNIn = async (req, res, next) => {
                                 ]
 
                             }
-                            console.log("inventory", inventory);
+                            // console.log("inventory", inventory);
                         } else {
                             inventory = {
                                 name: success.name,
@@ -1737,7 +1737,7 @@ const updateInventoryInOnGRNIn = async (req, res, next) => {
                                 ]
 
                             }
-                            console.log("inventory", inventory);
+                            // console.log("inventory", inventory);
                         }
                     } else {
                         inventory = {
@@ -1799,10 +1799,10 @@ const updateInventoryInOnGRNIn = async (req, res, next) => {
                     };
                 }
                 // res.send(inventory)
-                console.log("inventory final", inventory);
+                // console.log("inventory final", inventory);
                 const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
                 if (update) {
-                    console.log("update", update)
+                    // console.log("update", update)
                 }
             });
         } else {
@@ -1822,11 +1822,11 @@ const updateInventoryOutOnGRNDel = async (req, res, next) => {
     //     createdAt: { $gte: startOfDay(new Date()), $lte: endOfDay(new Date()) },
     // });
     const id = req.params.id;
-    console.log("grn delete", id)
+    // console.log("grn delete", id)
     const grnData = await Grn.find({ _id: id })
-    console.log("GRN Data", grnData)
+    // console.log("GRN Data", grnData)
     const products = grnData[0].products;
-    console.log("inventory Products", products);
+    // console.log("inventory Products", products);
     try {
         // const products = await req.body.products;
 
@@ -1836,7 +1836,7 @@ const updateInventoryOutOnGRNDel = async (req, res, next) => {
 
             products.map(async (product) => {
                 // console.log("single product", product);
-                console.log("single product", product);
+                // console.log("single product", product);
                 const id = product.get("id");
                 const name = product.get("name");
                 const article_code = product.get("article_code");
@@ -1855,20 +1855,20 @@ const updateInventoryOutOnGRNDel = async (req, res, next) => {
                     priceId: priceId,
                     tp: tp,
                 }
-                console.log("newProduct", newProduct)
+                // console.log("newProduct", newProduct)
                 // const { article_code, qty, priceId, name } = product;
-                console.log(article_code);
+                // console.log(article_code);
                 let inventory = {};
                 const success = await Inventory.findOne({ article_code: article_code });
 
                 if (success) {
-                    console.log("success", success);
+                    // console.log("success", success);
                     // res.send(success)
-                    console.log("PriceTable", success.priceTable);
+                    // console.log("PriceTable", success.priceTable);
 
                     if (success.priceTable.length > 0) {
-                        console.log("priceid", priceId);
-                        console.log("pricetable", success.priceTable);
+                        // console.log("priceid", priceId);
+                        // console.log("pricetable", success.priceTable);
                         // const prices = success.priceTable
                         // const prices = success.priceTable[0].get('id')
                         // prices.forEach((value, key) => {
@@ -1886,19 +1886,19 @@ const updateInventoryOutOnGRNDel = async (req, res, next) => {
                         );
 
                         //   console.log("checked", qty);
-                        console.log("checked", checked[0]);
+                        // console.log("checked", checked[0]);
                         // console.log("checkedid", checked[0].get("id"));
-                        console.log("rest", rest);
+                        // console.log("rest", rest);
                         if (checked?.length > 0) {
-                            console.log(
-                                checked,
-                                "exist",
-                                qty,
-                                Number(checked[0].get("currentQty"))
-                            );
+                            // console.log(
+                            //     checked,
+                            //     "exist",
+                            //     qty,
+                            //     Number(checked[0].get("currentQty"))
+                            // );
 
                             // const d = new Date.parse(success.createdAt);
-                            console.log("date", success.createdAt)
+                            // console.log("date", success.createdAt)
 
 
                             inventory = {
@@ -1930,7 +1930,7 @@ const updateInventoryOutOnGRNDel = async (req, res, next) => {
                                 ]
 
                             }
-                            console.log("inventory", inventory);
+                            // console.log("inventory", inventory);
                         } else {
                             inventory = {
                                 name: success.name,
@@ -1960,7 +1960,7 @@ const updateInventoryOutOnGRNDel = async (req, res, next) => {
                                 ]
 
                             }
-                            console.log("inventory", inventory);
+                            // console.log("inventory", inventory);
                         }
                     } else {
                         inventory = {
@@ -2021,10 +2021,10 @@ const updateInventoryOutOnGRNDel = async (req, res, next) => {
                     };
                 }
                 // res.send(inventory)
-                console.log("inventory final", inventory);
+                // console.log("inventory final", inventory);
                 const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
                 if (update) {
-                    console.log("update", update)
+                    // console.log("update", update)
                 }
             });
 =======

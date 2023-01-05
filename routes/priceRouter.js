@@ -14,6 +14,7 @@ const expressAsyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 const Price = require("../models/priceModel");
 const checklogin = require("../middlewares/checkLogin");
+const { handleNewPrice } = require("../middlewares/handlePrice");
 
 const priceRouter = express.Router();
 
@@ -73,9 +74,10 @@ priceRouter.get(
 // CREATE ONE Price
 priceRouter.post(
   "/",
+  // handleNewPrice,
   expressAsyncHandler(async (req, res) => {
     const newPrice = new Price(req.body);
-    console.log(req.body);
+    console.log("grn price", req.body);
     try {
       console.log("before save");
       let savePrice = await newPrice.save(); //when fail its goes to catch
