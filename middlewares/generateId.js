@@ -43,6 +43,7 @@ const generatePoId = async (req, res, next) => {
 // Generate Grn Id
 const generateGrnId = async (req, res, next) => {
   // TODO:: todays total
+  // console.log(req.body)
 
   const todayTotal = await Grn.countDocuments({
     createdAt: { $gte: startOfDay(new Date()), $lte: endOfDay(new Date()) },
@@ -54,7 +55,7 @@ const generateGrnId = async (req, res, next) => {
   const newId = process.env.ID_PREFIX + "-GRN-" + date + "-" + current;
   // console.log(newId);
   req.body.grnNo = newId;
-  console.log(newId);
+  // console.log(newId);
   next();
 };
 

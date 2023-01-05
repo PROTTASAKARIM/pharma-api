@@ -93,7 +93,7 @@ grnRouter.post(
   updateInventoryInOnGRNIn,
   handleNewPrice,
   expressAsyncHandler(async (req, res) => {
-    console.log('New:', req.body.grnData)
+    console.log('New:', req.body)
 
     //   const newGrn = new Grn(req.body);
     //   console.log(newGrn);
