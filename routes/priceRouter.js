@@ -64,6 +64,21 @@ priceRouter.get(
     const id = req.params.id;
     const prices = await Price.find({
       article_code: id,
+      status: "active"
+    });
+    res.send(prices);
+    // // res.send('removed');
+    // console.log("product:", prices);
+  })
+);
+// GET prices By Product Article Code
+priceRouter.get(
+  "/product/switch/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const prices = await Price.find({
+      article_code: id,
+      // status: "active"
     });
     res.send(prices);
     // // res.send('removed');
@@ -111,6 +126,85 @@ priceRouter.post(
     });
   })
 );
+// CREATE MULTI prices
+priceRouter.post(
+  "/multiprice",
+  expressAsyncHandler(async (req, res) => {
+
+    const allPrices = req.body
+    console.log("allPrices", allPrices)
+    const updatePriceList = allPrices.map(async price => {
+      if (price?._id) {
+        // try {
+        //   await Price.updateOne({ _id: price?._id }, { $set: price })
+        //     .then((response) => {
+        //       res.send(response);
+        //     })
+        //     .catch((err) => {
+        //       res.send(err);
+        //     });
+        // } catch (error) {
+        //   console.error(error);
+        // }
+        // const newPrice = new Price(price)
+        return new Promise(async (resolve, reject) => {
+          await Price.updateOne({ _id: price?._id }, { $set: price }).then(res => {
+            console.log("success", res)
+          }).catch(error => {
+            console.log(error)
+          })
+
+        });
+
+      }
+      else {
+        const newPrice = new Price(price)
+        // try {
+        //   let savePrice = await newPrice.save(); //when fail its goes to catch
+        //   console.log(savePrice); //when success it print.
+        //   console.log("after save");
+        //   res.status(200).json({
+        //     status: "success",
+        //     message: "Price is created Successfully",
+        //     // id: savePrice._id,
+        //   });
+        // } catch (err) {
+        //   res
+        //     .status(500)
+        //     .json({ message: "There was a server side error", error: err });
+        // }
+        return new Promise(async (resolve, reject) => {
+          await newPrice.save((error) => {
+            if (error) {
+              console.log(error);
+              reject(error);
+            } else {
+              resolve({ price })
+            }
+          });
+        });
+
+
+      }
+    })
+    Promise.all(updatePriceList)
+      .then((response) => {
+        res.send(response);
+      })
+      .catch((err) => {
+        res.send(err);
+      });
+    // await Price.insertMany(req.body, (err) => {
+    //   if (err) {
+    //     res.status(500).json({ error: err });
+    //   } else {
+    //     res.status(200).json({
+    //       message: "prices are created Successfully",
+    //     });
+    //   }
+    // });
+  })
+);
 
 // UPDATE ONE Price
 priceRouter.put(
@@ -131,6 +225,8 @@ priceRouter.put(
     }
   })
 );
+// UPDATE many
+
 
 // DELETE ONE Price
 priceRouter.delete(

@@ -66,8 +66,9 @@ const handleNewPrice = async (req, res, next) => {
             })
 
             console.log("newProductList", products)
-            req.body.newProducts = products
+            req.body.products = products
             console.log(req.body)
+            next();
         })
         .catch(err => { console.log(err) })
 }

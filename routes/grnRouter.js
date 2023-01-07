@@ -95,24 +95,24 @@ grnRouter.post(
   expressAsyncHandler(async (req, res) => {
     console.log('New:', req.body)
 
-    //   const newGrn = new Grn(req.body);
-    //   console.log(newGrn);
-    //   try {
-    //     const result = await newGrn.save();
+    const newGrn = new Grn(req.body);
+    console.log(newGrn);
+    try {
+      const result = await newGrn.save();
 
-    //     console.log("result", result);
-    //     if (result) {
-    //       res.status(200).json({
-    //         data: result,
-    //         message: "Grn is created Successfully",
-    //         status: "success",
-    //       });
-    //     }
-    //   } catch (err) {
-    //     res
-    //       .status(500)
-    //       .json({ message: "There was a server side error", error: err });
-    //   }
+      console.log("result", result);
+      if (result) {
+        res.status(200).json({
+          data: result,
+          message: "Grn is created Successfully",
+          status: "success",
+        });
+      }
+    } catch (err) {
+      res
+        .status(500)
+        .json({ message: "There was a server side error", error: err });
+    }
   })
 );
 
