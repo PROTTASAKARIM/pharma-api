@@ -15,8 +15,10 @@ const jwt = require("jsonwebtoken");
 const Grn = require("../models/grnModel"); // Goods Recieve Note
 const checklogin = require("../middlewares/checkLogin");
 const { generateGrnId } = require("../middlewares/generateId");
-const { updateInventoryInOnGRNIn,
-  updateInventoryOutOnGRNDel } = require("../middlewares/useInventory");
+const {
+  updateInventoryInOnGRNIn,
+  updateInventoryOutOnGRNDel,
+} = require("../middlewares/useInventory");
 const { handleNewPrice } = require("../middlewares/handlePrice");
 
 const grnRouter = express.Router();
@@ -90,10 +92,10 @@ grnRouter.get(
 grnRouter.post(
   "/",
   generateGrnId,
-  updateInventoryInOnGRNIn,
+  // updateInventoryInOnGRNIn,
   handleNewPrice,
   expressAsyncHandler(async (req, res) => {
-    console.log('New:', req.body)
+    console.log("New:", req.body.products);
 
     //   const newGrn = new Grn(req.body);
     //   console.log(newGrn);
