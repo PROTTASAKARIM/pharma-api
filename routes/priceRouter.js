@@ -73,7 +73,7 @@ priceRouter.get(
 );
 // GET prices By Product Article Code
 priceRouter.get(
-  "/product/switch/:id",
+  "/productswitch/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     const prices = await Price.find({

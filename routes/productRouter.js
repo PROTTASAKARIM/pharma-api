@@ -304,7 +304,7 @@ router.get(
       })
       .populate("category", "name")
       .populate("master_category", "name")
-      .populate("priceList", { mrp: 1, tp: 1, supplier: 1, _id: 1 });
+      .populate("priceList", { mrp: 1, tp: 1, supplier: 1, _id: 1, status: 1 });
     // .populate("priceList");
     res.send(products[0]);
   })
@@ -345,7 +345,7 @@ router.get(
         priceList: 1,
         ean: 1,
       })
-      .populate("priceList", { mrp: 1, tp: 1, supplier: 1, _id: 1 });
+      .populate("priceList", { mrp: 1, tp: 1, supplier: 1, _id: 1, status: 1 });
     res.send(products[0]);
   })
 );
@@ -496,7 +496,7 @@ router.get(
         article_code: 1,
         priceList: 1,
       })
-      .populate("priceList", { mrp: 1, tp: 1, supplier: 1 })
+      .populate("priceList", { mrp: 1, tp: 1, supplier: 1, status: 1 })
       .limit(10);
     if (payload === "") {
       res.send([]);

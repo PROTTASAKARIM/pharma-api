@@ -1,4 +1,3 @@
-// const { default: id } = require("date-fns/esm/locale/id/index.js");
 const Price = require("../models/priceModel");
 const handleNewPrice = async (req, res, next) => {
     // console.log("new Price", req.body)
