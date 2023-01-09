@@ -13,8 +13,10 @@ const router = express.Router();
 const expressAsyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 const Price = require("../models/priceModel");
+const Product = require("../models/productModel");
 const checklogin = require("../middlewares/checkLogin");
 const { handleNewPrice } = require("../middlewares/handlePrice");
+const { response } = require("express");
 
 const priceRouter = express.Router();
 
@@ -65,7 +67,10 @@ priceRouter.get(
     const prices = await Price.find({
       article_code: id,
       status: "active"
-    });
+    })
+      // .populate("supplier", "name")
+      // .populate("warehouse", "name")
+      ;
     res.send(prices);
     // // res.send('removed');
     // console.log("product:", prices);
@@ -79,7 +84,10 @@ priceRouter.get(
     const prices = await Price.find({
       article_code: id,
       // status: "active"
-    });
+    })
+      // .populate("supplier", "name")
+      // .populate("warehouse", "name")
+      ;
     res.send(prices);
     // // res.send('removed');
     // console.log("product:", prices);
@@ -127,73 +135,73 @@ priceRouter.post(
   })
 );
 // CREATE MULTI prices
-priceRouter.post(
+priceRouter.put(
   "/multiprice",
   expressAsyncHandler(async (req, res) => {
 
     const allPrices = req.body
     console.log("allPrices", allPrices)
-    const updatePriceList = allPrices.map(async price => {
-      if (price?._id) {
-        // try {
-        //   await Price.updateOne({ _id: price?._id }, { $set: price })
-        //     .then((response) => {
-        //       res.send(response);
-        //     })
-        //     .catch((err) => {
-        //       res.send(err);
-        //     });
-        // } catch (error) {
-        //   console.error(error);
-        // }
-        // const newPrice = new Price(price)
-        return new Promise(async (resolve, reject) => {
-          await Price.updateOne({ _id: price?._id }, { $set: price }).then(res => {
-            console.log("success", res)
-          }).catch(error => {
-            console.log(error)
-          })
+    // const updatePriceList = allPrices.map(async price => {
+    //   if (price?._id) {
+    //     // try {
+    //     //   await Price.updateOne({ _id: price?._id }, { $set: price })
+    //     //     .then((response) => {
+    //     //       res.send(response);
+    //     //     })
+    //     //     .catch((err) => {
+    //     //       res.send(err);
+    //     //     });
+    //     // } catch (error) {
+    //     //   console.error(error);
+    //     // }
+    //     // const newPrice = new Price(price)
+    //     return new Promise(async (resolve, reject) => {
+    //       await Price.updateOne({ _id: price?._id }, { $set: price }).then(res => {
+    //         console.log("success", res)
+    //       }).catch(error => {
+    //         console.log(error)
+    //       })
 
-        });
+    //     });
 
-      }
-      else {
-        const newPrice = new Price(price)
-        // try {
-        //   let savePrice = await newPrice.save(); //when fail its goes to catch
-        //   console.log(savePrice); //when success it print.
-        //   console.log("after save");
-        //   res.status(200).json({
-        //     status: "success",
-        //     message: "Price is created Successfully",
-        //     // id: savePrice._id,
-        //   });
-        // } catch (err) {
-        //   res
-        //     .status(500)
-        //     .json({ message: "There was a server side error", error: err });
-        // }
-        return new Promise(async (resolve, reject) => {
-          await newPrice.save((error) => {
-            if (error) {
-              console.log(error);
-              reject(error);
-            } else {
-              resolve({ price })
-            }
-          });
-        });
+    //   }
+    //   else {
+    //     const newPrice = new Price(price)
+    //     // try {
+    //     //   let savePrice = await newPrice.save(); //when fail its goes to catch
+    //     //   console.log(savePrice); //when success it print.
+    //     //   console.log("after save");
+    //     //   res.status(200).json({
+    //     //     status: "success",
+    //     //     message: "Price is created Successfully",
+    //     //     // id: savePrice._id,
+    //     //   });
+    //     // } catch (err) {
+    //     //   res
+    //     //     .status(500)
+    //     //     .json({ message: "There was a server side error", error: err });
+    //     // }
+    //     return new Promise(async (resolve, reject) => {
+    //       await newPrice.save((error) => {
+    //         if (error) {
+    //           console.log(error);
+    //           reject(error);
+    //         } else {
+    //           resolve({ price })
+    //         }
+    //       });
+    //     });
 
 
-      }
-    })
-    Promise.all(updatePriceList)
-      .then((response) => {
-        res.send(response);
-      })
-      .catch((err) => {
-        res.send(err);
-      });
+    //   }
+    // })
+    // Promise.all(updatePriceList)
+    //   .then((response) => {
+    //     res.send(response);
+    //   })
+    //   .catch((err) => {
+    //     res.send(err);
+    //   });
     // await Price.insertMany(req.body, (err) => {
     //   if (err) {
     //     res.status(500).json({ error: err });
@@ -203,6 +211,137 @@ priceRouter.post(
     //     });
     //   }
     // });
+
+    const updatePriceList = allPrices.map(async price => {
+      // if (price?._id) {
+      //   try {
+      //     await Price.updateOne({ _id: price?._id }, { $set: price }, { upsert: true })
+      //       .then((response) => {
+      //         console.log(response)
+      //         // res.status(200).json({
+      //         //   message: "prices are created Successfully",
+      //         // });
+      //         // res.send(response)
+      //       })
+      //       .catch((err) => {
+      //         // res.send(err);
+      //         // console.log("err", err)
+      //       });
+
+      //   } catch (err) {
+      //     // console.log("err", err)
+      //     // res.status(500).json({ error: err });
+      //   }
+
+      // } else {
+      //   const newPrice = new Price(price)
+      //   try {
+      //     let savePrice = await newPrice.save(); //when fail its goes to catch
+      //     console.log(savePrice); //when success it print.
+      //     console.log("after save");
+      //     // res.status(200).json({
+      //     //   status: "success",
+      //     //   message: "Price is created Successfully",
+      //     //   // id: savePrice._id,
+      //     // });
+      //   } catch (err) {
+      //     // res
+      //     //   .status(500)
+      //     //   .json({ message: "There was a server side error", error: err });
+      //   }
+      // }
+
+      let priceList = []
+      if (price?._id) {
+        return new Promise(async (resolve, reject) => {
+          try {
+            await Price.updateOne({ _id: price?._id }, { $set: price }, { upsert: true })
+              .then((response) => {
+                console.log("response update", response)
+                // Resolve 
+                resolve([...priceList, price?._id])
+              })
+              .catch((err) => {
+                // console.log("err", err)
+                // reject
+              });
+
+          } catch (err) {
+            reject()
+            // console.log("err", err)
+            // res.status(500).json({ error: err });
+          }
+
+        })
+      } else {
+        const newPrice = new Price(price)
+        return new Promise(async (resolve, reject) => {
+          try {
+            await newPrice.save(error => {
+              if (error) {
+                console.log(error)
+              } else {
+                console.log("save price", newPrice)
+                resolve([...priceList, newPrice._id])
+
+              }
+            }); //when fail its goes to catch
+            // console.log(savePrice); //when success it print.
+            // console.log("after save");
+
+            // res.status(200).json({
+            //   status: "success",
+            //   message: "Price is created Successfully",
+            //   // id: savePrice._id,
+            // });
+          } catch (err) {
+            // res
+            //   .status(500)
+            //   .json({ message: "There was a server side error", error: err });
+            reject()
+          }
+
+        })
+      }
+
+    })
+
+
+    console.log("updatePRice", updatePriceList)
+    // res.send(updatePriceList)
+    Promise.all(updatePriceList)
+      .then(async (response) => {
+        console.log("updatePRice2", updatePriceList)
+        console.log("response", response)
+        const article_code = allPrices[0]?.article_code ? allPrices[0]?.article_code : "";
+        console.log("article", article_code)
+        // const prices = await Price.find({ _id: id });
+        const selectedProducts = await Product?.find({ _id: article_code })
+        console.log("selected", selectedProducts)
+        selectedProducts[0].priceList = response
+        console.log("selected updated", selectedProducts)
+
+        await Product.updateOne({ _id: article_code }, { $set: { priceList: response } }, { upsert: true })
+          .then((response) => {
+            console.log("product update", response)
+            res.status(200).json({
+              status: "success",
+              message: "Price is created Successfully",
+            });
+
+          })
+          .catch((err) => {
+            console.log("product err", err)
+            res
+              .status(500)
+              .json({ message: "There was a server side error", error: err });
+          });
+        // response.map(result => {
+        //   console.log("result", result)
+        // })
+
+      })
+
   })
 );
 

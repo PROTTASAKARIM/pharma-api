@@ -1,4 +1,5 @@
 const Price = require("../models/priceModel");
+const Product = require("../models/productModel");
 const handleNewPrice = async (req, res, next) => {
     // console.log("new Price", req.body)
     let grnData = req.body;
@@ -25,17 +26,34 @@ const handleNewPrice = async (req, res, next) => {
             // NEW PRODUCT PRICE
             const newPrice = new Price(price)
             return new Promise(async (resolve, reject) => {
-                await newPrice.save((error) => {
+                await newPrice.save(async (error) => {
                     if (error) {
                         console.log(error);
                         reject(error);
                     } else {
                         //    IF SAVE NEW PRICE
 
-                        // console.log("new price", newPrice)
-                        // console.log("products", product)
+                        console.log("product", product.id)
+                        console.log("price id", newPrice._id)
                         // console.log("rest", rest)
-                        resolve({ ...product, priceId: newPrice._id, newPrice: false })
+
+                        // const convertToString = String(product.id)
+                        // console.log("convertToString", convertToString)
+                        // console.log("productId", productId)
+                        const previousProduct = await Product.find({ _id: product?.id })
+
+                        console.log("Previous price List", previousProduct[0]?.priceList)
+                        console.log("price id", newPrice?._id)
+                        const updatedPriceList = [...previousProduct[0].priceList, newPrice._id]
+
+                        console.log("Updated", updatedPriceList)
+                        await Product.updateOne({ _id: product?.id }, { $set: { priceList: updatedPriceList } }, { upsert: true })
+                            .then(res => {
+                                console.log("res status", res)
+                                resolve({ ...product, priceId: newPrice._id, newPrice: false })
+                            })
+
+
                     }
                 });
             });
@@ -46,8 +64,8 @@ const handleNewPrice = async (req, res, next) => {
 
     }) //Loop END
     Promise.all(updatedProducts)
-        .then(result => {
-            console.log("result", result)
+        .then(async result => {
+            // console.log("result", result)
             // let productData = req.body.products;
 
             let newProductList;
@@ -55,18 +73,22 @@ const handleNewPrice = async (req, res, next) => {
                 // console.log(pro)
                 if (pro !== undefined) {
                     // GET ALL PRODUCTS WITHOUT THIS PRODUCT
-                    console.log("pro", pro)
-                    console.log("products", products)
+                    // console.log("pro", pro)
+                    // console.log("products", products)
                     const rest = products.filter((pro1) => pro1.id != pro.id)
-                    console.log("rest", rest)
+                    // console.log("rest", rest)
                     products = [...rest, pro]
 
                 }
             })
 
-            console.log("newProductList", products)
+            // console.log("newProductList", products)
+            // const matchProducts = products.map(async product => {
+
+            // const previousProduct = await Product.find({ article_code: product.article_code })
+            // console.log("matched priceList", previousProduct[0].priceList)
             req.body.products = products
-            console.log(req.body)
+            // console.log(req.body)
             next();
         })
         .catch(err => { console.log(err) })
