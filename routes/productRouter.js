@@ -105,6 +105,9 @@ router.get(
           article_code: 1,
           priceList: 1,
           category: 1,
+          promo_price: 1,
+          promo_start: 1,
+          promo_end: 1,
         })
         .limit(100)
         .populate("category", "name")
@@ -125,6 +128,9 @@ router.get(
           article_code: 1,
           priceList: 1,
           category: 1,
+          promo_price: 1,
+          promo_start: 1,
+          promo_end: 1,
         })
         .limit(size)
         .skip(size * page)
@@ -239,6 +245,9 @@ router.get(
         priceList: 1,
         category: 1,
         master_category: 1,
+        promo_price: 1,
+        promo_start: 1,
+        promo_end: 1,
       })
       .populate("category", "name")
       .populate("priceList", "mrp")
@@ -279,10 +288,29 @@ router.get(
   "/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
-    const products = await Product.find({ _id: id }).populate(
-      "category",
-      "name"
-    );
+    const products = await Product.find({ _id: id })
+      .populate(
+        "category",
+        "name"
+      )
+      // .populate("priceList", "mrp")
+      ;
+    res.send(products[0]);
+  })
+);
+// GET ONE PRODUCT
+router.get(
+  "/promo-update/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const products = await Product.find({ _id: id })
+      .populate(
+        "category",
+        "name"
+      )
+      .populate("priceList", "mrp")
+      .populate("promo_price", "mrp")
+      ;
     res.send(products[0]);
   })
 );
@@ -323,6 +351,10 @@ router.get(
         article_code: 1,
         priceList: 1,
         ean: 1,
+        promo_start: 1,
+        promo_end: 1,
+        promo_price: 1
+
       })
       .populate("priceList", { mrp: 1, tp: 1, _id: 1 });
     // .populate("priceList");
@@ -344,6 +376,9 @@ router.get(
         article_code: 1,
         priceList: 1,
         ean: 1,
+        promo_start: 1,
+        promo_end: 1,
+        promo_price: 1
       })
       .populate("priceList", { mrp: 1, tp: 1, supplier: 1, _id: 1, status: 1 });
     res.send(products[0]);
@@ -364,6 +399,9 @@ router.get(
         unit: 1,
         article_code: 1,
         priceList: 1,
+        promo_start: 1,
+        promo_end: 1,
+        promo_price: 1
       })
       .populate("priceList", { mrp: 1, tp: 1, _id: 0 });
     res.send(products[0]);
@@ -384,6 +422,9 @@ router.post(
         unit: 1,
         article_code: 1,
         priceList: 1,
+        promo_start: 1,
+        promo_end: 1,
+        promo_price: 1
       })
       .populate("priceList", { mrp: 1, tp: 1, _id: 0 });
     res.send(products[0]);
@@ -495,6 +536,9 @@ router.get(
         vat: 1,
         article_code: 1,
         priceList: 1,
+        promo_start: 1,
+        promo_end: 1,
+        promo_price: 1
       })
       .populate("priceList", { mrp: 1, tp: 1, supplier: 1, status: 1 })
       .limit(10);
@@ -553,12 +597,16 @@ router.put(
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     const update = req.body;
+    console.log("update product", update)
     try {
       await Product.updateOne({ _id: id }, { $set: update })
         .then((response) => {
+          console.log("update", response)
           res.send(response);
+
         })
         .catch((err) => {
+          console.log("update", response)
           res.send(err);
         });
     } catch (error) {

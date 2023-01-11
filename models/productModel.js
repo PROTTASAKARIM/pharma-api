@@ -15,7 +15,7 @@ const productSchema = mongoose.Schema(
     slug: { type: String, require: true },
     details: { type: String },
     specification: { type: String },
-    promo_price: { type: String },
+    promo_price: { type: mongoose.Schema.Types.ObjectId, ref: "Price", default: null },
     promo_start: { type: Date },
     promo_end: { type: Date },
     unit: { type: String, require: true },
