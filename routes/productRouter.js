@@ -308,7 +308,7 @@ router.get(
         "category",
         "name"
       )
-      .populate("priceList", "mrp")
+      .populate("priceList", { mrp: 1, tp: 1, supplier: 1, _id: 1, status: 1 })
       .populate("promo_price", "mrp")
       ;
     res.send(products[0]);
