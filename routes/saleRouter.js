@@ -217,13 +217,14 @@ saleRouter.get(
         },
         {
           $project: {
-            invoiceId: 1,
+            "invoiceId": 1,
             "products.article_code": 1,
             "products.name": 1,
             "products.tp": 1,
             "products.mrp": 1,
             "products.qty": 1,
             "products.vat": 1,
+            "createdAt": 1
           },
         },
       ]);
