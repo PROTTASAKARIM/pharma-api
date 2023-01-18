@@ -108,6 +108,7 @@ router.get(
           promo_price: 1,
           promo_start: 1,
           promo_end: 1,
+          promo_type: 1
         })
         .limit(100)
         .populate("category", "name")
@@ -131,6 +132,7 @@ router.get(
           promo_price: 1,
           promo_start: 1,
           promo_end: 1,
+          promo_type: 1
         })
         .limit(size)
         .skip(size * page)
@@ -223,6 +225,7 @@ router.get(
         promo_price: 1,
         promo_start: 1,
         promo_end: 1,
+        promo_type: 1
       })
       .populate("category", "name")
       .populate("priceList");
@@ -248,6 +251,7 @@ router.get(
         promo_price: 1,
         promo_start: 1,
         promo_end: 1,
+        promo_type: 1
       })
       .populate("category", "name")
       .populate("priceList", "mrp")
@@ -353,7 +357,8 @@ router.get(
         ean: 1,
         promo_start: 1,
         promo_end: 1,
-        promo_price: 1
+        promo_price: 1,
+        promo_type: 1
 
       })
       .populate("priceList", { mrp: 1, tp: 1, _id: 1 });
@@ -378,7 +383,8 @@ router.get(
         ean: 1,
         promo_start: 1,
         promo_end: 1,
-        promo_price: 1
+        promo_price: 1,
+        promo_type: 1
       })
       .populate("priceList", { mrp: 1, tp: 1, supplier: 1, _id: 1, status: 1 });
     res.send(products[0]);
@@ -401,7 +407,8 @@ router.get(
         priceList: 1,
         promo_start: 1,
         promo_end: 1,
-        promo_price: 1
+        promo_price: 1,
+        promo_type: 1
       })
       .populate("priceList", { mrp: 1, tp: 1, _id: 0 });
     res.send(products[0]);
@@ -424,7 +431,8 @@ router.post(
         priceList: 1,
         promo_start: 1,
         promo_end: 1,
-        promo_price: 1
+        promo_price: 1,
+        promo_type: 1
       })
       .populate("priceList", { mrp: 1, tp: 1, _id: 0 });
     res.send(products[0]);
@@ -448,6 +456,7 @@ router.get(
         promo_price: 1,
         promo_start: 1,
         promo_end: 1,
+        promo_type: 1
       })
       .populate("priceList", "mrp");
     // .limit(5);
@@ -538,7 +547,8 @@ router.get(
         priceList: 1,
         promo_start: 1,
         promo_end: 1,
-        promo_price: 1
+        promo_price: 1,
+        promo_type: 1
       })
       .populate("priceList", { mrp: 1, tp: 1, supplier: 1, status: 1 })
       .limit(10);
