@@ -224,7 +224,14 @@ saleRouter.get(
             "products.mrp": 1,
             "products.qty": 1,
             "products.vat": 1,
-            "createdAt": 1
+            "createdAt": 1,
+            "returnProducts.article_code": 1,
+            "returnProducts.name": 1,
+            "returnProducts.tp": 1,
+            "returnProducts.mrp": 1,
+            "returnProducts.qty": 1,
+            "returnProducts.vat": 1,
+            "returnInvoice": 1
           },
         },
       ]);

@@ -202,7 +202,7 @@ categoryRouter.post(
   "/",
   expressAsyncHandler(async (req, res) => {
     const newCategory = new Category(req.body);
-    // console.log(newCategory)
+    console.log("category", req.body)
     await newCategory.save((err) => {
       if (err) {
         res.status(500).json({ error: "There was a server side error" });
