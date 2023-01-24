@@ -20,6 +20,7 @@ const rtvRouter = require("./routes/rtvRouter");
 const tpnRouter = require("./routes/tpnRouter");
 const companyRouter = require("./routes/companyRouter");
 const damageRouter = require("./routes/damageRouter");
+const ecomRouter = require("./routes/ecomRouter");
 const multer = require("multer");
 const fileUpload = require("express-fileupload");
 
@@ -77,6 +78,7 @@ app.use("/api/rtv", rtvRouter);
 app.use("/api/tpn", tpnRouter);
 app.use("/api/company", companyRouter);
 app.use("/api/damage", damageRouter);
+app.use("/api/ecom", ecomRouter);
 app.use("/uploads", express.static("uploads"));
 // Home
 app.get("/", async (req, res) => {
