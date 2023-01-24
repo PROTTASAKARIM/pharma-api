@@ -425,6 +425,38 @@ saleRouter.post(
     }
   })
 );
+// CREATE ONE SALE
+saleRouter.post(
+  "/ecom",
+  generatePosId,
+  // updateInventoryOutOnSaleIn,
+  expressAsyncHandler(async (req, res) => {
+    console.log("body", req.body);
+    let newSale = new Sale(req.body);
+    console.log("newSale", newSale);
+    try {
+      await newSale.save((err, sale) => {
+        if (err) {
+          console.log("err:", res, err);
+          res
+            .status(500)
+            .json({ message: "There was a server side error", error: err });
+        } else {
+          console.log(sale);
+          res.status(200).json({
+            message: "Sale is created Successfully",
+            data: sale,
+            status: 200,
+          });
+        }
+      });
+    } catch (err) {
+      res
+        .status(500)
+        .json({ message: "There was a server side error", error: err });
+    }
+  })
+);
 
 // CREATE MULTI sales
 saleRouter.post(
