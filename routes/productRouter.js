@@ -108,7 +108,7 @@ router.get(
           promo_price: 1,
           promo_start: 1,
           promo_end: 1,
-          promo_type: 1
+          promo_type: 1,
         })
         .limit(100)
         .populate("category", "name")
@@ -132,7 +132,7 @@ router.get(
           promo_price: 1,
           promo_start: 1,
           promo_end: 1,
-          promo_type: 1
+          promo_type: 1,
         })
         .limit(size)
         .skip(size * page)
@@ -225,7 +225,7 @@ router.get(
         promo_price: 1,
         promo_start: 1,
         promo_end: 1,
-        promo_type: 1
+        promo_type: 1,
       })
       .populate("category", "name")
       .populate("priceList");
@@ -251,7 +251,7 @@ router.get(
         promo_price: 1,
         promo_start: 1,
         promo_end: 1,
-        promo_type: 1
+        promo_type: 1,
       })
       .populate("category", "name")
       .populate("priceList", "mrp")
@@ -292,13 +292,11 @@ router.get(
   "/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
-    const products = await Product.find({ _id: id })
-      .populate(
-        "category",
-        "name"
-      )
-      // .populate("priceList", "mrp")
-      ;
+    const products = await Product.find({ _id: id }).populate(
+      "category",
+      "name"
+    );
+    // .populate("priceList", "mrp")
     res.send(products[0]);
   })
 );
@@ -308,13 +306,9 @@ router.get(
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     const products = await Product.find({ _id: id })
-      .populate(
-        "category",
-        "name"
-      )
+      .populate("category", "name")
       .populate("priceList", { mrp: 1, tp: 1, supplier: 1, _id: 1, status: 1 })
-      .populate("promo_price", "mrp")
-      ;
+      .populate("promo_price", "mrp");
     res.send(products[0]);
   })
 );
@@ -358,8 +352,7 @@ router.get(
         promo_start: 1,
         promo_end: 1,
         promo_price: 1,
-        promo_type: 1
-
+        promo_type: 1,
       })
       .populate("priceList", { mrp: 1, tp: 1, _id: 1 });
     // .populate("priceList");
@@ -384,7 +377,7 @@ router.get(
         promo_start: 1,
         promo_end: 1,
         promo_price: 1,
-        promo_type: 1
+        promo_type: 1,
       })
       .populate("priceList", { mrp: 1, tp: 1, supplier: 1, _id: 1, status: 1 });
     res.send(products[0]);
@@ -408,7 +401,7 @@ router.get(
         promo_start: 1,
         promo_end: 1,
         promo_price: 1,
-        promo_type: 1
+        promo_type: 1,
       })
       .populate("priceList", { mrp: 1, tp: 1, _id: 0 });
     res.send(products[0]);
@@ -432,7 +425,7 @@ router.post(
         promo_start: 1,
         promo_end: 1,
         promo_price: 1,
-        promo_type: 1
+        promo_type: 1,
       })
       .populate("priceList", { mrp: 1, tp: 1, _id: 0 });
     res.send(products[0]);
@@ -456,7 +449,7 @@ router.get(
         promo_price: 1,
         promo_start: 1,
         promo_end: 1,
-        promo_type: 1
+        promo_type: 1,
       })
       .populate("priceList", "mrp");
     // .limit(5);
@@ -548,7 +541,7 @@ router.get(
         promo_start: 1,
         promo_end: 1,
         promo_price: 1,
-        promo_type: 1
+        promo_type: 1,
       })
       .populate("priceList", { mrp: 1, tp: 1, supplier: 1, status: 1 })
       .limit(10);
@@ -607,16 +600,15 @@ router.put(
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     const update = req.body;
-    console.log("update product", update)
+    console.log("update product", update);
     try {
       await Product.updateOne({ _id: id }, { $set: update })
         .then((response) => {
-          console.log("update", response)
+          console.log("update", response);
           res.send(response);
-
         })
         .catch((err) => {
-          console.log("update", response)
+          console.log("update", response);
           res.send(err);
         });
     } catch (error) {
