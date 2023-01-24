@@ -358,7 +358,7 @@ customerRouter.post(
       res.status(400).json({
         message: "Registration Unsuccessful",
         error: error,
-        ststus: "fail",
+        status: "fail",
       });
     }
 
