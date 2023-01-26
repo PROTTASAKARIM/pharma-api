@@ -187,46 +187,12 @@ userRouter.delete(
   })
 );
 
-// USER SIGNIN
-userRouter.post(
-  "/ecom/register",
-  expressAsyncHandler(async (req, res) => {
-    try {
-      const hashPassword = await bcrypt.hash(req.body.password, 10);
-      console.log(hashPassword)
-      const newUser = new User({
-        name: req.body.name,
-        email: req.body.email,
-        username: req.body.username,
-        phone: req.body.phone,
-        type: req.body.type,
-        address: "",
-        privilege: {},
-        password: hashPassword,
-        status: req.body.status,
-      });
-      await newUser.save();
-      res.status(200).json({
-        message: "Registration Successful",
-        status: "success",
-      });
-    } catch (error) {
-      // res.status(400).json({
-      res
-        .status(500)
-        .json({ message: "There was a server side error", error: error });
-      // });
-    }
-
-    // res.send(newUser);?
-  })
-);
 userRouter.post(
   "/register",
   expressAsyncHandler(async (req, res) => {
     try {
       const hashPassword = await bcrypt.hash(req.body.password, 10);
-      console.log(hashPassword)
+      console.log(hashPassword);
       const newUser = new User({
         name: req.body.name,
         email: req.body.email,
@@ -255,77 +221,6 @@ userRouter.post(
   })
 );
 
-// USER LOGIN
-userRouter.post(
-  "/ecom/login",
-  expressAsyncHandler(async (req, res) => {
-    const isEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(
-      req.body.email
-    );
-    // console.log({ body: req.body, email: isEmail })
-    try {
-      let user;
-      if (isEmail) {
-        user = await User.find({
-          status: "active",
-          email: req.body.email.toLowerCase(),
-        });
-      } else {
-        user = await User.find({
-          status: "active",
-          username: req.body.email.toLowerCase(),
-        });
-      }
-      // console.log(user)
-      if (user && user.length > 0) {
-        const isValidPassword = await bcrypt.compare(
-          req.body.password,
-          user[0].password
-        );
-        if (isValidPassword) {
-          // generate token
-          const token = jwt.sign(
-            {
-              username: user[0].username,
-              userId: user[0]._id,
-              type: user[0].type,
-            },
-            process.env.JWT_SECRET,
-            { expiresIn: "1h" }
-          );
-
-          res.status(200).json({
-            access_token: token,
-            status: true,
-            user: {
-              id: user[0]._id,
-              name: user[0].name,
-              username: user[0].username,
-              email: user[0].email,
-              type: user[0].type,
-            },
-            message: "Login Successful",
-          });
-        } else {
-          res.status(401).json({
-            status: false,
-            error: "Password Does not Match",
-          });
-        }
-      } else {
-        res.status(401).json({
-          status: false,
-          error: "User Not Found",
-        });
-      }
-    } catch (err) {
-      res.status(404).json({
-        status: false,
-        error: err,
-      });
-    }
-  })
-);
 userRouter.post(
   "/login",
   expressAsyncHandler(async (req, res) => {
