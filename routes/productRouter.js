@@ -644,6 +644,11 @@ router.post(
     const id = req.params.id;
 
     const appRoot = process.env.PWD;
+    // const appRoot = process.cwd();
+    //  console.log("p", PWD)
+    console.log("env", process.env)
+    // console.log("p", PWD)
+    console.log("approot", appRoot)
     if (req.files === null) {
       return res.status(400).json({ msg: "No file uploaded" });
     }
