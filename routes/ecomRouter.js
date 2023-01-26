@@ -3,7 +3,9 @@ const expressAsyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 const Sale = require("../models/saleModel");
 const Product = require("../models/productModel");
+const Customer = require("../models/customerModel");
 const Category = require("../models/categoryModel");
+const bcrypt = require("bcrypt");
 const checklogin = require("../middlewares/checkLogin");
 const { generatePosId } = require("../middlewares/generateId");
 const { startOfDay, endOfDay } = require("date-fns");
@@ -32,6 +34,7 @@ ecomRouter.get(
         promo_end: 1,
         promo_type: 1,
         featured: 1,
+        photo: 1,
       })
       .limit(20)
       .populate("category", "name")
@@ -439,32 +442,40 @@ ecomRouter.get(
     res.status(200).json(product);
   })
 );
+
 /*==========================
 * log in register
 ===========================*/
-// USER SIGNIN
+// Customer SIGNIN
 ecomRouter.post(
   "/customer/register",
   expressAsyncHandler(async (req, res) => {
+    console.table(req.body);
+    const hashPassword = await bcrypt.hash(req.body.password, 10);
+    console.log("hashpassss", hashPassword);
+    console.log(hashPassword);
+    const newUser = new Customer({
+      name: req.body.name,
+      email: req.body.email,
+      username: req.body.phone,
+      phone: req.body.phone,
+      type: req.body.type,
+      address: "",
+      // privilege: {},
+      password: hashPassword,
+      status: req.body.status,
+    });
     try {
-      const hashPassword = await bcrypt.hash(req.body.password, 10);
-      console.log(hashPassword);
-      const newUser = new User({
-        name: req.body.name,
-        email: req.body.email,
-        username: req.body.phone,
-        phone: req.body.phone,
-        type: req.body.type,
-        address: "",
-        privilege: {},
-        password: hashPassword,
-        status: req.body.status,
-      });
-      await newUser.save();
-      res.status(200).json({
-        message: "Registration Successful",
-        status: "success",
-      });
+      //   console.log("newUser", newUser);
+      const p = await newUser.save();
+      if (p) {
+        console.log("p", p);
+        res.send({
+          message: "Registration Successful",
+          status: "success",
+          newuser: p,
+        });
+      }
     } catch (error) {
       // res.status(400).json({
       res
@@ -473,33 +484,104 @@ ecomRouter.post(
       // });
     }
 
-    // res.send(newUser);?
+    // res.send(newUser);
   })
 );
 
-// USER LOGIN
+// Customer LOGIN
+// ecomRouter.post(
+//   "/customer/login",
+//   expressAsyncHandler(async (req, res) => {
+//     const isEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(
+//       req.body.email
+//     );
+//     // console.log({ body: req.body, email: isEmail })
+//     try {
+//       let user;
+//       if (isEmail) {
+//         user = await Customer.find({
+//           status: "active",
+//           email: req.body.email.toLowerCase(),
+//         });
+//       } else {
+//         user = await Customer.find({
+//           status: "active",
+//           username: req.body.email.toLowerCase(),
+//         });
+//       }
+//       // console.log(user)
+//       if (user && user.length > 0) {
+//         console.log("user", user);
+//         const isValidPassword = await bcrypt.compare(
+//           req.body.password,
+//           user[0].password
+//         );
+//         if (isValidPassword) {
+//           // generate token
+//           const token = jwt.sign(
+//             {
+//               username: user[0].username,
+//               userId: user[0]._id,
+//               type: user[0].type,
+//             },
+//             process.env.JWT_SECRET,
+//             { expiresIn: "1h" }
+//           );
+
+//           res.status(200).json({
+//             access_token: token,
+//             status: true,
+//             user: {
+//               id: user[0]._id,
+//               name: user[0].name,
+//               username: user[0].username,
+//               email: user[0].email,
+//               type: user[0].type,
+//             },
+//             message: "Login Successful",
+//           });
+//         } else {
+//           res.status(401).json({
+//             status: false,
+//             error: "Password Does not Match",
+//           });
+//         }
+//       } else {
+//         res.status(401).json({
+//           status: false,
+//           error: "User Not Found",
+//         });
+//       }
+//     } catch (err) {
+//       res.status(404).json({
+//         status: false,
+//         error: err,
+//       });
+//     }
+//   })
+// );
+
 ecomRouter.post(
   "/customer/login",
   expressAsyncHandler(async (req, res) => {
-    const isEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(
-      req.body.email
-    );
-    // console.log({ body: req.body, email: isEmail })
+    const isPhone = req.body.phone;
+    console.log({ body: req.body, phone: isPhone });
     try {
       let user;
-      if (isEmail) {
-        user = await User.find({
+      if (isPhone) {
+        user = await Customer.find({
           status: "active",
-          email: req.body.email.toLowerCase(),
+          phone: req.body.phone,
         });
       } else {
-        user = await User.find({
+        user = await Customer.find({
           status: "active",
-          username: req.body.email.toLowerCase(),
+          username: req.body.username,
         });
       }
       // console.log(user)
       if (user && user.length > 0) {
+        console.log("user", user);
         const isValidPassword = await bcrypt.compare(
           req.body.password,
           user[0].password
@@ -523,7 +605,7 @@ ecomRouter.post(
               id: user[0]._id,
               name: user[0].name,
               username: user[0].username,
-              email: user[0].email,
+              phone: user[0].phone,
               type: user[0].type,
             },
             message: "Login Successful",
