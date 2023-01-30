@@ -468,24 +468,24 @@ ecomRouter.post(
     });
     try {
       console.log("newUser", newUser);
-      const p = await newUser.save();
-      if (p) {
+      const user = await newUser.save();
+      console.log("p", user);
+      if (user) {
         const token = jwt.sign(
           {
-            username: p.username,
-            userId: p._id,
-            type: p.type,
+            username: user.username,
+            userId: user._id,
+            type: user.type,
           },
           process.env.JWT_SECRET,
           { expiresIn: "1h" }
         );
 
-        console.log("p", p);
-        res.send({
+        res.status(200).json({
           access_token: token,
           status: true,
           message: "Registration Successful",
-          newUser: p,
+          //   newUser: user,
         });
       }
     } catch (error) {
@@ -619,6 +619,7 @@ ecomRouter.post(
               username: user[0].username,
               phone: user[0].phone,
               type: user[0].type,
+              point: user[0].point,
             },
             message: "Login Successful",
           });
