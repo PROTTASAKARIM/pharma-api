@@ -6,7 +6,7 @@ const customerSchema = mongoose.Schema(
     email: { type: String, unique: true, sparse: true, default: null },
     username: { type: String },
     password: { type: String },
-    membership: { type: String, unique: true },
+    // membership: { type: String, unique: true },
     address: { type: String },
     type: {
       type: String,
