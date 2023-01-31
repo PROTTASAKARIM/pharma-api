@@ -7,7 +7,7 @@ const Customer = require("../models/customerModel");
 const Category = require("../models/categoryModel");
 const bcrypt = require("bcrypt");
 const checklogin = require("../middlewares/checkLogin");
-const { generatePosId } = require("../middlewares/generateId");
+const { generateEcomId } = require("../middlewares/generateId");
 const { startOfDay, endOfDay } = require("date-fns");
 const ecomRouter = express.Router();
 
@@ -359,8 +359,7 @@ ecomRouter.get(
   "/sale",
   expressAsyncHandler(async (req, res) => {
     const sales = await Sale.find({
-      status: "complete",
-      source: "web",
+      source: "web"
     })
       .select({
         invoiceId: 1,
@@ -371,15 +370,31 @@ ecomRouter.get(
         billerId: 1,
         createdAt: 1,
         changeAmount: 1,
+        status: 1,
       })
-      .populate("billerId", "name");
+    // .populate("billerId", "name");
     res.send(sales);
     // // res.send('removed');
   })
 );
+
+// GET ONE sales
+ecomRouter.get(
+  "/sale/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const sales = await Sale.find({ _id: id, source: "web" })
+      .populate("billerId", "name")
+      .populate("customerId", { phone: 1, name: 1, point: 1, email: 1, address: 1 });
+    res.send(sales[0]);
+    // // res.send('removed');
+    // console.log(sales);
+  })
+);
+
 ecomRouter.post(
   "/sale",
-  generatePosId,
+  generateEcomId,
   // updateInventoryOutOnSaleIn,
   expressAsyncHandler(async (req, res) => {
     console.log("body", req.body);

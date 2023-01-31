@@ -22,6 +22,21 @@ const generatePosId = async (req, res, next) => {
   req.body.invoiceId = newId;
   next();
 };
+const generateEcomId = async (req, res, next) => {
+  // TODO:: todays total
+
+  const todayTotal = await Sale.countDocuments({
+    createdAt: { $gte: startOfDay(new Date()), $lte: endOfDay(new Date()) },
+  });
+
+  const number = ("000" + (todayTotal + 1)).toString();
+  const current = number.substring(number.length - 4);
+  const date = format(new Date(new Date()), "MMddyyyy");
+  const newId = process.env.ID_PREFIX + "-ECOM-" + date + "-" + current;
+  console.log(newId);
+  req.body.invoiceId = newId;
+  next();
+};
 
 // Generate PO Id
 const generatePoId = async (req, res, next) => {
@@ -121,6 +136,7 @@ const generateDamageId = async (req, res, next) => {
 
 module.exports = {
   generatePosId,
+  generateEcomId,
   generatePoId,
   generateGrnId,
   generateRtvId,
