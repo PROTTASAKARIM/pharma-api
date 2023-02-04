@@ -15,6 +15,7 @@ const jwt = require("jsonwebtoken");
 const Purchase = require("../models/purchaseModel");
 const checklogin = require("../middlewares/checkLogin");
 const { generatePoId } = require("../middlewares/generateId");
+const { startOfDay, endOfDay } = require("date-fns");
 
 const purchaseRouter = express.Router();
 
@@ -62,7 +63,7 @@ purchaseRouter.get(
   })
 );
 
-// GET ONE Purchases
+
 purchaseRouter.get(
   "/grn/:id",
   expressAsyncHandler(async (req, res) => {
@@ -87,6 +88,64 @@ purchaseRouter.get(
     // // res.send('removed');
   })
 );
+purchaseRouter.get(
+  "/grn",
+  expressAsyncHandler(async (req, res) => {
+    console.log("err");
+    // try {
+    //   res.send("Purchases");
+    // } catch (err) {
+    //   console.log(err);
+    // }
+    // // res.send('removed');
+  })
+);
+
+purchaseRouter.get(
+  "/week-purchase",
+  expressAsyncHandler(async (req, res) => {
+    const today = new Date();
+    const startDate = new Date(today.setDate(today.getDate() - today.getDay()));
+    const endDate = new Date(today.setDate(today.getDate() + 6 - today.getDay()));
+    console.log(startDate, endDate)
+    try {
+      const purchases = await Purchase.aggregate([
+        {
+          $match: {
+            createdAt: {
+              $gte: startDate,
+              $lt: endDate
+            }
+          }
+        },
+        {
+          $group: {
+            _id: {
+              $dateToString: {
+                format: "%Y-%m-%d",
+                date: "$createdAt"
+              }
+            },
+            total: {
+              $sum: "$total"
+            }
+          }
+        },
+        {
+          $sort: {
+            "_id": 1
+          }
+        }
+      ]);
+      res.send(purchases);
+      // res.send(Purchases);
+    } catch (err) {
+      console.log(err);
+    }
+    // // res.send('removed');
+  })
+)
+
 
 // CREATE ONE Purchase
 purchaseRouter.post(
