@@ -377,12 +377,49 @@ ecomRouter.get(
     // // res.send('removed');
   })
 );
+// GET ALL type sale
+ecomRouter.get(
+  "/sale/:status",
+  expressAsyncHandler(async (req, res) => {
+    let query = {}
+    let statusType = {}
+    let status = req.params.status;
+    console.log(status)
+    if (status === "process") {
+      statusType = { status: { $in: ["confirm", "deliver", "process"] } }
+    } else {
+      statusType = { status: status }
+    }
+    query = {
+      source: "web",
+      status: statusType.status
+    }
+
+    console.log(query)
+    const sales = await Sale.find(query)
+      .select({
+        invoiceId: 1,
+        totalItem: 1,
+        grossTotalRound: 1,
+        total: 1,
+        status: 1,
+        billerId: 1,
+        createdAt: 1,
+        changeAmount: 1,
+        status: 1,
+      })
+    console.log("billerId", sales);
+    res.send(sales);
+    // // res.send('removed');
+  })
+);
 
 // GET ONE sales
 ecomRouter.get(
-  "/sale/:id",
+  "/sale/details/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
+    console.log(id)
     const sales = await Sale.find({ _id: id, source: "web" })
       .populate("billerId", "name")
       .populate("customerId", { phone: 1, name: 1, point: 1, email: 1, address: 1 });
@@ -420,6 +457,29 @@ ecomRouter.post(
       res
         .status(500)
         .json({ message: "There was a server side error", error: err });
+    }
+  })
+);
+
+// UPDATE ONE Sale
+ecomRouter.put(
+  "/sale/:id",
+  // updateInventoryInOnSaleDel,
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const update = req.body.newData;
+    console.log("ecom sale Update", update)
+    console.log('id', id)
+    try {
+      await Sale.updateOne({ _id: id }, { $set: update })
+        .then((response) => {
+          res.send(response);
+        })
+        .catch((err) => {
+          res.send(err);
+        });
+    } catch (error) {
+      console.error(error);
     }
   })
 );
