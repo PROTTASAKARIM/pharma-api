@@ -46,6 +46,53 @@ purchaseRouter.get(
     // console.log(Purchases);
   })
 );
+// GET weekly Purchases
+purchaseRouter.get(
+  "/week-purchase",
+  expressAsyncHandler(async (req, res) => {
+    const today = new Date();
+    const startDate = new Date(today.setDate(today.getDate() - 1 - today.getDay()));
+    const endDate = new Date(today.setDate(today.getDate() - today.getDay()));
+    const end = startOfDay(new Date(endDate))
+    const start = endOfDay(new Date(startDate))
+    console.log(startDate, endDate)
+    try {
+      const purchases = await Purchase.aggregate([
+        {
+          $match: {
+            createdAt: {
+              $gte: end,
+              $lt: start
+            }
+          }
+        },
+        {
+          $group: {
+            _id: {
+              $dateToString: {
+                format: "%Y-%m-%d",
+                date: "$createdAt"
+              }
+            },
+            total: {
+              $sum: "$total"
+            }
+          }
+        },
+        {
+          $sort: {
+            "_id": 1
+          }
+        }
+      ]);
+      res.send(purchases);
+      // res.send(Purchases);
+    } catch (err) {
+      console.log(err);
+    }
+    // // res.send('removed');
+  })
+)
 
 // GET ONE Purchases
 purchaseRouter.get(
@@ -97,50 +144,7 @@ purchaseRouter.get(
   // })
 );
 
-purchaseRouter.get(
-  "/week-purchase",
-  expressAsyncHandler(async (req, res) => {
-    const today = new Date();
-    const startDate = new Date(today.setDate(today.getDate() - 1 - today.getDay()));
-    const endDate = new Date(today.setDate(today.getDate() - today.getDay()));
-    console.log(startDate, endDate)
-    try {
-      const purchases = await Purchase.aggregate([
-        {
-          $match: {
-            createdAt: {
-              $gte: endDate,
-              $lt: startDate
-            }
-          }
-        },
-        {
-          $group: {
-            _id: {
-              $dateToString: {
-                format: "%Y-%m-%d",
-                date: "$createdAt"
-              }
-            },
-            total: {
-              $sum: "$total"
-            }
-          }
-        },
-        {
-          $sort: {
-            "_id": 1
-          }
-        }
-      ]);
-      res.send(purchases);
-      // res.send(Purchases);
-    } catch (err) {
-      console.log(err);
-    }
-    // // res.send('removed');
-  })
-)
+
 
 
 // CREATE ONE Purchase

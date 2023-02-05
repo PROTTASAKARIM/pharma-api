@@ -19,6 +19,7 @@ const {
   updateInventoryInOnGRNIn,
   updateInventoryOutOnGRNDel,
 } = require("../middlewares/useInventory");
+const { startOfDay, endOfDay } = require("date-fns");
 const { handleNewPrice } = require("../middlewares/handlePrice");
 
 const grnRouter = express.Router();
@@ -48,6 +49,96 @@ grnRouter.get(
     // console.log(grns);
   })
 );
+///// today grn
+grnRouter.get(
+  "/today-grn",
+  expressAsyncHandler(async (req, res) => {
+    const today = new Date();
+    const end = startOfDay(new Date(today))
+    const start = endOfDay(new Date(today))
+    try {
+      const grn = await Grn.aggregate([
+        {
+          $match: {
+            createdAt: {
+              $gte: end,
+              $lt: start
+            }
+          }
+        },
+        {
+          $group: {
+            _id: {
+              $dateToString: {
+                format: "%Y-%m-%d",
+                date: "$createdAt"
+              }
+            },
+            total: {
+              $sum: "$total"
+            }
+          }
+        },
+        {
+          $sort: {
+            "_id": 1
+          }
+        }
+      ]);
+      res.send(grn);
+      // res.send(Purchases);
+    } catch (err) {
+      console.log(err);
+    }
+    // // res.send('removed');
+  })
+);
+grnRouter.get(
+  "/week-grn",
+  expressAsyncHandler(async (req, res) => {
+    const today = new Date();
+    const startDate = new Date(today.setDate(today.getDate() - 1 - today.getDay()));
+    const endDate = new Date(today.setDate(today.getDate() - today.getDay()));
+    const end = startOfDay(new Date(endDate))
+    const start = endOfDay(new Date(startDate))
+    console.log(startDate, endDate)
+    try {
+      const grn = await Grn.aggregate([
+        {
+          $match: {
+            createdAt: {
+              $gte: end,
+              $lt: start
+            }
+          }
+        },
+        {
+          $group: {
+            _id: {
+              $dateToString: {
+                format: "%Y-%m-%d",
+                date: "$createdAt"
+              }
+            },
+            total: {
+              $sum: "$total"
+            }
+          }
+        },
+        {
+          $sort: {
+            "_id": 1
+          }
+        }
+      ]);
+      res.send(grn);
+      // res.send(Purchases);
+    } catch (err) {
+      console.log(err);
+    }
+    // // res.send('removed');
+  })
+)
 
 grnRouter.get(
   "/count",
@@ -153,6 +244,7 @@ grnRouter.put(
     }
   })
 );
+
 
 
 

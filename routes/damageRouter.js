@@ -16,6 +16,7 @@ const Damage = require("../models/damageModel");
 const checklogin = require("../middlewares/checkLogin");
 const { generateDamageId } = require("../middlewares/generateId");
 const { updateInventoryOutOnDamageIn, updateInventoryInOnDamageOut } = require("../middlewares/useInventory");
+const { startOfDay, endOfDay } = require("date-fns");
 
 const damageRouter = express.Router();
 
@@ -48,6 +49,53 @@ damageRouter.get(
     console.log(damages);
   })
 );
+
+///// today grn
+damageRouter.get(
+  "/today-damage",
+  expressAsyncHandler(async (req, res) => {
+    const today = new Date();
+    const end = startOfDay(new Date(today))
+    const start = endOfDay(new Date(today))
+    try {
+      const damage = await Damage.aggregate([
+        {
+          $match: {
+            createdAt: {
+              $gte: end,
+              $lt: start
+            }
+          }
+        },
+        {
+          $group: {
+            _id: {
+              $dateToString: {
+                format: "%Y-%m-%d",
+                date: "$createdAt"
+              }
+            },
+            total: {
+              $sum: "$total"
+            }
+          }
+        },
+        {
+          $sort: {
+            "_id": 1
+          }
+        }
+      ]);
+      res.send(damage);
+      // res.send(Purchases);
+    } catch (err) {
+      console.log(err);
+    }
+    // // res.send('removed');
+  })
+);
+
+
 // GET ALL damages
 damageRouter.get(
   "/export",

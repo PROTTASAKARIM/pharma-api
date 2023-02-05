@@ -295,14 +295,19 @@ saleRouter.get(
     const today = new Date();
     const startDate = new Date(today.setDate(today.getDate() - 1 - today.getDay()));
     const endDate = new Date(today.setDate(today.getDate() - today.getDay()));
+
+    const end = startOfDay(new Date(endDate))
+    const start = endOfDay(new Date(startDate))
+    // console.log("test1", test1)
+    // console.log("test2", test2)
     console.log(startDate, endDate)
     try {
       const sales = await Sale.aggregate([
         {
           $match: {
             createdAt: {
-              $gte: endDate,
-              $lt: startDate
+              $gte: end,
+              $lt: start
             }
           }
         },
