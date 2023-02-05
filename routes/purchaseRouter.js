@@ -89,32 +89,28 @@ purchaseRouter.get(
   })
 );
 purchaseRouter.get(
-  "/grn",
-  expressAsyncHandler(async (req, res) => {
-    console.log("err");
-    // try {
-    //   res.send("Purchases");
-    // } catch (err) {
-    //   console.log(err);
-    // }
-    // // res.send('removed');
-  })
+  "/grnl",
+  // expressAsyncHandler(async 
+  (req, res) => {
+    console.log("err")
+  }
+  // })
 );
 
 purchaseRouter.get(
   "/week-purchase",
   expressAsyncHandler(async (req, res) => {
     const today = new Date();
-    const startDate = new Date(today.setDate(today.getDate() - today.getDay()));
-    const endDate = new Date(today.setDate(today.getDate() + 6 - today.getDay()));
+    const startDate = new Date(today.setDate(today.getDate() - 1 - today.getDay()));
+    const endDate = new Date(today.setDate(today.getDate() - today.getDay()));
     console.log(startDate, endDate)
     try {
       const purchases = await Purchase.aggregate([
         {
           $match: {
             createdAt: {
-              $gte: startDate,
-              $lt: endDate
+              $gte: endDate,
+              $lt: startDate
             }
           }
         },

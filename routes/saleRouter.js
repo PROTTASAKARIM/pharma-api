@@ -293,16 +293,16 @@ saleRouter.get(
   "/week-sale",
   expressAsyncHandler(async (req, res) => {
     const today = new Date();
-    const startDate = new Date(today.setDate(today.getDate() - today.getDay()));
-    const endDate = new Date(today.setDate(today.getDate() + 6 - today.getDay()));
+    const startDate = new Date(today.setDate(today.getDate() - 1 - today.getDay()));
+    const endDate = new Date(today.setDate(today.getDate() - today.getDay()));
     console.log(startDate, endDate)
     try {
       const sales = await Sale.aggregate([
         {
           $match: {
             createdAt: {
-              $gte: startDate,
-              $lt: endDate
+              $gte: endDate,
+              $lt: startDate
             }
           }
         },
