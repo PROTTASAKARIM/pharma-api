@@ -36,7 +36,7 @@ purchaseRouter.get(
         shipping_cost: 1,
         note: 1,
       })
-      .populate("supplier", "name")
+      .populate("supplier", "company")
       .populate("warehouse", "name")
       .populate("userId", "name");
     //   .exec(callback);
@@ -46,23 +46,41 @@ purchaseRouter.get(
     // console.log(Purchases);
   })
 );
+
 // GET weekly Purchases
 purchaseRouter.get(
   "/week-purchase",
   expressAsyncHandler(async (req, res) => {
     const today = new Date();
-    const startDate = new Date(today.setDate(today.getDate() - 1 - today.getDay()));
-    const endDate = new Date(today.setDate(today.getDate() - today.getDay()));
-    const end = startOfDay(new Date(endDate))
-    const start = endOfDay(new Date(startDate))
-    console.log(startDate, endDate)
+    // const startDate = new Date(today.setDate(today.getDate() - 1 - today.getDay()));
+    // const endDate = new Date(today.setDate(today.getDate() - today.getDay()));
+    // const end = startOfDay(new Date(endDate))
+    // const start = endOfDay(new Date(startDate))
+    // console.log(startDate, endDate)
+
+    const currentDate = new Date();
+    const last7Days = [];
+
+    for (let i = 0; i <= 10; i++) {
+      let day = new Date(currentDate.getTime());
+      day.setDate(currentDate.getDate() - i);
+      last7Days.push(day);
+    }
+
+    console.log(last7Days);
+    const to = endOfDay(currentDate)
+    const end = startOfDay(new Date(last7Days[0]))
+    const start = endOfDay(new Date(last7Days[8]))
+    console.log("test1", start)
+    console.log("test2", end)
+    console.log("test2", to)
     try {
       const purchases = await Purchase.aggregate([
         {
           $match: {
             createdAt: {
-              $gte: end,
-              $lt: start
+              $gte: start,
+              $lt: end
             }
           }
         },
@@ -109,7 +127,46 @@ purchaseRouter.get(
     console.log(Purchases);
   })
 );
+//purchase load by two dates
+purchaseRouter.get(
+  "/byDate/:start/:end",
+  expressAsyncHandler(async (req, res) => {
+    const start = req.params.start
+      ? startOfDay(new Date(req.params.start))
+      : startOfDay(new Date.now());
+    const end = req.params.end
+      ? endOfDay(new Date(req.params.end))
+      : endOfDay(new Date.now());
 
+    console.log(start, end, new Date());
+
+    try {
+      const purchase = await Purchase.find({
+        createdAt: { $gte: start, $lte: end },
+      })
+        .select({
+          poNo: 1,
+          supplier: 1,
+          warehouse: 1,
+          type: 1,
+          totalItem: 1,
+          total: 1,
+          status: 1,
+          createdAt: 1,
+          shipping_cost: 1,
+          note: 1,
+        })
+        .populate("supplier", "company")
+        .populate("warehouse", "name")
+        .populate("userId", "name");
+      res.send(purchase);
+    } catch (err) {
+      console.log(err)
+    }
+    // console.log(sales);
+    // // res.send('removed');
+  })
+);
 
 purchaseRouter.get(
   "/grn/:id",

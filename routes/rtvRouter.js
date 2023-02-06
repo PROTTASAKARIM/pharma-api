@@ -17,6 +17,7 @@ const checklogin = require("../middlewares/checkLogin");
 const { generateRtvId } = require("../middlewares/generateId");
 const { updateInventoryOutOnRTVIn,
   updateInventoryINOnRTVOut } = require("../middlewares/useInventory");
+const { startOfDay, endOfDay } = require("date-fns");
 
 const rtvRouter = express.Router();
 
@@ -52,7 +53,45 @@ rtvRouter.get(
     console.log(rtvs);
   })
 );
+//rtv load by two dates
+rtvRouter.get(
+  "/byDate/:start/:end",
+  expressAsyncHandler(async (req, res) => {
+    const start = req.params.start
+      ? startOfDay(new Date(req.params.start))
+      : startOfDay(new Date.now());
+    const end = req.params.end
+      ? endOfDay(new Date(req.params.end))
+      : endOfDay(new Date.now());
 
+    console.log(start, end, new Date());
+
+    try {
+      const rtv = await Rtv.find({
+        createdAt: { $gte: start, $lte: end },
+      })
+        .select({
+          rtvNo: 1,
+          userId: 1,
+          totalItem: 1,
+          products: 1,
+          supplier: 1,
+          total: 1,
+          status: 1,
+          createdAt: 1,
+          warehouse: 1
+        })
+        .populate("supplier", { company: 1, email: 1, phone: 1, address: 1 })
+        .populate("warehouse", "name")
+        .populate("userId", "name");
+      res.send(rtv);
+    } catch (err) {
+      console.log(err)
+    }
+    // console.log(sales);
+    // // res.send('removed');
+  })
+);
 // GET ONE rtvs
 rtvRouter.get(
   "/:id",
@@ -114,6 +153,8 @@ rtvRouter.post(
     });
   })
 );
+
+
 
 // UPDATE ONE Rtv
 rtvRouter.put(

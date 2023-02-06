@@ -93,22 +93,80 @@ grnRouter.get(
     // // res.send('removed');
   })
 );
+
+//grn load by two dates
+grnRouter.get(
+  "/byDate/:start/:end",
+  expressAsyncHandler(async (req, res) => {
+    const start = req.params.start
+      ? startOfDay(new Date(req.params.start))
+      : startOfDay(new Date.now());
+    const end = req.params.end
+      ? endOfDay(new Date(req.params.end))
+      : endOfDay(new Date.now());
+
+    console.log(start, end, new Date());
+
+    try {
+      const grn = await Grn.find({
+        createdAt: { $gte: start, $lte: end },
+      })
+        .select({
+          poNo: 1,
+          grnNo: 1,
+          userId: 1,
+          totalItem: 1,
+          supplier: 1,
+          total: 1,
+          status: 1,
+          createdAt: 1,
+          shipping_cost: 1,
+          note: 1,
+        })
+        .populate("poNo", "poNo")
+        .populate("supplier", "company")
+        .populate("userId", "name");
+      res.send(grn);
+    } catch (err) {
+      console.log(err)
+    }
+    // console.log(sales);
+    // // res.send('removed');
+  })
+);
+
 grnRouter.get(
   "/week-grn",
   expressAsyncHandler(async (req, res) => {
     const today = new Date();
-    const startDate = new Date(today.setDate(today.getDate() - 1 - today.getDay()));
-    const endDate = new Date(today.setDate(today.getDate() - today.getDay()));
-    const end = startOfDay(new Date(endDate))
-    const start = endOfDay(new Date(startDate))
-    console.log(startDate, endDate)
+    // const startDate = new Date(today.setDate(today.getDate() - 1 - today.getDay()));
+    // const endDate = new Date(today.setDate(today.getDate() - today.getDay()));
+    // const end = startOfDay(new Date(endDate))
+    // const start = endOfDay(new Date(startDate))
+    // console.log(startDate, endDate)
+    const currentDate = new Date();
+    const last7Days = [];
+
+    for (let i = 0; i <= 10; i++) {
+      let day = new Date(currentDate.getTime());
+      day.setDate(currentDate.getDate() - i);
+      last7Days.push(day);
+    }
+
+    console.log(last7Days);
+    const to = endOfDay(currentDate)
+    const end = startOfDay(new Date(last7Days[0]))
+    const start = endOfDay(new Date(last7Days[8]))
+    console.log("test1", start)
+    console.log("test2", end)
+    console.log("test2", to)
     try {
       const grn = await Grn.aggregate([
         {
           $match: {
             createdAt: {
-              $gte: end,
-              $lt: start
+              $gte: start,
+              $lt: end
             }
           }
         },
