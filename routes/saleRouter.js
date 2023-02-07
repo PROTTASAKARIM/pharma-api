@@ -45,6 +45,88 @@ saleRouter.get(
     // // res.send('removed');
   })
 );
+// weekly SALE Count
+saleRouter.get(
+  "/week-sale",
+  expressAsyncHandler(async (req, res) => {
+    const today = new Date();
+    // const date = today.getDate() - 1
+    // const newd = new Date(today.setDate(date))
+    // const date2 = today.getDate() - 7
+    // const newd2 = new Date(today.setDate(date2))
+    // console.log("d", date)
+    // console.log("e", newd)
+    // console.log("f", date2)
+    // console.log("g", newd2)
+
+    // const end1 = startOfDay(new Date(newd))
+    // const start1 = endOfDay(new Date(newd2))
+    // console.log("h", end1)
+    // console.log("i", start1)
+
+    const currentDate = new Date();
+    const last7Days = [];
+
+    for (let i = 0; i <= 10; i++) {
+      let day = new Date(currentDate.getTime());
+      day.setDate(currentDate.getDate() - i);
+      last7Days.push(day);
+    }
+
+    console.log(last7Days);
+
+    // const startDate = new Date(today.setDate(today.getDate() - 1 - today.getDay()));
+    // const endDate = new Date(today.setDate(today.getDate() - today.getDay()));
+    const to = endOfDay(currentDate)
+    const end = startOfDay(new Date(last7Days[0]))
+    const start = endOfDay(new Date(last7Days[8]))
+    console.log("test1", start)
+    console.log("test2", end)
+    console.log("test2", to)
+    // console.log(startDate, endDate)
+    try {
+      const sales = await Sale.aggregate([
+        {
+          $match: {
+            createdAt: {
+              $gte: start,
+              $lt: end
+            }
+          }
+        },
+        {
+          $group: {
+            _id: {
+              $dateToString: {
+                format: "%Y-%m-%d",
+                date: "$createdAt"
+              }
+            },
+            grossTotalRound: {
+              $sum: "$grossTotalRound"
+            },
+            total: {
+              $sum: "$total"
+            },
+            vat: {
+              $sum: "$vat"
+            },
+          }
+        },
+        {
+          $sort: {
+            "_id": 1
+          }
+        }
+      ]);
+      console.log(sales);
+      res.send(sales);
+    } catch (err) {
+      console.log(err);
+    }
+  })
+);
+
 // GET ALL sales
 saleRouter.get(
   "/byDate/:start/:end",
@@ -288,56 +370,7 @@ saleRouter.get(
     }
   })
 );
-// weekly SALE Count
-saleRouter.get(
-  "/week-sale",
-  expressAsyncHandler(async (req, res) => {
-    const today = new Date();
-    const startDate = new Date(today.setDate(today.getDate() - 1 - today.getDay()));
-    const endDate = new Date(today.setDate(today.getDate() - today.getDay()));
-    console.log(startDate, endDate)
-    try {
-      const sales = await Sale.aggregate([
-        {
-          $match: {
-            createdAt: {
-              $gte: endDate,
-              $lt: startDate
-            }
-          }
-        },
-        {
-          $group: {
-            _id: {
-              $dateToString: {
-                format: "%Y-%m-%d",
-                date: "$createdAt"
-              }
-            },
-            grossTotalRound: {
-              $sum: "$grossTotalRound"
-            },
-            total: {
-              $sum: "$total"
-            },
-            vat: {
-              $sum: "$vat"
-            },
-          }
-        },
-        {
-          $sort: {
-            "_id": 1
-          }
-        }
-      ]);
-      console.log(sales);
-      res.send(sales);
-    } catch (err) {
-      console.log(err);
-    }
-  })
-);
+
 // // TODAYS SALE Count
 // saleRouter.get(
 //   "/week-sale",
