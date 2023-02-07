@@ -284,6 +284,7 @@ ecomRouter.get(
         promo_price: 1,
         promo_type: 1,
         category: 1,
+        photo: 1,
       })
       .populate("priceList", { mrp: 1, tp: 1, supplier: 1, _id: 1, status: 1 })
       .populate("category", { name: 1 });
@@ -359,19 +360,18 @@ ecomRouter.get(
   "/sale",
   expressAsyncHandler(async (req, res) => {
     const sales = await Sale.find({
-      source: "web"
-    })
-      .select({
-        invoiceId: 1,
-        totalItem: 1,
-        grossTotalRound: 1,
-        total: 1,
-        status: 1,
-        billerId: 1,
-        createdAt: 1,
-        changeAmount: 1,
-        status: 1,
-      })
+      source: "web",
+    }).select({
+      invoiceId: 1,
+      totalItem: 1,
+      grossTotalRound: 1,
+      total: 1,
+      status: 1,
+      billerId: 1,
+      createdAt: 1,
+      changeAmount: 1,
+      status: 1,
+    });
     // .populate("billerId", "name");
     res.send(sales);
     // // res.send('removed');
@@ -381,33 +381,32 @@ ecomRouter.get(
 ecomRouter.get(
   "/sale/:status",
   expressAsyncHandler(async (req, res) => {
-    let query = {}
-    let statusType = {}
+    let query = {};
+    let statusType = {};
     let status = req.params.status;
-    console.log(status)
+    console.log(status);
     if (status === "process") {
-      statusType = { status: { $in: ["confirm", "deliver", "process"] } }
+      statusType = { status: { $in: ["confirm", "deliver", "process"] } };
     } else {
-      statusType = { status: status }
+      statusType = { status: status };
     }
     query = {
       source: "web",
-      status: statusType.status
-    }
+      status: statusType.status,
+    };
 
-    console.log(query)
-    const sales = await Sale.find(query)
-      .select({
-        invoiceId: 1,
-        totalItem: 1,
-        grossTotalRound: 1,
-        total: 1,
-        status: 1,
-        billerId: 1,
-        createdAt: 1,
-        changeAmount: 1,
-        status: 1,
-      })
+    console.log(query);
+    const sales = await Sale.find(query).select({
+      invoiceId: 1,
+      totalItem: 1,
+      grossTotalRound: 1,
+      total: 1,
+      status: 1,
+      billerId: 1,
+      createdAt: 1,
+      changeAmount: 1,
+      status: 1,
+    });
     console.log("billerId", sales);
     res.send(sales);
     // // res.send('removed');
@@ -419,10 +418,16 @@ ecomRouter.get(
   "/sale/details/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
-    console.log(id)
+    console.log(id);
     const sales = await Sale.find({ _id: id, source: "web" })
       .populate("billerId", "name")
-      .populate("customerId", { phone: 1, name: 1, point: 1, email: 1, address: 1 });
+      .populate("customerId", {
+        phone: 1,
+        name: 1,
+        point: 1,
+        email: 1,
+        address: 1,
+      });
     res.send(sales[0]);
     // // res.send('removed');
     // console.log(sales);
@@ -468,8 +473,8 @@ ecomRouter.put(
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     const update = req.body.newData;
-    console.log("ecom sale Update", update)
-    console.log('id', id)
+    console.log("ecom sale Update", update);
+    console.log("id", id);
     try {
       await Sale.updateOne({ _id: id }, { $set: update })
         .then((response) => {
