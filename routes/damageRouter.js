@@ -110,7 +110,47 @@ damageRouter.get(
     console.log(damages);
   })
 );
+//grn load by two dates
+damageRouter.get(
+  "/byDate/:start/:end",
+  expressAsyncHandler(async (req, res) => {
+    const start = req.params.start
+      ? startOfDay(new Date(req.params.start))
+      : startOfDay(new Date.now());
+    const end = req.params.end
+      ? endOfDay(new Date(req.params.end))
+      : endOfDay(new Date.now());
 
+    console.log(start, end, new Date());
+
+    try {
+      const damages = await Damage.find({
+        createdAt: { $gte: start, $lte: end },
+      })
+        .select({
+          _id: 1,
+          product: 1,
+          warehouse: 1,
+          reason: 1,
+          userId: 1,
+          qty: 1,
+          damageNo: 1,
+          createdAt: 1,
+          note: 1,
+          total: 1,
+          totalItem: 1
+        })
+        .populate("products", "name")
+        .populate("warehouse", "name")
+        .populate("userId", "name");
+      res.send(damages);
+    } catch (err) {
+      console.log(err)
+    }
+    // console.log(sales);
+    // // res.send('removed');
+  })
+);
 // GET ONE damages
 damageRouter.get(
   "/:id",
