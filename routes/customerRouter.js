@@ -295,10 +295,12 @@ customerRouter.put(
   "/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
-    const update = req.body;
+    const update = req.body.newCustomer;
+    console.log("id", id, "update", update)
     try {
       await Customer.updateOne({ _id: id }, { $set: update })
         .then((response) => {
+          console.log(response)
           res.send(response);
         })
         .catch((err) => {

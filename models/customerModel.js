@@ -11,6 +11,7 @@ const customerSchema = mongoose.Schema(
       {
         type: Map,
         of: new mongoose.Schema({
+          id: { type: String },
           type: { type: String },
           holdingNo: { type: String },
           sector: { type: String },

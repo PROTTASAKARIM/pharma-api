@@ -74,9 +74,6 @@ saleRouter.get(
     }
 
     console.log(last7Days);
-
-    // const startDate = new Date(today.setDate(today.getDate() - 1 - today.getDay()));
-    // const endDate = new Date(today.setDate(today.getDate() - today.getDay()));
     const to = endOfDay(currentDate)
     const end = startOfDay(new Date(last7Days[0]))
     const start = endOfDay(new Date(last7Days[8]))
