@@ -62,6 +62,7 @@ const saleSchema = mongoose.Schema(
     returnInvoice: {
       type: mongoose.Types.ObjectId,
       ref: "Sale",
+      // sparse: true,
       default: null,
     },
     paidAmount: new mongoose.Schema({

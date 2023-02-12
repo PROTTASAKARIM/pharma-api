@@ -526,7 +526,51 @@ ecomRouter.get(
 /*==========================
 * log in register
 ===========================*/
+//get one Customer
+ecomRouter.get(
+  "/customer/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id
+    const customer = await Customer.find({ _id: id, status: "active" }).select({
+      name: 1,
+      email: 1,
+      username: 1,
+      membership: 1,
+      address: 1,
+      point: 1,
+      phone: 1
+    });
+    if (customer) {
+      console.log(customer);
+    }
+    res.status(200).json(customer[0]);
+  })
+);
+
+// UPDATE ONE Customer
+ecomRouter.put(
+  "/customer/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const update = req.body.address;
+    console.log("id", id, "update", update)
+    try {
+      await Customer.updateOne({ _id: id }, { $set: { address: update } })
+        .then((response) => {
+          console.log(response)
+          res.send(response);
+        })
+        .catch((err) => {
+          res.send(err);
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  })
+);
+
 // Customer SIGNIN
+
 ecomRouter.post(
   "/customer/register",
   expressAsyncHandler(async (req, res) => {
@@ -553,9 +597,16 @@ ecomRouter.post(
       if (user) {
         const token = jwt.sign(
           {
-            username: user.username,
+            // username: user.username,
+            // userId: user._id,
+            // type: user.type,
             userId: user._id,
+            name: user.name,
+            username: user.username,
+            phone: user.phone,
             type: user.type,
+            point: user.point,
+
           },
           process.env.JWT_SECRET,
           { expiresIn: "1h" }
@@ -682,9 +733,15 @@ ecomRouter.post(
           // generate token
           const token = jwt.sign(
             {
-              username: user[0].username,
+              // username: user[0].username,
+              // userId: user[0]._id,
+              // type: user[0].type,
               userId: user[0]._id,
+              name: user[0].name,
+              username: user[0].username,
+              phone: user[0].phone,
               type: user[0].type,
+              point: user[0].point,
             },
             process.env.JWT_SECRET,
             { expiresIn: "1h" }
