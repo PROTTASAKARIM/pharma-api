@@ -547,15 +547,36 @@ ecomRouter.get(
   })
 );
 
-// UPDATE ONE Customer
+// UPDATE ONE Customer address
 ecomRouter.put(
-  "/customer/:id",
+  "/customer/address/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     const update = req.body.address;
     console.log("id", id, "update", update)
     try {
       await Customer.updateOne({ _id: id }, { $set: { address: update } })
+        .then((response) => {
+          console.log(response)
+          res.send(response);
+        })
+        .catch((err) => {
+          res.send(err);
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  })
+);
+// UPDATE ONE Customer point
+ecomRouter.put(
+  "/customer/point/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const update = req.body.point;
+    console.log("id", id, "update", update)
+    try {
+      await Customer.updateOne({ _id: id }, { $set: { point: update } })
         .then((response) => {
           console.log(response)
           res.send(response);
