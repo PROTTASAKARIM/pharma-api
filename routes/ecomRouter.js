@@ -16,15 +16,36 @@ const ecomRouter = express.Router();
 ===========================*/
 
 // GET FEATURED PRODUCTS
+//get all the combo type products 
+ecomRouter.get(
+  "/product/combo",
+  expressAsyncHandler(async (req, res) => {
+    const products = await Product.find({ product_type: "combo" })
+      .select({
+        _id: 1,
+        name: 1,
+        ean: 1,
+        unit: 1,
+        article_code: 1,
+        priceList: 1,
+        category: 1,
+        promo_price: 1,
+        promo_start: 1,
+        promo_end: 1,
+        promo_type: 1,
+        featured: 1,
+        photo: 1,
+      })
+      .populate("category", "name")
+      .populate("priceList");
+    res.status(200).json(products);
+  })
+);
 //get all the products between promo date
 ecomRouter.get(
   "/product/promo-products",
   expressAsyncHandler(async (req, res) => {
     const today = new Date();
-    // const end = startOfDay(new Date(today))
-    // const start = endOfDay(new Date(today))
-    // const startDate = new Date('2023-02-01');
-    // const endDate = new Date('2023-02-28');
     try {
       const product = await Product.aggregate([
         {
@@ -36,12 +57,14 @@ ecomRouter.get(
         },
         {
           $project: {
-            _id: 0,
+            _id: 1,
             name: 1,
             article_code: 1,
+            promo_price: 1,
+            promo_type: 1,
+            promo_start: 1,
+            promo_end: 1,
             priceList: 1,
-            // promoStartDate: 1,
-            // promoEndDate: 1
           }
         }
       ])
