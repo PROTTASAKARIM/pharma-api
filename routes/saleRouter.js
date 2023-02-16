@@ -124,6 +124,9 @@ saleRouter.get(
   })
 );
 
+
+
+
 // GET ALL sales
 saleRouter.get(
   "/byDate/:start/:end",

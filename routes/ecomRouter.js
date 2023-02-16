@@ -41,6 +41,7 @@ ecomRouter.get(
     res.status(200).json(products);
   })
 );
+
 //get all the products between promo date
 ecomRouter.get(
   "/product/promo-products",
@@ -76,6 +77,50 @@ ecomRouter.get(
     }
   })
 );
+
+//get all the best selling products
+ecomRouter.get(
+  "/product/best-seller",
+  expressAsyncHandler(async (req, res) => {
+
+    try {
+      const product = await Sale.aggregate([
+        {
+          $unwind: '$products'
+        },
+        {
+          $group: {
+            _id: '$products.id',
+            article_code: { $first: '$products.article_code' },
+            totalQuantity: { $sum: '$products.qty' },
+            name: { $first: '$products.name' },
+            mrp: { $last: '$products.mrp' },
+
+          }
+        },
+        {
+          $sort: { totalQuantity: -1 }
+        },
+        {
+          $limit: 20
+        }
+      ])
+      let pProduct_AC = []
+      product.map(pro => {
+        pProduct_AC = [...pProduct_AC, pro.article_code]
+      })
+      console.log("pProduct", pProduct_AC)
+
+      const productDetails = await Product.find({ article_code: pProduct_AC }).populate("priceList")
+      console.log("pProduct new", productDetails)
+      // .populate("priceList");
+      res.send({ product: product, productDetails: productDetails });
+    } catch (err) {
+      console.log(err);
+    }
+  })
+);
+
 // GET PRODUCT BY CATEGORY
 ecomRouter.get(
   "/featured",
@@ -557,6 +602,15 @@ ecomRouter.put(
 //         res.send(categories);
 //     })
 // );
+
+
+
+
+
+
+
+
+
 // // GET ALL CATEGORY BY GROUP
 ecomRouter.get(
   "/product/:catID",
