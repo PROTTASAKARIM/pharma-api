@@ -16,6 +16,43 @@ const ecomRouter = express.Router();
 ===========================*/
 
 // GET FEATURED PRODUCTS
+//get all the products between promo date
+ecomRouter.get(
+  "/product/promo-products",
+  expressAsyncHandler(async (req, res) => {
+    const today = new Date();
+    // const end = startOfDay(new Date(today))
+    // const start = endOfDay(new Date(today))
+    // const startDate = new Date('2023-02-01');
+    // const endDate = new Date('2023-02-28');
+    try {
+      const product = await Product.aggregate([
+        {
+          $match: {
+            promo_price: { $ne: null },
+            promo_start: { $lte: today },
+            promo_end: { $gte: today }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            name: 1,
+            article_code: 1,
+            priceList: 1,
+            // promoStartDate: 1,
+            // promoEndDate: 1
+          }
+        }
+      ])
+      const populatedProducts = await Product.populate(product, { path: 'priceList' })
+      // .populate("priceList");
+      res.send(populatedProducts);
+    } catch (err) {
+      console.log(err);
+    }
+  })
+);
 // GET PRODUCT BY CATEGORY
 ecomRouter.get(
   "/featured",
