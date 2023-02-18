@@ -16,6 +16,7 @@ const router = express.Router();
 const expressAsyncHandler = require("express-async-handler");
 const Product = require("../models/productModel");
 const { startOfDay, endOfDay } = require("date-fns");
+const path = require("path");
 
 // COUNT PRODUCT
 router.get(
@@ -38,7 +39,6 @@ router.get(
     res.status(200).json(products);
   })
 );
-
 
 // GET PRODUCT PRICE
 router.get(
@@ -603,11 +603,11 @@ router.put(
     const id = req.params.id;
     const update = req.body;
     console.log("update product", update);
-    const start = startOfDay(new Date(update.promo_start))
-    const end = endOfDay(new Date(update.promo_end))
-    console.log("start", start, "end", end)
-    const newProduct = { ...update, promo_start: start, promo_end: end }
-    console.log("newProduct", newProduct)
+    const start = startOfDay(new Date(update.promo_start));
+    const end = endOfDay(new Date(update.promo_end));
+    console.log("start", start, "end", end);
+    const newProduct = { ...update, promo_start: start, promo_end: end };
+    console.log("newProduct", newProduct);
     try {
       await Product.updateOne({ _id: id }, { $set: newProduct })
         .then((response) => {
@@ -650,12 +650,18 @@ router.post(
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
 
-    const appRoot = process.env.PWD;
+    // APP ROOT
+
+    const appRoot = path.dirname(require.main.filename);
+    // APP ROOT
+    // const appRoot = process.env.PWD;
     // const appRoot = process.cwd();
-    //  console.log("p", PWD)
-    console.log("env", process.env)
+    console.log(appRoot);
+    // App Root
+
+    console.log("env", process.env);
     // console.log("p", PWD)
-    console.log("approot", appRoot)
+    console.log("approot", appRoot);
     if (req.files === null) {
       return res.status(400).json({ msg: "No file uploaded" });
     }
