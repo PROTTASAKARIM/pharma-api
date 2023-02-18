@@ -15,7 +15,9 @@ const router = express.Router();
 const expressAsyncHandler = require("express-async-handler");
 const Category = require("../models/categoryModel");
 const upload = require("../middlewares/fileUploader");
+const path = require("path");
 const categoryRouter = express.Router();
+
 // COUNT Category
 categoryRouter.get(
   "/count",
@@ -109,16 +111,13 @@ categoryRouter.get(
       _id: 1,
       name: 1,
       code: 1,
-      mcId: 1
+      mcId: 1,
     });
     res.send(categories);
     // // res.send('removed');
     // console.log(categories);
   })
 );
-
-
-
 
 // GET ALL CATEGORY BY GROUP
 categoryRouter.get(
@@ -202,7 +201,7 @@ categoryRouter.post(
   "/",
   expressAsyncHandler(async (req, res) => {
     const newCategory = new Category(req.body);
-    console.log("category", req.body)
+    console.log("category", req.body);
     await newCategory.save((err) => {
       if (err) {
         res.status(500).json({ error: "There was a server side error" });
@@ -278,7 +277,10 @@ categoryRouter.post(
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
 
-    const appRoot = process.env.PWD;
+    // APPRoot
+    const appRoot = path.dirname(require.main.filename);
+    // const appRoot = process.env.PWD;
+    // APPRoot
     if (req.files === null) {
       return res.status(400).json({ msg: "No file uploaded" });
     }
