@@ -16,6 +16,111 @@ const ecomRouter = express.Router();
 ===========================*/
 
 // GET FEATURED PRODUCTS
+//get all the combo type products 
+ecomRouter.get(
+  "/product/combo",
+  expressAsyncHandler(async (req, res) => {
+    const products = await Product.find({ product_type: "combo" })
+      .select({
+        _id: 1,
+        name: 1,
+        ean: 1,
+        unit: 1,
+        article_code: 1,
+        priceList: 1,
+        category: 1,
+        promo_price: 1,
+        promo_start: 1,
+        promo_end: 1,
+        promo_type: 1,
+        featured: 1,
+        photo: 1,
+      })
+      .populate("category", "name")
+      .populate("priceList");
+    res.status(200).json(products);
+  })
+);
+
+//get all the products between promo date
+ecomRouter.get(
+  "/product/promo-products",
+  expressAsyncHandler(async (req, res) => {
+    const today = new Date();
+    try {
+      const product = await Product.aggregate([
+        {
+          $match: {
+            promo_price: { $ne: null },
+            promo_start: { $lte: today },
+            promo_end: { $gte: today }
+          }
+        },
+        {
+          $project: {
+            _id: 1,
+            name: 1,
+            article_code: 1,
+            promo_price: 1,
+            promo_type: 1,
+            promo_start: 1,
+            promo_end: 1,
+            priceList: 1,
+          }
+        }
+      ])
+      const populatedProducts = await Product.populate(product, { path: 'priceList' })
+      // .populate("priceList");
+      res.send(populatedProducts);
+    } catch (err) {
+      console.log(err);
+    }
+  })
+);
+
+//get all the best selling products
+ecomRouter.get(
+  "/product/best-seller",
+  expressAsyncHandler(async (req, res) => {
+
+    try {
+      const product = await Sale.aggregate([
+        {
+          $unwind: '$products'
+        },
+        {
+          $group: {
+            _id: '$products.id',
+            article_code: { $first: '$products.article_code' },
+            totalQuantity: { $sum: '$products.qty' },
+            name: { $first: '$products.name' },
+            mrp: { $last: '$products.mrp' },
+
+          }
+        },
+        {
+          $sort: { totalQuantity: -1 }
+        },
+        {
+          $limit: 20
+        }
+      ])
+      let pProduct_AC = []
+      product.map(pro => {
+        pProduct_AC = [...pProduct_AC, pro.article_code]
+      })
+      console.log("pProduct", pProduct_AC)
+
+      const productDetails = await Product.find({ article_code: pProduct_AC }).populate("priceList")
+      console.log("pProduct new", productDetails)
+      // .populate("priceList");
+      res.send({ product: product, productDetails: productDetails });
+    } catch (err) {
+      console.log(err);
+    }
+  })
+);
+
 // GET PRODUCT BY CATEGORY
 ecomRouter.get(
   "/featured",
@@ -497,6 +602,15 @@ ecomRouter.put(
 //         res.send(categories);
 //     })
 // );
+
+
+
+
+
+
+
+
+
 // // GET ALL CATEGORY BY GROUP
 ecomRouter.get(
   "/product/:catID",
@@ -526,7 +640,72 @@ ecomRouter.get(
 /*==========================
 * log in register
 ===========================*/
+//get one Customer
+ecomRouter.get(
+  "/customer/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id
+    const customer = await Customer.find({ _id: id, status: "active" }).select({
+      name: 1,
+      email: 1,
+      username: 1,
+      membership: 1,
+      address: 1,
+      point: 1,
+      phone: 1
+    });
+    if (customer) {
+      console.log(customer);
+    }
+    res.status(200).json(customer[0]);
+  })
+);
+
+// UPDATE ONE Customer address
+ecomRouter.put(
+  "/customer/address/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const update = req.body.address;
+    console.log("id", id, "update", update)
+    try {
+      await Customer.updateOne({ _id: id }, { $set: { address: update } })
+        .then((response) => {
+          console.log(response)
+          res.send(response);
+        })
+        .catch((err) => {
+          res.send(err);
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  })
+);
+// UPDATE ONE Customer point
+ecomRouter.put(
+  "/customer/point/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const update = req.body.point;
+    console.log("id", id, "update", update)
+    try {
+      await Customer.updateOne({ _id: id }, { $set: { point: update } })
+        .then((response) => {
+          console.log(response)
+          res.send(response);
+        })
+        .catch((err) => {
+          res.send(err);
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  })
+);
+
 // Customer SIGNIN
+
 ecomRouter.post(
   "/customer/register",
   expressAsyncHandler(async (req, res) => {
@@ -553,9 +732,16 @@ ecomRouter.post(
       if (user) {
         const token = jwt.sign(
           {
-            username: user.username,
+            // username: user.username,
+            // userId: user._id,
+            // type: user.type,
             userId: user._id,
+            name: user.name,
+            username: user.username,
+            phone: user.phone,
             type: user.type,
+            point: user.point,
+
           },
           process.env.JWT_SECRET,
           { expiresIn: "1h" }
@@ -682,9 +868,15 @@ ecomRouter.post(
           // generate token
           const token = jwt.sign(
             {
-              username: user[0].username,
+              // username: user[0].username,
+              // userId: user[0]._id,
+              // type: user[0].type,
               userId: user[0]._id,
+              name: user[0].name,
+              username: user[0].username,
+              phone: user[0].phone,
               type: user[0].type,
+              point: user[0].point,
             },
             process.env.JWT_SECRET,
             { expiresIn: "1h" }

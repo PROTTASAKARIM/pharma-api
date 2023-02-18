@@ -15,6 +15,7 @@ const express = require("express");
 const router = express.Router();
 const expressAsyncHandler = require("express-async-handler");
 const Product = require("../models/productModel");
+const { startOfDay, endOfDay } = require("date-fns");
 
 // COUNT PRODUCT
 router.get(
@@ -37,6 +38,7 @@ router.get(
     res.status(200).json(products);
   })
 );
+
 
 // GET PRODUCT PRICE
 router.get(
@@ -601,8 +603,13 @@ router.put(
     const id = req.params.id;
     const update = req.body;
     console.log("update product", update);
+    const start = startOfDay(new Date(update.promo_start))
+    const end = endOfDay(new Date(update.promo_end))
+    console.log("start", start, "end", end)
+    const newProduct = { ...update, promo_start: start, promo_end: end }
+    console.log("newProduct", newProduct)
     try {
-      await Product.updateOne({ _id: id }, { $set: update })
+      await Product.updateOne({ _id: id }, { $set: newProduct })
         .then((response) => {
           console.log("update", response);
           res.send(response);

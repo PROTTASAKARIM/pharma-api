@@ -12,7 +12,7 @@ const customerSchema = mongoose.Schema(
         type: Map,
         of: new mongoose.Schema({
           id: { type: String },
-          type: { type: String },
+          type: { type: String, enum: ['Home', 'Work', 'Other'] },
           holdingNo: { type: String },
           sector: { type: String },
           street: { type: String },

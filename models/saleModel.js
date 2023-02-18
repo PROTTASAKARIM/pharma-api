@@ -26,6 +26,10 @@ const saleSchema = mongoose.Schema(
           order: { type: Number, require: true },
           vat: { type: Number, require: true },
           qty: { type: Number, require: true },
+          promo_price: { type: String },
+          promo_type: { type: Boolean, default: false },
+          promo_start: { type: Date },
+          promo_end: { type: Date },
         }),
       },
     ],
@@ -62,6 +66,7 @@ const saleSchema = mongoose.Schema(
     returnInvoice: {
       type: mongoose.Types.ObjectId,
       ref: "Sale",
+      // sparse: true,
       default: null,
     },
     paidAmount: new mongoose.Schema({
