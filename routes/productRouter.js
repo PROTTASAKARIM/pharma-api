@@ -652,11 +652,10 @@ router.post(
 
     // APP ROOT
 
-    // const appRoot = process.env.BASE_URL || path.dirname(require.main.filename);
-    const appRoot = path.dirname(require.main.filename);
+
     // APP ROOT
     // const appRoot = process.env.PWD;
-    // const appRoot = process.cwd();
+    const appRoot = process.cwd();
     console.log(appRoot);
     // App Root
 

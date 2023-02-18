@@ -278,8 +278,9 @@ categoryRouter.post(
     const id = req.params.id;
 
     // APPRoot
-    const appRoot = path.dirname(require.main.filename);
+    // const appRoot = path.dirname(require.main.filename);
     // const appRoot = process.env.PWD;
+    const appRoot = process.cwd();
     // APPRoot
     if (req.files === null) {
       return res.status(400).json({ msg: "No file uploaded" });
