@@ -392,7 +392,7 @@ ecomRouter.get(
         photo: 1,
       })
       .populate("priceList", { mrp: 1, tp: 1, supplier: 1, _id: 1, status: 1 })
-      .populate("category", { name: 1 });
+      .populate("category", { name: 1 })
     if (products) {
       console.log(products);
       res.send(products);
@@ -400,6 +400,39 @@ ecomRouter.get(
   })
 );
 
+// GET PRODUCT BY CATEGORY
+ecomRouter.get(
+  "/product-similar/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const products = await Product.findOne({ _id: id })
+    // const cProducts = await Product.find({ category: products?.category })
+    const cProducts = await Product.find({ category: products?.category, _id: { $ne: id } })
+      .select({
+        _id: 1,
+        name: 1,
+        ean: 1,
+        vat: 1,
+        unit: 1,
+        article_code: 1,
+        priceList: 1,
+        ean: 1,
+        promo_start: 1,
+        promo_end: 1,
+        promo_price: 1,
+        promo_type: 1,
+        category: 1,
+        photo: 1,
+      })
+      .populate("priceList", { mrp: 1, tp: 1, supplier: 1, _id: 1, status: 1 })
+      .populate("category", { name: 1 })
+    // const similarP = cProducts.filter(p => p._id === id)
+    if (cProducts) {
+      res.send(cProducts);
+      // res.send({ products: products, cProducts: cProducts, similarP: similarP });
+    }
+  })
+);
 // GET PRODUCT BY CATEGORY
 ecomRouter.get(
   "/product_category/:id",
