@@ -291,7 +291,7 @@ categoryRouter.post(
     const ext = name[1];
     const time = Date.now();
     const fileName = `${id}-${time}.${ext}`;
-    console.log(`../uploads/${fileName}`);
+    // console.log(`../uploads/${fileName}`);
 
     file.mv(`${appRoot}/uploads/category/${fileName}`, async (err) => {
       if (err) {

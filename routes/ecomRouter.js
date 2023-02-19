@@ -419,6 +419,7 @@ ecomRouter.get(
         promo_end: 1,
         promo_price: 1,
         promo_type: 1,
+        photo: 1,
       })
       .populate("priceList", { mrp: 1, tp: 1, supplier: 1, _id: 1, status: 1 });
     if (products) {
