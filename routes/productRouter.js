@@ -35,7 +35,10 @@ router.get(
       name: 1,
       article_code: 1,
       unit: 1,
-    });
+      category: 1,
+
+    })
+      .populate("category", { name: 1, code: 1, mcId: 1, group: 1 });
     res.status(200).json(products);
   })
 );
