@@ -38,7 +38,13 @@ ecomRouter.get(
       })
       .populate("category", "name")
       .populate("priceList");
-    res.status(200).json(products);
+    console.log("products", products)
+    const fProducts = products.filter(p => p.priceList.length > 0)
+    console.log("fProducts", fProducts)
+
+    if (fProducts) {
+      res.status(200).json(fProducts);
+    }
   })
 );
 
@@ -65,13 +71,17 @@ ecomRouter.get(
             promo_type: 1,
             promo_start: 1,
             promo_end: 1,
+            photo: 1,
             priceList: 1,
           }
         }
       ])
       const populatedProducts = await Product.populate(product, { path: 'priceList' })
+      console.log(populatedProducts);
+      const fProducts = populatedProducts.filter(p => p.priceList.length > 0)
+      console.log(fProducts);
       // .populate("priceList");
-      res.send(populatedProducts);
+      res.send(fProducts);
     } catch (err) {
       console.log(err);
     }
@@ -113,8 +123,9 @@ ecomRouter.get(
 
       const productDetails = await Product.find({ article_code: pProduct_AC }).populate("priceList")
       console.log("pProduct new", productDetails)
+      const fProducts = productDetails.filter(p => p.priceList.length > 0)
       // .populate("priceList");
-      res.send({ product: product, productDetails: productDetails });
+      res.send({ product: product, productDetails: fProducts });
     } catch (err) {
       console.log(err);
     }
@@ -145,9 +156,10 @@ ecomRouter.get(
       .populate("category", "name")
       .populate("priceList");
     if (product) {
-      console.log(product);
+      const fProducts = product.filter(p => p.priceList.length > 0)
+      console.log(fProducts);
+      res.status(200).json(fProducts);
     }
-    res.status(200).json(product);
   })
 );
 
@@ -219,7 +231,9 @@ ecomRouter.get(
         .limit(100)
         .populate("category", "name")
         .populate("priceList");
-      res.status(200).json(product);
+
+      const fProducts = product.filter(p => p.priceList.length > 0)
+      res.status(200).json(fProducts);
     } else {
       console.log("no query");
 
@@ -244,7 +258,9 @@ ecomRouter.get(
         .skip(size * page)
         .populate("category", "name")
         .populate("priceList");
-      res.status(200).json(product);
+
+      const fProducts = product.filter(p => p.priceList.length > 0)
+      res.status(200).json(fProducts);
       console.log("done:", query);
     }
   })
@@ -338,7 +354,8 @@ ecomRouter.get(
         .limit(100)
         .populate("category", "name")
         .populate("priceList");
-      res.status(200).json(product);
+      const fProducts = product.filter(p => p.priceList.length > 0)
+      res.status(200).json(fProducts);
     } else {
       console.log("no query");
 
@@ -363,7 +380,9 @@ ecomRouter.get(
         .skip(size * page)
         .populate("category", "name")
         .populate("priceList");
-      res.status(200).json(product);
+
+      const fProducts = product.filter(p => p.priceList.length > 0)
+      res.status(200).json(fProducts);
       console.log("done:", query);
     }
   })
@@ -394,7 +413,8 @@ ecomRouter.get(
       .populate("priceList", { mrp: 1, tp: 1, supplier: 1, _id: 1, status: 1 })
       .populate("category", { name: 1 })
     if (products) {
-      console.log(products);
+      // const fProducts = products.filter(p => p.priceList.length > 0)
+      // console.log(fProducts);
       res.send(products);
     }
   })
@@ -428,7 +448,8 @@ ecomRouter.get(
       .populate("category", { name: 1 })
     // const similarP = cProducts.filter(p => p._id === id)
     if (cProducts) {
-      res.send(cProducts);
+      const fProducts = cProducts.filter(p => p.priceList.length > 0)
+      res.send(fProducts);
       // res.send({ products: products, cProducts: cProducts, similarP: similarP });
     }
   })
@@ -457,7 +478,8 @@ ecomRouter.get(
       .populate("priceList", { mrp: 1, tp: 1, supplier: 1, _id: 1, status: 1 });
     if (products) {
       //   console.log(products);
-      res.send(products);
+      const fProducts = products.filter(p => p.priceList.length > 0)
+      res.send(fProducts);
     }
   })
 );
@@ -667,7 +689,8 @@ ecomRouter.get(
       .limit(100)
       .populate("category", "name")
       .populate("priceList");
-    res.status(200).json(product);
+    const fProducts = product.filter(p => p.priceList.length > 0)
+    res.status(200).json(fProducts);
   })
 );
 
