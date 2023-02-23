@@ -6,7 +6,7 @@ const customerSchema = mongoose.Schema(
     email: { type: String, unique: true, sparse: true },
     username: { type: String },
     password: { type: String },
-    membership: { type: String, unique: true },
+    membership: { type: String },
     address: [
       {
         type: Map,
@@ -22,10 +22,7 @@ const customerSchema = mongoose.Schema(
           country: { type: String },
           zipCode: { type: String },
 
-        },
-          {
-            timestamps: true,
-          }
+        }
         ),
       },
 
@@ -37,7 +34,7 @@ const customerSchema = mongoose.Schema(
       default: "regular",
     },
     point: { type: Number, default: 0 },
-    phone: { type: String, require: true, unique: true },
+    phone: { type: String, require: true, unique: true, sparse: true },
     status: { type: String, enum: ["active", "inactive"], default: "active" },
   },
   {

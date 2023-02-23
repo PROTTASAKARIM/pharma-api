@@ -769,15 +769,15 @@ ecomRouter.post(
     console.table(req.body);
     const hashPassword = await bcrypt.hash(req.body.password, 10);
     console.log("hashpassss", hashPassword);
-    console.log(hashPassword);
+    // console.log(hashPassword);
     const newUser = new Customer({
       name: req.body.name,
       email: req.body.email,
-      username: req.body.phone,
+      username: req.body.username,
       phone: req.body.phone,
       type: req.body.type,
       membership: req.body.membership,
-      address: "",
+      // address: "",
       // privilege: {},
       password: hashPassword,
       status: req.body.status,
