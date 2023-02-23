@@ -21,7 +21,6 @@ const customerSchema = mongoose.Schema(
           division: { type: String },
           country: { type: String },
           zipCode: { type: String },
-
         }
         ),
       },
@@ -34,7 +33,7 @@ const customerSchema = mongoose.Schema(
       default: "regular",
     },
     point: { type: Number, default: 0 },
-    phone: { type: String, require: true, unique: true, sparse: true },
+    phone: { type: String, require: true, unique: true },
     status: { type: String, enum: ["active", "inactive"], default: "active" },
   },
   {

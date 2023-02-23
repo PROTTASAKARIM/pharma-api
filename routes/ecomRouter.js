@@ -769,21 +769,27 @@ ecomRouter.post(
     console.table(req.body);
     const hashPassword = await bcrypt.hash(req.body.password, 10);
     console.log("hashpassss", hashPassword);
-    // console.log(hashPassword);
-    const newUser = new Customer({
+    const updatedUser = {
       name: req.body.name,
-      email: req.body.email,
       username: req.body.username,
       phone: req.body.phone,
       type: req.body.type,
       membership: req.body.membership,
-      // address: "",
-      // privilege: {},
       password: hashPassword,
       status: req.body.status,
-    });
+    }
+    // console.log(hashPassword);
+    const newUser = new Customer(updatedUser);
     try {
       console.log("newUser", newUser);
+      // await newUser.save()
+      //   .then(savedCustomer => {
+      //     console.log('Customer saved:', savedCustomer);
+      //   })
+      //   .catch(error => {
+      //     console.error('Error saving customer:', error);
+      //   });
+
       const user = await newUser.save();
       console.log("p", user);
       if (user) {
@@ -812,6 +818,7 @@ ecomRouter.post(
         });
       }
     } catch (error) {
+      console.log("some errors")
       // res.status(400).json({
       res
         .status(500)
