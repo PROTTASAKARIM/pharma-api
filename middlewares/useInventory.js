@@ -1258,6 +1258,171 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
   }
 };
 // Generate Sale in -> inventory Out
+const adjustInventoryOnSale = async (req, res, next) => {
+  // TODO:: todays total
+
+
+  try {
+    const products = await req.body;
+    console.log("pp", products)
+    if (products.length > 0) {
+      products.map(async (product) => {
+        // console.log("single product", product);
+        const { code: article_code, qty, priceId, name } = product;
+        console.log("article_code", article_code?.length);
+        if (article_code?.length > 0) {
+          let inventory = {};
+          const success = await Inventory.findOne({ article_code: article_code });
+
+          if (success) {
+
+            if (success.priceTable.length > 0) {
+
+              const checked = success.priceTable.filter(
+                (p) => p.get("id") === priceId
+              );
+              const rest = success.priceTable.filter(
+                (p) => p.get("id") !== priceId
+              );
+              if (checked?.length > 0) {
+                inventory = {
+                  name: success.name,
+                  article_code: success.article_code,
+                  warehouse: "62b5b575b4facb87eef3b47c",
+                  currentQty: Number(success.currentQty)
+                    - Number(qty),
+                  openingQty: success.openingQty - Number(qty),
+                  totalQty: Number(success.totalQty) - Number(qty),
+                  soldQty: success.soldQty,
+                  damageQty: Number(success.damageQty),
+                  rtvQty: success.rtvQty,
+                  status: success.status,
+                  createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
+                  updatedAt: new Date(Date.parse(success.updatedAt)),
+                  priceTable: [
+                    ...rest,
+                    {
+                      id: checked[0].get("id"),
+                      currentQty: checked[0].get("currentQty") ? Number(checked[0].get("currentQty")) - Number(qty) : 0 - Number(qty),
+                      openingQty: checked[0].get("openingQty") ? checked[0].get("openingQty") - Number(qty) : 0,
+                      totalQty: checked[0].get("totalQty") ? checked[0].get("totalQty") - Number(qty) : 0,
+                      soldQty: checked[0].get("soldQty") ? checked[0].get("soldQty") : 0,
+                      damageQty: checked[0].get("damageQty") ? Number(checked[0].get("damageQty")) : 0,
+                      rtvQty: checked[0].get("rtvQty") ? checked[0].get("rtvQty") : 0,
+
+                    }
+                  ]
+
+                }
+                // console.log("inventory", inventory);
+              } else {
+                inventory = {
+                  name: success.name,
+                  article_code: success.article_code,
+                  warehouse: "62b5b575b4facb87eef3b47c",
+                  currentQty: Number(success.currentQty) - Number(qty),
+                  openingQty: Number(success.openingQty) - Number(qty),
+                  totalQty: Number(success.totalQty) - Number(qty),
+                  soldQty: success.soldQty,
+                  damageQty: Number(success.damageQty),
+                  rtvQty: success.rtvQty,
+                  status: success.status,
+                  createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
+                  updatedAt: new Date(Date.parse(success.updatedAt)),
+                  priceTable: [
+                    ...rest,
+                    {
+                      id: priceId,
+                      currentQty: -Number(qty),
+                      openingQty: -Number(qty),
+                      totalQty: - Number(qty),
+                      soldQty: 0,
+                      damageQty: 0,
+                      rtvQty: 0,
+
+                    }
+                  ]
+
+                }
+                // console.log("inventory", inventory);
+              }
+            } else {
+              inventory = {
+                name: success.name,
+                article_code: success.article_code,
+                warehouse: "62b5b575b4facb87eef3b47c",
+                currentQty: - Number(qty),
+                openingQty: - Number(qty),
+                totalQty: - Number(qty),
+                soldQty: 0,
+                damageQty: 0,
+                rtvQty: 0,
+                status: success.status,
+                createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
+                updatedAt: new Date(Date.parse(success.updatedAt)),
+                priceTable: [
+                  ...success.priceTable,
+                  {
+                    id: priceId,
+                    openingQty: - Number(qty),
+                    currentQty: - Number(qty),
+                    totalQty: -Number(qty),
+                    soldQty: 0,
+                    damageQty: 0,
+                    rtvQty: 0,
+                  },
+                ],
+
+              };
+            }
+          } else {
+            inventory = {
+              name: name,
+              article_code: article_code,
+              warehouse: "62b5b575b4facb87eef3b47c",
+              currentQty: - Number(qty),
+              openingQty: - Number(qty),
+              totalQty: -Number(qty),
+              soldQty: 0,
+              damageQty: 0,
+              rtvQty: 0,
+              status: "active",
+              createdAt: new Date(Date.now()),
+              updatedAt: new Date(Date.now()),
+              priceTable: [
+
+                {
+                  id: priceId,
+                  openingQty: - Number(qty),
+                  currentQty: - Number(qty),
+                  totalQty: -Number(qty),
+                  soldQty: 0,
+                  damageQty: 0,
+                  rtvQty: 0,
+                },
+              ],
+
+            };
+          }
+          const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
+          if (update) {
+            req.body.update = update
+          }
+        } else {
+          console.log("no update")
+        }
+      });
+    }
+  } catch (err) {
+    console.log(err)
+  } finally {
+    next()
+  }
+
+
+
+};
+
 const updateInventoryOutOnSaleIn = async (req, res, next) => {
   // TODO:: todays total
 
@@ -2047,6 +2212,7 @@ module.exports = {
   updateInventoryINOnRTVOut,
   updateInventoryInOnSaleDel,
   updateInventoryOutOnSaleIn,
+  adjustInventoryOnSale,
   updateInventoryInOnGRNIn,
   updateInventoryOutOnGRNDel
 };

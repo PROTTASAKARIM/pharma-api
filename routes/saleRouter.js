@@ -301,6 +301,7 @@ saleRouter.get(
           $project: {
             "invoiceId": 1,
             "products.article_code": 1,
+            "products.priceId": 1,
             "products.name": 1,
             "products.tp": 1,
             "products.mrp": 1,
@@ -308,6 +309,7 @@ saleRouter.get(
             "products.vat": 1,
             "createdAt": 1,
             "returnProducts.article_code": 1,
+            "returnProducts.priceId": 1,
             "returnProducts.name": 1,
             "returnProducts.tp": 1,
             "returnProducts.mrp": 1,
