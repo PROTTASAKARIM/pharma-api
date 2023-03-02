@@ -247,8 +247,9 @@ inventoryRouter.get(
 inventoryRouter.post(
   "/",
   expressAsyncHandler(async (req, res) => {
+    console.log("hi", req.body)
     const newInventory = new Inventory(req.body);
-    console.log(newInventory);
+    console.log("newInventory", newInventory);
     try {
       await newInventory.save();
       res.status(200).json({
@@ -309,12 +310,17 @@ inventoryRouter.put(
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     const update = req.body;
+    console.log("in id", id)
+    console.log("in up", update)
     try {
       await Inventory.updateOne({ _id: id }, { $set: update })
         .then((response) => {
+          // console.log("inventory updating")
+          console.log("inventory updating", response)
           res.send(response);
         })
         .catch((err) => {
+          console.log("inventory not updating", err)
           res.send(err);
         });
     } catch (error) {

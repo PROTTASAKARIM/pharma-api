@@ -311,6 +311,28 @@ customerRouter.put(
     }
   })
 );
+// UPDATE ONE Customer
+customerRouter.put(
+  "/point/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const update = req.body;
+    console.log("id", id, "update", update)
+    console.log("req.body", req.body)
+    try {
+      await Customer.updateOne({ _id: id }, { $set: update })
+        .then((response) => {
+          console.log(response)
+          res.send(response);
+        })
+        .catch((err) => {
+          res.send(err);
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  })
+);
 
 // DELETE ONE Customer
 customerRouter.delete(
