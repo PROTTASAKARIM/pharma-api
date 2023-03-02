@@ -15,6 +15,7 @@ const express = require("express");
 const router = express.Router();
 const expressAsyncHandler = require("express-async-handler");
 const Product = require("../models/productModel");
+const Sale = require("../models/saleModel");
 const { startOfDay, endOfDay } = require("date-fns");
 const path = require("path");
 
@@ -40,6 +41,46 @@ router.get(
     })
       .populate("category", { name: 1, code: 1, mcId: 1, group: 1 });
     res.status(200).json(products);
+  })
+);
+//get all the best selling products
+router.get(
+  "/best-seller",
+  expressAsyncHandler(async (req, res) => {
+
+    try {
+      const product = await Sale.aggregate([
+        {
+          $unwind: '$products'
+        },
+        {
+          $group: {
+            _id: '$products.id',
+            article_code: { $first: '$products.article_code' },
+            totalQuantity: { $sum: '$products.qty' },
+            name: { $first: '$products.name' },
+            mrp: { $last: '$products.mrp' },
+
+          }
+        },
+        {
+          $sort: { totalQuantity: -1 }
+        }
+      ])
+      // let pProduct_AC = []
+      // product.map(pro => {
+      //   pProduct_AC = [...pProduct_AC, pro.article_code]
+      // })
+      // console.log("pProduct", pProduct_AC)
+
+      // const productDetails = await Product.find({ article_code: pProduct_AC }).populate("priceList")
+      // console.log("pProduct new", productDetails)
+      // const fProducts = productDetails.filter(p => p.priceList.length > 0)
+      // .populate("priceList");
+      res.send(product);
+    } catch (err) {
+      console.log(err);
+    }
   })
 );
 
