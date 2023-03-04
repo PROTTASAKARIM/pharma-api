@@ -15,6 +15,7 @@ const router = express.Router();
 const expressAsyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 const Sale = require("../models/saleModel");
+const Product = require("../models/productModel");
 const checklogin = require("../middlewares/checkLogin");
 const { generatePosId } = require("../middlewares/generateId");
 const { startOfDay, endOfDay } = require("date-fns");
@@ -127,6 +128,70 @@ saleRouter.get(
 
 
 
+// GET ALL sales
+saleRouter.get(
+  "/byCategory/:start/:end/:catID",
+  expressAsyncHandler(async (req, res) => {
+    const start = req.params.start
+      ? startOfDay(new Date(req.params.start))
+      : startOfDay(new Date.now());
+    const end = req.params.end
+      ? endOfDay(new Date(req.params.end))
+      : endOfDay(new Date.now());
+    const catId = req.params.catID
+    console.log(catId)
+    console.log(start, end);
+
+    const product = await Sale.aggregate([
+      {
+        $match: {
+          status: "complete",
+          createdAt: { $gte: start, $lte: end },
+        }
+      },
+      {
+        $unwind: '$products'
+      },
+      {
+        $group: {
+          _id: '$products.id',
+          article_code: { $first: '$products.article_code' },
+          totalQuantity: { $sum: '$products.qty' },
+          name: { $first: '$products.name' },
+          mrp: { $last: '$products.mrp' },
+          tp: { $last: '$products.tp' },
+          priceId: { $first: '$products.priceId' }
+
+        }
+      },
+      {
+        $sort: { totalQuantity: -1 }
+      }
+    ])
+    // const populated = product.populate("priceId", "mrp")
+    // res.send(populated);
+
+    let pProduct_AC = []
+    product.map(pro => {
+      pProduct_AC = [...pProduct_AC, pro.article_code]
+    })
+    // console.log("pProduct", pProduct_AC)
+    const matchProducts = await Product.find({ article_code: pProduct_AC })
+    const catProduct = matchProducts.filter(pro => pro.master_category == catId || pro.category == catId)
+    let filteredProducts = []
+    catProduct.map(pro => {
+      const p = product.filter(pp => pp.article_code === pro.article_code)
+      filteredProducts = [...filteredProducts, p[0]]
+    })
+    console.log(product.length)
+    console.log(catProduct.length)
+    console.log(filteredProducts.length)
+    const sortedProducts = filteredProducts.slice().sort((a, b) => b.totalQuantity - a.totalQuantity)
+    console.log(sortedProducts.length)
+    res.send(sortedProducts);
+
+  })
+);
 // GET ALL sales
 saleRouter.get(
   "/byDate/:start/:end",
