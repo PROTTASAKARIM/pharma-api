@@ -128,7 +128,61 @@ saleRouter.get(
 
 
 
-// GET ALL sales
+// GET ALL sales by category
+saleRouter.get(
+  "/bySupplier/:start/:end/:supplierId",
+  expressAsyncHandler(async (req, res) => {
+    const start = req.params.start
+      ? startOfDay(new Date(req.params.start))
+      : startOfDay(new Date.now());
+    const end = req.params.end
+      ? endOfDay(new Date(req.params.end))
+      : endOfDay(new Date.now());
+    const supplierId = req.params.supplierId
+    console.log(supplierId)
+    console.log(start, end);
+
+    const product = await Sale.aggregate([
+      {
+        $match: {
+          status: "complete",
+          createdAt: { $gte: start, $lte: end },
+        }
+      },
+      {
+        $unwind: '$products'
+      },
+      {
+        $group: {
+          _id: '$products.id',
+          article_code: { $first: '$products.article_code' },
+          totalQuantity: { $sum: '$products.qty' },
+          name: { $first: '$products.name' },
+          mrp: { $last: '$products.mrp' },
+          tp: { $last: '$products.tp' },
+          priceId: { $first: '$products.priceId' },
+          supplier: { $first: '$products.supplier' }
+
+        }
+      },
+      {
+        $sort: { totalQuantity: -1 }
+      }
+    ])
+    // const populated = product.populate("priceId", "mrp")
+    // res.send(populated);
+
+    let pProduct_supplier = []
+    product.map(pro => {
+      pProduct_supplier = [...pProduct_supplier, pro.supplier]
+    })
+    const supplierProducts = product.filter(pro => pro.supplier == supplierId)
+
+    res.send(supplierProducts);
+
+  })
+);
+// GET ALL sales by category
 saleRouter.get(
   "/byCategory/:start/:end/:catID",
   expressAsyncHandler(async (req, res) => {
