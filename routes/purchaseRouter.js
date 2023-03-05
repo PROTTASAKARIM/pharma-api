@@ -23,7 +23,7 @@ const purchaseRouter = express.Router();
 purchaseRouter.get(
   "/",
   expressAsyncHandler(async (req, res) => {
-    const Purchases = await Purchase.find({})
+    const purchases = await Purchase.find({})
       .select({
         poNo: 1,
         supplier: 1,
@@ -40,12 +40,13 @@ purchaseRouter.get(
       .populate("warehouse", "name")
       .populate("userId", "name");
     //   .exec(callback);
-
-    res.send(Purchases);
+    const sorted = purchases.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    res.send(sorted);
     // // res.send('removed');
     // console.log(Purchases);
   })
 );
+
 
 // GET weekly Purchases
 purchaseRouter.get(
@@ -248,6 +249,26 @@ purchaseRouter.put(
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     const update = req.body;
+    try {
+      await Purchase.updateOne({ _id: id }, { $set: update })
+        .then((response) => {
+          res.send(response);
+        })
+        .catch((err) => {
+          res.send(err);
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  })
+);
+// UPDATE ONE Purchase Status
+purchaseRouter.put(
+  "/status/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const update = req.body;
+    console.log("PO", id, update)
     try {
       await Purchase.updateOne({ _id: id }, { $set: update })
         .then((response) => {
