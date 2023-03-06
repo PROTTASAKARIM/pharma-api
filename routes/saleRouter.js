@@ -46,6 +46,43 @@ saleRouter.get(
     // // res.send('removed');
   })
 );
+// today point
+saleRouter.get(
+  "/todayPoint",
+  expressAsyncHandler(async (req, res) => {
+    // res.send("hi");
+    const today = new Date()
+    const start = startOfDay(new Date());
+    const end = endOfDay(new Date());
+    // console.log(start, end)
+    // console.log(today)
+    try {
+      const sales = await Sale.aggregate([
+        {
+          $match: {
+            createdAt: {
+              $gte: start,
+              $lt: end
+            },
+
+          }
+        },
+        // { $match: { "point.new": { $lt: "point.old" } } },
+        // { $group: { _id: null, total: { $sum: "$point.new" } } }
+      ]);
+      const filtered = sales.filter(sale => sale.point.old > sale.point.new)
+      console.log(filtered);
+      let todayPoint = 0;
+      filtered.map(sale => {
+        todayPoint = todayPoint + (Number(sale.point.old) - Number(sale.point.new) + Number(sale.todayPoint))
+      })
+      console.log(todayPoint)
+      res.send({ spentPoint: todayPoint });
+    } catch (err) {
+      console.log(err);
+    }
+  })
+);
 // weekly SALE Count
 saleRouter.get(
   "/week-sale",
