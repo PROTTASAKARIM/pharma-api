@@ -104,26 +104,26 @@ purchaseRouter.get(
           }
         }
       ]);
-      console.log(start, end);
-      console.log(start, end);
-      let filteredDate = []
-      const match = purchases.map(purchase => {
-        console.log("o", new Date(purchase._id))
-        for (let i = 1; i <= 7; i++) {
-          console.log("p", new Date(last7Days[i]))
-          if (new Date(last7Days[i]) == new Date(purchase._id)) {
-            console.log("true")
-          } else {
-            console.log("false")
-          }
-        }
-        // filteredDate = [...filteredDate, p[0]]
-      })
+      // console.log(start, end);
+      // console.log(start, end);
+      // let filteredDate = []
+      // const match = purchases.map(purchase => {
+      //   console.log("o", new Date(purchase._id))
+      //   for (let i = 1; i <= 7; i++) {
+      //     console.log("p", new Date(last7Days[i]))
+      //     if (new Date(last7Days[i]) == new Date(purchase._id)) {
+      //       console.log("true")
+      //     } else {
+      //       console.log("false")
+      //     }
+      //   }
+      //   // filteredDate = [...filteredDate, p[0]]
+      // })
 
 
 
 
-      console.log(match)
+      // console.log(match)
       res.send(purchases);
       // res.send(Purchases);
     } catch (err) {
