@@ -70,7 +70,7 @@ saleRouter.get(
         // { $match: { "point.new": { $lt: "point.old" } } },
         // { $group: { _id: null, total: { $sum: "$point.new" } } }
       ]);
-      const filtered = sales.filter(sale => sale.point.old > sale.point.new)
+      const filtered = sales.filter(sale => sale?.point?.old > sale?.point?.new)
       console.log(filtered);
       let todayPoint = 0;
       filtered.map(sale => {

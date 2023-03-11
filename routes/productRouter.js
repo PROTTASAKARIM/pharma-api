@@ -640,6 +640,7 @@ router.post(
   })
 );
 
+
 // UPDATE ONE PRODUCT
 router.put(
   "/:id",
@@ -667,7 +668,28 @@ router.put(
     }
   })
 );
-
+// UPDATE ONE PRODUCT pricelist
+router.put(
+  "/price/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const update = { priceList: req.body.newP };
+    console.log(id, update)
+    try {
+      await Product.updateOne({ _id: id }, { $set: update })
+        .then((response) => {
+          console.log("update", response);
+          res.send(response);
+        })
+        .catch((err) => {
+          console.log("update", response);
+          res.send(err);
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  })
+);
 // DELETE PRODUCT
 router.delete(
   "/:id",
