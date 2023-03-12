@@ -135,6 +135,32 @@ purchaseRouter.get(
 
 // GET ONE Purchases
 purchaseRouter.get(
+  "/supplier/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const Purchases = await Purchase.find({ _id: id })
+      .populate({
+        path: "supplier",
+        select: { company: 1, email: 1, phone: 1, address: 1, products: 1 },
+        populate: {
+          path: "products.id",
+          model: "Product",
+          populate: {
+            path: "priceList",
+            model: "Price",
+          },
+        },
+      })
+      .populate("warehouse", "name")
+      .populate("userId", "name");
+    // .populate("userId")
+    res.send(Purchases[0]);
+    // // res.send('removed');
+    // console.log(Purchases);
+  })
+);
+// GET ONE Purchases
+purchaseRouter.get(
   "/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
@@ -145,7 +171,7 @@ purchaseRouter.get(
     // .populate("userId")
     res.send(Purchases[0]);
     // // res.send('removed');
-    console.log(Purchases);
+    // console.log(Purchases);
   })
 );
 //purchase load by two dates
@@ -262,6 +288,26 @@ purchaseRouter.put(
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     const update = req.body;
+    try {
+      await Purchase.updateOne({ _id: id }, { $set: update })
+        .then((response) => {
+          res.send(response);
+        })
+        .catch((err) => {
+          res.send(err);
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  })
+);
+// UPDATE ONE Purchase
+purchaseRouter.put(
+  "/update/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const update = req.body.purchaseData;
+    console.log(id, update)
     try {
       await Purchase.updateOne({ _id: id }, { $set: update })
         .then((response) => {
