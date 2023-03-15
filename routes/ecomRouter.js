@@ -814,6 +814,14 @@ ecomRouter.post(
           access_token: token,
           status: true,
           message: "Registration Successful",
+          user: {
+            id: user._id,
+            name: user.name,
+            username: user.username,
+            phone: user.phone,
+            type: user.type,
+            point: user.point,
+          },
           //   newUser: user,
         });
       }

@@ -245,6 +245,7 @@ grnRouter.post(
   handleNewPrice,
   expressAsyncHandler(async (req, res) => {
     console.log("New:", req.body.products);
+    console.log("New:All", req.body);
 
     const newGrn = new Grn(req.body);
     console.log(newGrn);

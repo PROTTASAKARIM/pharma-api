@@ -7,6 +7,7 @@ const customerSchema = mongoose.Schema(
     username: { type: String },
     password: { type: String },
     membership: { type: String },
+    dob: { type: Date, default: null },
     address: [
       {
         type: Map,
