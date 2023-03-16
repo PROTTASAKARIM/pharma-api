@@ -8,6 +8,7 @@ const customerSchema = mongoose.Schema(
     password: { type: String },
     membership: { type: String },
     dob: { type: Date, default: null },
+    gender: { type: String, enum: ['Male', 'Female', 'Other'], default: "Male" },
     address: [
       {
         type: Map,

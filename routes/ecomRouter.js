@@ -709,7 +709,9 @@ ecomRouter.get(
       membership: 1,
       address: 1,
       point: 1,
-      phone: 1
+      phone: 1,
+      dob: 1,
+      gender: 1
     });
     if (customer) {
       console.log(customer);
@@ -718,6 +720,53 @@ ecomRouter.get(
   })
 );
 
+// UPDATE ONE Customer address
+ecomRouter.put(
+  "/customer/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const update = req.body.customerData;
+    console.log("id", id, "update", update)
+    try {
+      // const customer = await Customer.updateOne({ _id: id }, { $set: update })
+      // console.log("customer", customer)
+      // if (customer) {
+      //   res.send(customer);
+      // } else {
+      //   res.send({ message: "Server Side Error" })
+      // }
+      await Customer.updateOne({ _id: id }, { $set: update })
+        .then(async (response) => {
+          console.log(response)
+          await Customer.findOne({ _id: id }).select({
+            name: 1,
+            email: 1,
+            username: 1,
+            membership: 1,
+            dob: 1,
+            gender: 1,
+            // type:1,
+            point: 1,
+            phone: 1,
+
+          })
+            .then(resp => {
+              console.log("customer full info", resp)
+              res.send(resp);
+            }).catch(err => {
+              console.log(err)
+              res.send(err)
+            })
+          // res.send(customer);
+        })
+        .catch((err) => {
+          res.send(err);
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  })
+);
 // UPDATE ONE Customer address
 ecomRouter.put(
   "/customer/address/:id",
