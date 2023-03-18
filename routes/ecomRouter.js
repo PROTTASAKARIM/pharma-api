@@ -961,6 +961,119 @@ ecomRouter.post(
 // );
 
 ecomRouter.post(
+  "/customer/isPhone",
+  expressAsyncHandler(async (req, res) => {
+    const isPhone = req.body.phone;
+    console.log({ body: req.body, phone: isPhone });
+    try {
+      let user;
+      if (isPhone) {
+        user = await Customer.find({
+          status: "active",
+          phone: req.body.phone,
+        });
+      } else {
+        res.send({ isFound: false, message: "User is not Found" })
+      }
+      // console.log(user)
+      if (user && user.length > 0) {
+        console.log("user", user);
+
+        res.status(200).json({ isFound: true, message: "User is Found" });
+
+      } else {
+        res.status(401).json({
+          isFound: false,
+          message: "User is not Found",
+          error: "User Not Found",
+        });
+      }
+    } catch (err) {
+      res.status(404).json({
+        isFound: false,
+        message: "User is not Found",
+        error: err,
+      });
+    }
+  })
+);
+
+ecomRouter.put(
+  "/customer/password/:phone",
+  expressAsyncHandler(async (req, res) => {
+    const phone = req.params.phone;
+    console.log("phone", phone)
+    const password = req.body.password;
+    console.log("phone", phone, "password", password)
+    const hashPassword = await bcrypt.hash(req.body.password, 10);
+    console.log("hashPassword", hashPassword)
+    try {
+      // res.status(200).json({ message: "User is Found" });
+      if (phone) {
+        let user;
+        user = await Customer.find({
+          status: "active",
+          phone: phone,
+        });
+        console.log("user", user);
+        if (user && user.length > 0) {
+          console.log("user", user);
+          console.log("user", { password: hashPassword });
+          console.log("user", { _id: user[0]._id });
+          const updateCustomer = await Customer.updateOne({ _id: user[0]._id }, { $set: { password: hashPassword } })
+          console.log("updateCustomer", updateCustomer)
+          if (updateCustomer) {
+            const token = jwt.sign(
+              {
+                userId: user[0]._id,
+                name: user[0].name,
+                username: user[0].username,
+                phone: user[0].phone,
+                type: user[0].type,
+                point: user[0].point,
+              },
+              process.env.JWT_SECRET,
+              { expiresIn: "1h" }
+            );
+            res.status(200).json({
+              access_token: token,
+              status: true,
+              user: {
+                id: user[0]._id,
+                name: user[0].name,
+                username: user[0].username,
+                phone: user[0].phone,
+                type: user[0].type,
+                point: user[0].point,
+              },
+              message: "Password Reset Successful",
+            });
+
+          }
+          else {
+            res.status(403).json({
+              status: false,
+              error: "User Not Found",
+            });
+          }
+
+        }
+        else {
+          res.status(401).json({
+            status: false,
+            error: "User Not Found",
+          });
+        }
+      }
+    } catch {
+      res.status(404).json({
+        status: false,
+        error: err,
+      });
+    }
+  })
+);
+ecomRouter.post(
   "/customer/login",
   expressAsyncHandler(async (req, res) => {
     const isPhone = req.body.phone;
@@ -998,6 +1111,7 @@ ecomRouter.post(
               phone: user[0].phone,
               type: user[0].type,
               point: user[0].point,
+              // email: user[0]?.email,
             },
             process.env.JWT_SECRET,
             { expiresIn: "1h" }
