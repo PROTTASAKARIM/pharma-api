@@ -294,6 +294,97 @@ ecomRouter.get(
 
 // GET PRODUCTS BY SIZE AND PAGE
 ecomRouter.get(
+  "/product/search",
+  expressAsyncHandler(async (req, res) => {
+
+    const queryString = req.query?.q?.trim().toString().toLocaleLowerCase();
+
+
+    let query = {};
+    let product = [];
+    // const size = parseInt(req.query.size);
+    console.log("queryString", queryString);
+    console.log(typeof queryString);
+
+    //check if search or the pagenation
+
+    if (queryString) {
+      console.log("== query");
+
+      console.log("search:", query);
+      // search check if num or string
+      const isNumber = /^\d/.test(queryString);
+      console.log(isNumber);
+      if (!isNumber) {
+        // if text then search name
+        query = {
+          name: { $regex: new RegExp(".*" + queryString + ".*?", "i") },
+        };
+        // query = { name:  queryString  };
+      } else {
+        // if number search in ean and article code
+        query = {
+          $or: [
+            { ean: { $regex: RegExp("^" + queryString + ".*", "i") } },
+            {
+              article_code: {
+                $regex: RegExp("^" + queryString + ".*", "i"),
+              },
+            },
+          ],
+        };
+      }
+      console.log(query);
+
+      product = await Product.find(query)
+        .select({
+          _id: 1,
+          name: 1,
+          ean: 1,
+          unit: 1,
+          article_code: 1,
+          priceList: 1,
+          category: 1,
+          promo_price: 1,
+          promo_start: 1,
+          promo_end: 1,
+          promo_type: 1,
+        })
+        .limit(100)
+        .populate("category", "name")
+        .populate("priceList");
+      const fProducts = product.filter(p => p.priceList.length > 0)
+      res.status(200).json(fProducts);
+    } else {
+      console.log("no query");
+
+      // regular pagination
+      query = {};
+
+      product = await Product.find(query)
+        .select({
+          _id: 1,
+          name: 1,
+          ean: 1,
+          unit: 1,
+          article_code: 1,
+          priceList: 1,
+          category: 1,
+          promo_price: 1,
+          promo_start: 1,
+          promo_end: 1,
+          promo_type: 1,
+        })
+        .populate("category", "name")
+        .populate("priceList")
+
+      const fProducts = product.filter(p => p.priceList.length > 0)
+      res.status(200).json(fProducts);
+      console.log("done:", query);
+    }
+  })
+);
+ecomRouter.get(
   "/product/:page/:size",
   expressAsyncHandler(async (req, res) => {
     const page = parseInt(req.params.page);
@@ -444,6 +535,7 @@ ecomRouter.get(
         category: 1,
         photo: 1,
       })
+      .limit(15)
       .populate("priceList", { mrp: 1, tp: 1, supplier: 1, _id: 1, status: 1 })
       .populate("category", { name: 1 })
     // const similarP = cProducts.filter(p => p._id === id)
