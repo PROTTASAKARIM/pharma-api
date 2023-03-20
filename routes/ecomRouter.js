@@ -630,6 +630,31 @@ ecomRouter.get(
     // // res.send('removed');
   })
 );
+// GET ALL sales by customer
+ecomRouter.get(
+  "/sale/:cId",
+  expressAsyncHandler(async (req, res) => {
+    const cId = req.params.cId
+    const sales = await Sale.find({
+      customerId: cId,
+      source: "web",
+    }).select({
+      invoiceId: 1,
+      totalItem: 1,
+      grossTotalRound: 1,
+      total: 1,
+      status: 1,
+      billerId: 1,
+      createdAt: 1,
+      changeAmount: 1,
+      status: 1,
+      products: 1,
+    });
+    // .populate("billerId", "name");
+    res.send(sales);
+    // // res.send('removed');
+  })
+);
 // GET ALL type sale
 ecomRouter.get(
   "/sale/:status",
