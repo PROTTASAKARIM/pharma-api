@@ -828,7 +828,8 @@ ecomRouter.get(
       point: 1,
       phone: 1,
       dob: 1,
-      gender: 1
+      gender: 1,
+      photo: 1,
     });
     if (customer) {
       console.log(customer);
@@ -1265,6 +1266,58 @@ ecomRouter.post(
         error: err,
       });
     }
+  })
+);
+// PRODUCT PHOTO UPLOAD
+// Upload Endpoint
+ecomRouter.post(
+  "/upload/customer/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+
+    // APP ROOT
+
+    // APP ROOT
+    // const appRoot = process.env.PWD;
+    const appRoot = process.cwd();
+    console.log(appRoot);
+    // App Root
+
+    console.log("env", process.env);
+    // console.log("p", PWD)
+    console.log("approot", appRoot);
+    if (req.files === null) {
+      return res.status(400).json({ msg: "No file uploaded" });
+    }
+
+    const file = req.files.file;
+    const name = file.name.split(".");
+    const ext = name[1];
+    const time = Date.now();
+    const fileName = `${id}-${time}.${ext}`;
+    console.log(`../uploads/${fileName}`);
+
+    file.mv(`${appRoot}/uploads/customer/${fileName}`, async (err) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send(err);
+      } else {
+        await Customer.updateOne(
+          { _id: id },
+          { $set: { photo: `/uploads/customer/${fileName}` } }
+        )
+          .then((response) => {
+            // res.send(response);
+            res.json({
+              fileName: fileName,
+              filePath: `/uploads/customer/${fileName}`,
+            });
+          })
+          .catch((err) => {
+            res.send(err);
+          });
+      }
+    });
   })
 );
 

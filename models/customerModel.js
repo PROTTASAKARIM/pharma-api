@@ -36,6 +36,7 @@ const customerSchema = mongoose.Schema(
     },
     point: { type: Number, default: 0 },
     phone: { type: String, require: true, unique: true },
+    photo: { type: String },
     status: { type: String, enum: ["active", "inactive"], default: "active" },
   },
   {
