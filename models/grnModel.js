@@ -4,6 +4,7 @@ const grnSchema = mongoose.Schema(
   {
     grnNo: { type: String, require: true },
     poNo: { type: mongoose.Types.ObjectId, ref: "Purchase", require: true },
+    tpnNo: { type: String, require: true },
     supplier: { type: mongoose.Types.ObjectId, ref: "Supplier", require: true },
     warehouse: {
       type: mongoose.Types.ObjectId,

@@ -3,9 +3,8 @@ const mongoose = require("mongoose");
 const tpnSchema = mongoose.Schema(
   {
     tpnNo: { type: String, require: true },
-    poNo: { type: mongoose.Types.ObjectId, ref: "Purchase", require: true },
-    warehouseTo: { type: mongoose.Types.ObjectId, ref: "Warehouse" },
-    warehouseFrom: { type: mongoose.Types.ObjectId, ref: "Warehouse" },
+    warehouseTo: { type: mongoose.Types.ObjectId, ref: "Warehouse", require: true },
+    warehouseFrom: { type: mongoose.Types.ObjectId, ref: "Warehouse", require: true },
     products: [
       {
         type: Map,
@@ -15,16 +14,17 @@ const tpnSchema = mongoose.Schema(
             ref: "Product",
             require: true,
           },
-          tp: { type: mongoose.Types.Decimal128, default: 0, require: true },
-          mrp: { type: mongoose.Types.Decimal128, default: 0, require: true },
-          tax: { type: mongoose.Types.Decimal128, default: 0, require: true },
-          qty: { type: mongoose.Types.Decimal128, default: 0, require: true },
+          priceId: { type: Number, ref: "Price", require: true },
+          tp: { type: Number, default: 0, require: true },
+          mrp: { type: Number, default: 0, require: true },
+          tax: { type: Number, default: 0, require: true },
+          qty: { type: Number, default: 0, require: true },
           unit: { type: mongoose.Types.ObjectId, ref: "Unit", require: true },
-          discount: {
-            type: mongoose.Types.Decimal128,
-            default: 0,
-            require: true,
-          },
+          // discount: {
+          //   type: Number,
+          //   default: 0,
+          //   require: true,
+          // },
           order: { type: Number, require: true },
         }),
       },
@@ -33,12 +33,13 @@ const tpnSchema = mongoose.Schema(
     note: { type: String },
     doc: { type: String },
     totalItem: { type: Number, default: 0, require: true },
-    total: { type: mongoose.Types.Decimal128, default: 0, require: true },
+    total: { type: Number, default: 0, require: true },
     userId: { type: mongoose.Types.ObjectId, ref: "User", require: true },
     status: {
       type: String,
       enum: ["Pending", "Complete"],
     },
+    shipping_cost: { type: Number, default: 0, require: true },
   },
   {
     timestamps: true,
