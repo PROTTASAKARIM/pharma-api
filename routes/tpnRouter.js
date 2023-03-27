@@ -14,6 +14,8 @@ const expressAsyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 const Tpn = require("../models/tpnModel");
 const checklogin = require("../middlewares/checkLogin");
+const { generateTpnId } = require("../middlewares/generateId");
+const { startOfDay, endOfDay } = require("date-fns");
 
 const tpnRouter = express.Router();
 
@@ -33,16 +35,48 @@ tpnRouter.get(
   "/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
-    const tpns = await Tpn.find({ _id: id });
+    const tpns = await Tpn.find({ _id: id })
+      .populate("warehouseTo", "name")
+      .populate("warehouseFrom", "name")
+      .populate("userId", "name");;
     res.send(tpns[0]);
     // // res.send('removed');
     console.log(tpns);
+  })
+);
+//tpn load by two dates
+tpnRouter.get(
+  "/byDate/:start/:end",
+  expressAsyncHandler(async (req, res) => {
+    const start = req.params.start
+      ? startOfDay(new Date(req.params.start))
+      : startOfDay(new Date.now());
+    const end = req.params.end
+      ? endOfDay(new Date(req.params.end))
+      : endOfDay(new Date.now());
+
+    console.log(start, end, new Date());
+
+    try {
+      const tpn = await Tpn.find({
+        createdAt: { $gte: start, $lte: end },
+      })
+        .populate("warehouseTo", "name")
+        .populate("warehouseFrom", "name")
+        .populate("userId", "name");
+      res.send(tpn);
+    } catch (err) {
+      console.log(err)
+    }
+    // console.log(sales);
+    // // res.send('removed');
   })
 );
 
 // CREATE ONE Tpn
 tpnRouter.post(
   "/",
+  generateTpnId,
   expressAsyncHandler(async (req, res) => {
     const newTpn = new Tpn(req.body);
     try {
