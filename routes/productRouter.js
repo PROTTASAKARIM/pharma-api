@@ -18,6 +18,9 @@ const Product = require("../models/productModel");
 const Sale = require("../models/saleModel");
 const { startOfDay, endOfDay } = require("date-fns");
 const path = require("path");
+const {
+  updateSupplierProducts
+} = require("../middlewares/supplierProductRemove");
 
 // COUNT PRODUCT
 router.get(
@@ -693,6 +696,26 @@ router.put(
 // DELETE PRODUCT
 router.delete(
   "/:id",
+  updateSupplierProducts,
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    console.log("id", id)
+    try {
+      await Product.deleteOne({ _id: id })
+        .then((response) => {
+          res.send(response);
+        })
+        .catch((err) => {
+          res.send(err);
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  })
+);
+// DELETE PRODUCT
+router.delete(
+  "/test/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     try {
