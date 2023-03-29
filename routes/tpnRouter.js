@@ -30,20 +30,7 @@ tpnRouter.get(
   })
 );
 
-// GET ONE tpns
-tpnRouter.get(
-  "/:id",
-  expressAsyncHandler(async (req, res) => {
-    const id = req.params.id;
-    const tpns = await Tpn.find({ _id: id })
-      .populate("warehouseTo", "name")
-      .populate("warehouseFrom", "name")
-      .populate("userId", "name");;
-    res.send(tpns[0]);
-    // // res.send('removed');
-    console.log(tpns);
-  })
-);
+
 //tpn load by two dates
 tpnRouter.get(
   "/byDate/:start/:end",
@@ -70,6 +57,22 @@ tpnRouter.get(
     }
     // console.log(sales);
     // // res.send('removed');
+  })
+);
+// GET ONE tpns
+tpnRouter.get(
+  "/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const tpns = await Tpn.find({ _id: id })
+      // .populate("warehouseTo", "name")
+      // .populate("warehouseFrom", "name")
+      .populate("warehouseTo", { name: 1, address: 1, phone: 1 })
+      .populate("warehouseFrom", { name: 1, address: 1, phone: 1 })
+      .populate("userId", "name");;
+    res.send(tpns[0]);
+    // // res.send('removed');
+    console.log(tpns);
   })
 );
 

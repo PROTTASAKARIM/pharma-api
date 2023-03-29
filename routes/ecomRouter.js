@@ -16,6 +16,38 @@ const ecomRouter = express.Router();
 ===========================*/
 
 // GET FEATURED PRODUCTS
+//get all the offer type products 
+ecomRouter.get(
+  "/product/offer",
+  expressAsyncHandler(async (req, res) => {
+    const products = await Product.find({ product_type: "offer" })
+      .select({
+        _id: 1,
+        name: 1,
+        ean: 1,
+        unit: 1,
+        article_code: 1,
+        priceList: 1,
+        category: 1,
+        promo_price: 1,
+        promo_start: 1,
+        promo_end: 1,
+        promo_type: 1,
+        featured: 1,
+        photo: 1,
+        product_type: 1
+      })
+      .populate("category", "name")
+      .populate("priceList");
+    console.log("products", products)
+    const fProducts = products.filter(p => p.priceList.length > 0)
+    console.log("fProducts", fProducts)
+
+    if (fProducts) {
+      res.status(200).json(fProducts);
+    }
+  })
+);
 //get all the combo type products 
 ecomRouter.get(
   "/product/combo",
@@ -35,6 +67,7 @@ ecomRouter.get(
         promo_type: 1,
         featured: 1,
         photo: 1,
+        product_type: 1
       })
       .populate("category", "name")
       .populate("priceList");
