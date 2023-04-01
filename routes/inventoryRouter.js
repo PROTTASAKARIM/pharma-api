@@ -47,6 +47,7 @@ inventoryRouter.get(
         soldQty: 1,
         damageQty: 1,
         rtvQty: 1,
+        tpnQty: 1,
       })
       .populate("priceTable", {
         path: "priceTable",
@@ -144,6 +145,7 @@ inventoryRouter.get(
           soldQty: 1,
           damageQty: 1,
           rtvQty: 1,
+          tpnQty: 1,
         })
         .limit(100);
       // .populate("category", "name")
@@ -170,6 +172,7 @@ inventoryRouter.get(
           soldQty: 1,
           damageQty: 1,
           rtvQty: 1,
+          tpnQty: 1,
         })
         .limit(size)
         .skip(size * page);
@@ -201,6 +204,7 @@ inventoryRouter.get(
         soldQty: 1,
         damageQty: 1,
         rtvQty: 1,
+        tpnQty: 1,
       })
       // .populate("warehouse", "name")
       .populate({

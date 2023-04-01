@@ -16,6 +16,10 @@ const Tpn = require("../models/tpnModel");
 const checklogin = require("../middlewares/checkLogin");
 const { generateTpnId } = require("../middlewares/generateId");
 const { startOfDay, endOfDay } = require("date-fns");
+const {
+  updateInventoryOutOnTPNIn,
+  updateInventoryInOnTpnDel,
+} = require("../middlewares/useInventory");
 
 const tpnRouter = express.Router();
 
@@ -105,6 +109,7 @@ tpnRouter.get(
 tpnRouter.post(
   "/",
   generateTpnId,
+  updateInventoryOutOnTPNIn,
   expressAsyncHandler(async (req, res) => {
     const newTpn = new Tpn(req.body);
     try {
@@ -159,6 +164,7 @@ tpnRouter.put(
 // DELETE ONE Tpn
 tpnRouter.delete(
   "/:id",
+  updateInventoryInOnTpnDel,
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     try {
