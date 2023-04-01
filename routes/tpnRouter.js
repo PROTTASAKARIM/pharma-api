@@ -24,13 +24,38 @@ tpnRouter.get(
   "/",
   expressAsyncHandler(async (req, res) => {
     const tpns = await Tpn.find();
-    res.send(tpns);
+    const sorted = tpns.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    res.send(sorted);
     // // res.send('removed');
     console.log(tpns);
   })
 );
 
-
+tpnRouter.get(
+  "/grn/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    try {
+      const tpn = await Tpn.find({ _id: id })
+        // .populate("supplier", { company: 1, email: 1, phone: 1, address: 1 })
+        .populate("warehouseTo", "name")
+        .populate("warehouseFrom", "name")
+        .populate("userId", "name")
+        .populate({
+          path: "products",
+          populate: {
+            path: "priceId",
+            model: "Price",
+          },
+        });
+      console.log(tpn);
+      res.send(tpn[0]);
+    } catch (err) {
+      console.log(err);
+    }
+    // // res.send('removed');
+  })
+);
 //tpn load by two dates
 tpnRouter.get(
   "/byDate/:start/:end",

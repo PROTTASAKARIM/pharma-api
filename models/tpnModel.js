@@ -37,7 +37,7 @@ const tpnSchema = mongoose.Schema(
     userId: { type: mongoose.Types.ObjectId, ref: "User", require: true },
     status: {
       type: String,
-      enum: ["Pending", "Complete"],
+      enum: ["Pending", "Partial", "Complete"],
     },
     shipping_cost: { type: Number, default: 0, require: true },
   },

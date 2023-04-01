@@ -30,6 +30,7 @@ grnRouter.get(
   expressAsyncHandler(async (req, res) => {
     const grns = await Grn.find({})
       .select({
+        tpnNo: 1,
         poNo: 1,
         grnNo: 1,
         userId: 1,
@@ -112,6 +113,7 @@ grnRouter.get(
         createdAt: { $gte: start, $lte: end },
       })
         .select({
+          tpnNo: 1,
           poNo: 1,
           grnNo: 1,
           userId: 1,
@@ -124,6 +126,14 @@ grnRouter.get(
           note: 1,
         })
         .populate("poNo", "poNo")
+        .populate("tpnNo", { tpnNo: 1, warehouseFrom: 1, warehouseTo: 1 })
+        // .populate({
+        //   path: "tpnNo",
+        //   populate: {
+        //     path: "warehouseFrom",
+        //     model: "warehouse",
+        //   },
+        // })
         .populate("supplier", "company")
         .populate("userId", "name");
       res.send(grn);
@@ -213,6 +223,7 @@ grnRouter.get(
     const id = req.params.id;
     const grns = await Grn.find({ _id: id })
       .select({
+        tpnNo: 1,
         poNo: 1,
         grnNo: 1,
         userId: 1,
@@ -228,6 +239,21 @@ grnRouter.get(
         note: 1,
       })
       .populate("poNo", "poNo")
+      // .populate("tpnNo", { tpnNo: 1, warehouseFrom: 1, warehouseTo: 1 })
+      .populate({
+        path: "tpnNo",
+        select: { tpnNo: 1, warehouseFrom: 1, warehouseTo: 1 },
+        populate: [
+          {
+            path: "warehouseFrom",
+            model: "Warehouse",
+          },
+          {
+            path: "warehouseTo",
+            model: "Warehouse",
+          },
+        ],
+      })
       .populate("supplier", { company: 1, email: 1, phone: 1, address: 1 })
       .populate("warehouse", "name")
       .populate("userId", "name");

@@ -3,9 +3,9 @@ const mongoose = require("mongoose");
 const grnSchema = mongoose.Schema(
   {
     grnNo: { type: String, require: true },
-    poNo: { type: mongoose.Types.ObjectId, ref: "Purchase", require: true },
-    tpnNo: { type: String, require: true },
-    supplier: { type: mongoose.Types.ObjectId, ref: "Supplier", require: true },
+    poNo: { type: mongoose.Types.ObjectId, ref: "Purchase" },
+    tpnNo: { type: mongoose.Types.ObjectId, ref: "Tpn" },
+    supplier: { type: mongoose.Types.ObjectId, ref: "Supplier" },
     warehouse: {
       type: mongoose.Types.ObjectId,
       ref: "Warehouse",
