@@ -13,6 +13,8 @@ const router = express.Router();
 const expressAsyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 const Grn = require("../models/grnModel"); // Goods Recieve Note
+const Product = require("../models/productModel"); // Goods Recieve Note
+const Category = require("../models/categoryModel"); // Goods Recieve Note
 const checklogin = require("../middlewares/checkLogin");
 const { generateGrnId } = require("../middlewares/generateId");
 const {
@@ -95,6 +97,104 @@ grnRouter.get(
   })
 );
 
+//grn by category  between two dates
+grnRouter.get(
+  "/category/:start/:end",
+  expressAsyncHandler(async (req, res) => {
+    const start = req.params.start
+      ? startOfDay(new Date(req.params.start))
+      : startOfDay(new Date.now());
+    const end = req.params.end
+      ? endOfDay(new Date(req.params.end))
+      : endOfDay(new Date.now());
+
+    console.log(start, end, new Date());
+
+    try {
+      const grn = await Grn.aggregate([
+        {
+          $match: {
+            createdAt: {
+              $gte: start,
+              $lt: end
+            }
+          }
+        },
+        {
+          $unwind: '$products'
+        },
+        {
+          $group: {
+            _id: '$products.id',
+            article_code: { $first: '$products.article_code' },
+            totalQuantity: { $sum: { $toDouble: '$products.qty' } },
+            name: { $first: '$products.name' },
+            mrp: { $last: '$products.mrp' },
+            tp: { $last: '$products.tp' },
+            priceId: { $first: '$products.priceId' }
+
+          }
+        },
+        {
+          $sort: { totalQuantity: -1 }
+        },
+        {
+          $lookup:
+          {
+            from: "products",
+            localField: "article_code",
+            foreignField: "article_code",
+            as: "productId"
+          }
+        },
+        {
+          $unwind: '$productId'
+        },
+        // {
+        //   $group: {
+        //     _id: '$productId._id',
+        //     article_code: { $first: '$productId.article_code' },
+        //     totalQuantity: { $sum: '$productId.qty' },
+        //     name: { $first: '$productId.name' },
+        //     // mrp: { $last: '$products.mrp' },
+        //     // tp: { $last: '$products.tp' },
+        //     // priceId: { $first: '$products.priceId' },
+        //     category: { $first: '$productId.category' }
+        //   }
+        // },
+        {
+          $lookup: {
+            from: 'categories',
+            localField: 'productId.category',
+            foreignField: '_id',
+            as: 'category'
+          }
+        },
+        {
+          $unwind: '$category'
+        },
+        {
+          $group: {
+            _id: '$category._id',
+            totalQuantity: { $sum: { $toDouble: '$totalQuantity' } },
+            totalValue: { $sum: { $multiply: [{ $toDouble: '$totalQuantity' }, { $toDouble: '$mrp' }] } }
+          }
+        }
+
+
+      ]);
+      const populateGrn = await Category.populate(grn, {
+        path: "_id",
+        model: "Category",
+      })
+      res.send(populateGrn);
+    } catch (err) {
+      console.log(err)
+    }
+    // console.log(sales);
+    // // res.send('removed');
+  })
+);
 //grn load by two dates
 grnRouter.get(
   "/byDate/:start/:end",
