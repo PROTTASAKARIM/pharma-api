@@ -17,6 +17,7 @@ const Product = require("../models/productModel"); // Goods Recieve Note
 const Category = require("../models/categoryModel"); // Goods Recieve Note
 const checklogin = require("../middlewares/checkLogin");
 const { generateGrnId } = require("../middlewares/generateId");
+const { updatePurchaseStatus } = require("../middlewares/updatePurchaseOnGRnDel");
 const {
   updateInventoryInOnGRNIn,
   updateInventoryOutOnGRNDel,
@@ -150,18 +151,6 @@ grnRouter.get(
         {
           $unwind: '$productId'
         },
-        // {
-        //   $group: {
-        //     _id: '$productId._id',
-        //     article_code: { $first: '$productId.article_code' },
-        //     totalQuantity: { $sum: '$productId.qty' },
-        //     name: { $first: '$productId.name' },
-        //     // mrp: { $last: '$products.mrp' },
-        //     // tp: { $last: '$products.tp' },
-        //     // priceId: { $first: '$products.priceId' },
-        //     category: { $first: '$productId.category' }
-        //   }
-        // },
         {
           $lookup: {
             from: 'categories',
@@ -533,8 +522,10 @@ grnRouter.get(
 grnRouter.delete(
   "/:id",
   updateInventoryOutOnGRNDel,
+  updatePurchaseStatus,
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
+    console.log("b", id)
     try {
       await Grn.deleteOne({ _id: id })
         .then((response) => {
