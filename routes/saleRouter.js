@@ -219,7 +219,7 @@ saleRouter.get(
         {
           $lookup: {
             from: 'categories',
-            localField: 'productId.category',
+            localField: 'productId.master_category',
             foreignField: '_id',
             as: 'category'
           }
