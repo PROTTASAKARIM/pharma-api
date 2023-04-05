@@ -286,7 +286,44 @@ saleRouter.get(
           mrp: { $last: '$products.mrp' },
           tp: { $last: '$products.tp' },
           priceId: { $first: '$products.priceId' },
-          supplier: { $first: '$products.supplier' }
+          supplier: { $first: '$products.supplier' },
+          // discount: { $first:  '$products.promo.promo_type' }
+          // discount: {
+          //   $sum: {
+          //     $cond: {
+          //       if: { $eq: ['$products.promo.promo_type', false] },
+          //       then: { $multiply: [{ $last: '$products.mrp' }, '$products.promo.promo_price'] },
+          //       else: { $multiply: [{ $last: '$products.mrp' }, { $divide: ['$products.promo.promo_price', 100] }] },
+          //     }
+          //   }
+
+          // },
+          // discount: {
+          //   $sum: {
+          //     $cond: [
+          //       {
+          //         $and: [
+          //           { $ne: ['$products.promo', null] },
+          //           { $eq: ['$products.promo.promo_type', false] }
+          //         ]
+          //       },
+          //       { $multiply: [{ $last: '$products.mrp' }, '$products.promo.promo_price'] },
+          //       {
+          //         $cond: [
+          //           {
+          //             $and: [
+          //               { $ne: ['$products.promo', null] },
+          //               { $eq: ['$products.promo.promo_type', true] }
+          //             ]
+          //           },
+          //           { $multiply: [{ $last: '$products.mrp' }, { $divide: ['$products.promo.promo_price', 100] }] },
+          //           0
+          //         ]
+          //       }
+          //     ]
+          //   }
+
+          // },
 
         }
       },
