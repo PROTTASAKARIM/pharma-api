@@ -10,7 +10,10 @@ const accountHeadRouter = express.Router();
 accountHeadRouter.get(
     "/",
     expressAsyncHandler(async (req, res) => {
-        const accountHead = await AccountHead.find({});
+        const accountHead = await AccountHead.find({}).populate("maId", {
+            name: 1, code: 1, description: 1,
+            status: 1
+        });;
         res.send(accountHead);
         // // res.send('removed');
         console.log(accountHead);
@@ -33,7 +36,19 @@ accountHeadRouter.get(
     "/:id",
     expressAsyncHandler(async (req, res) => {
         const id = req.params.id;
-        const accountHead = await AccountHead.findOne({ _id: id, status: "active" });
+        const accountHead = await AccountHead.findOne({ _id: id, status: "active" })
+            .select({
+                name: 1,
+                code: 1,
+                maId: 1,
+                photo: 1,
+                description: 1,
+                status: 1
+            })
+            .populate("maId", {
+                name: 1, code: 1, description: 1,
+                status: 1
+            });
         res.send(accountHead);
         // // res.send('removed');
         console.log(accountHead);
