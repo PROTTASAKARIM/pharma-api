@@ -15,8 +15,12 @@ const express = require("express");
 const router = express.Router();
 const expressAsyncHandler = require("express-async-handler");
 const Product = require("../models/productModel");
+const Sale = require("../models/saleModel");
 const { startOfDay, endOfDay } = require("date-fns");
 const path = require("path");
+const {
+  updateSupplierProducts
+} = require("../middlewares/supplierProductRemove");
 
 // COUNT PRODUCT
 router.get(
@@ -35,8 +39,51 @@ router.get(
       name: 1,
       article_code: 1,
       unit: 1,
-    });
+      category: 1,
+
+    })
+      .populate("category", { name: 1, code: 1, mcId: 1, group: 1 });
     res.status(200).json(products);
+  })
+);
+//get all the best selling products
+router.get(
+  "/best-seller",
+  expressAsyncHandler(async (req, res) => {
+
+    try {
+      const product = await Sale.aggregate([
+        {
+          $unwind: '$products'
+        },
+        {
+          $group: {
+            _id: '$products.id',
+            article_code: { $first: '$products.article_code' },
+            totalQuantity: { $sum: '$products.qty' },
+            name: { $first: '$products.name' },
+            mrp: { $last: '$products.mrp' },
+
+          }
+        },
+        {
+          $sort: { totalQuantity: -1 }
+        }
+      ])
+      // let pProduct_AC = []
+      // product.map(pro => {
+      //   pProduct_AC = [...pProduct_AC, pro.article_code]
+      // })
+      // console.log("pProduct", pProduct_AC)
+
+      // const productDetails = await Product.find({ article_code: pProduct_AC }).populate("priceList")
+      // console.log("pProduct new", productDetails)
+      // const fProducts = productDetails.filter(p => p.priceList.length > 0)
+      // .populate("priceList");
+      res.send(product);
+    } catch (err) {
+      console.log(err);
+    }
   })
 );
 
@@ -596,6 +643,7 @@ router.post(
   })
 );
 
+
 // UPDATE ONE PRODUCT
 router.put(
   "/:id",
@@ -623,10 +671,51 @@ router.put(
     }
   })
 );
-
+// UPDATE ONE PRODUCT pricelist
+router.put(
+  "/price/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const update = { priceList: req.body.newP };
+    console.log(id, update)
+    try {
+      await Product.updateOne({ _id: id }, { $set: update })
+        .then((response) => {
+          console.log("update", response);
+          res.send(response);
+        })
+        .catch((err) => {
+          console.log("update", response);
+          res.send(err);
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  })
+);
 // DELETE PRODUCT
 router.delete(
   "/:id",
+  updateSupplierProducts,
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    console.log("id", id)
+    try {
+      await Product.deleteOne({ _id: id })
+        .then((response) => {
+          res.send(response);
+        })
+        .catch((err) => {
+          res.send(err);
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  })
+);
+// DELETE PRODUCT
+router.delete(
+  "/test/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     try {
@@ -652,7 +741,6 @@ router.post(
 
     // APP ROOT
 
-    // const appRoot = path.dirname(require.main.filename);
     // APP ROOT
     // const appRoot = process.env.PWD;
     const appRoot = process.cwd();

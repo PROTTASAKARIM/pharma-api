@@ -10,6 +10,7 @@ const userSchema = mongoose.Schema(
     privilege: { type: Object },
     address: { type: String },
     phone: { type: String, require: true, unique: true },
+    warehouse: { type: mongoose.Types.ObjectId, ref: "Warehouse", require: true },
     status: { type: String, enum: ["active", "inactive"] },
   },
   {

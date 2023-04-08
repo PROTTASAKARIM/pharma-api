@@ -2,6 +2,7 @@ const { parseISO, format, startOfDay, endOfDay } = require("date-fns");
 // const { parseISO } = require("date-fns/esm");
 const Damage = require("../models/damageModel");
 const Grn = require("../models/grnModel");
+const Tpn = require("../models/tpnModel");
 const Inventory = require("../models/inventoryModel");
 const Rtv = require("../models/rtvModel");
 const Sale = require("../models/saleModel");
@@ -76,6 +77,7 @@ const updateInventoryOutOnDamageIn = async (req, res, next) => {
                 soldQty: success.soldQty,
                 damageQty: Number(success.damageQty) + Number(qty),
                 rtvQty: success.rtvQty,
+                tpnQty: success.tpnQty ? success.tpnQty : 0,
                 status: success.status,
                 createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
                 updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -89,6 +91,7 @@ const updateInventoryOutOnDamageIn = async (req, res, next) => {
                     soldQty: checked[0].get("soldQty") ? checked[0].get("soldQty") : 0,
                     damageQty: checked[0].get("damageQty") ? Number(checked[0].get("damageQty")) + Number(qty) : 0 + Number(qty),
                     rtvQty: checked[0].get("rtvQty") ? checked[0].get("rtvQty") : 0,
+                    tpnQty: checked[0].get("tpnQty") ? checked[0].get("tpnQty") : 0,
 
                   }
                 ]
@@ -106,6 +109,7 @@ const updateInventoryOutOnDamageIn = async (req, res, next) => {
                 soldQty: success.soldQty,
                 damageQty: Number(success.damageQty) + Number(qty),
                 rtvQty: success.rtvQty,
+                tpnQty: success.tpnQty ? success.tpnQty : 0,
                 status: success.status,
                 createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
                 updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -119,6 +123,7 @@ const updateInventoryOutOnDamageIn = async (req, res, next) => {
                     soldQty: 0,
                     damageQty: 0 + Number(qty),
                     rtvQty: 0,
+                    tpnQty: 0,
 
                   }
                 ]
@@ -137,6 +142,7 @@ const updateInventoryOutOnDamageIn = async (req, res, next) => {
               soldQty: 0,
               damageQty: Number(qty),
               rtvQty: 0,
+              tpnQty: 0,
               status: success.status,
               createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
               updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -150,6 +156,7 @@ const updateInventoryOutOnDamageIn = async (req, res, next) => {
                   soldQty: 0,
                   damageQty: Number(qty),
                   rtvQty: 0,
+                  tpnQty: 0,
                 },
               ],
 
@@ -166,6 +173,7 @@ const updateInventoryOutOnDamageIn = async (req, res, next) => {
             soldQty: 0,
             damageQty: Number(qty),
             rtvQty: 0,
+            tpnQty: 0,
             status: "active",
             createdAt: new Date(Date.now()),
             updatedAt: new Date(Date.now()),
@@ -179,6 +187,7 @@ const updateInventoryOutOnDamageIn = async (req, res, next) => {
                 soldQty: 0,
                 damageQty: Number(qty),
                 rtvQty: 0,
+                tpnQty: 0,
               },
             ],
 
@@ -296,6 +305,7 @@ const updateInventoryInOnDamageOut = async (req, res, next) => {
                 soldQty: success.soldQty,
                 damageQty: Number(success.damageQty) - Number(qty),
                 rtvQty: success.rtvQty,
+                tpnQty: success?.tpnQty ? success?.tpnQty : 0,
                 status: success.status,
                 createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
                 updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -309,6 +319,7 @@ const updateInventoryInOnDamageOut = async (req, res, next) => {
                     soldQty: checked[0].get("soldQty") ? checked[0].get("soldQty") : 0,
                     damageQty: checked[0].get("damageQty") ? Number(checked[0].get("damageQty")) - Number(qty) : 0 - Number(qty),
                     rtvQty: checked[0].get("rtvQty") ? checked[0].get("rtvQty") : 0,
+                    tpnQty: checked[0].get("tpnQty") ? checked[0].get("tpnQty") : 0,
 
                   }
                 ]
@@ -326,6 +337,7 @@ const updateInventoryInOnDamageOut = async (req, res, next) => {
                 soldQty: success.soldQty,
                 damageQty: Number(success.damageQty) - Number(qty),
                 rtvQty: success.rtvQty,
+                tpnQty: success?.tpnQty ? success?.tpnQty : 0,
                 status: success.status,
                 createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
                 updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -339,6 +351,7 @@ const updateInventoryInOnDamageOut = async (req, res, next) => {
                     soldQty: 0,
                     damageQty: 0 - Number(qty),
                     rtvQty: 0,
+                    tpnQty: 0,
 
                   }
                 ]
@@ -357,6 +370,7 @@ const updateInventoryInOnDamageOut = async (req, res, next) => {
               soldQty: 0,
               damageQty: -Number(qty),
               rtvQty: 0,
+              tpnQty: 0,
               status: success.status,
               createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
               updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -370,6 +384,7 @@ const updateInventoryInOnDamageOut = async (req, res, next) => {
                   soldQty: 0,
                   damageQty: -Number(qty),
                   rtvQty: 0,
+                  tpnQty: 0,
                 },
               ],
 
@@ -386,6 +401,7 @@ const updateInventoryInOnDamageOut = async (req, res, next) => {
             soldQty: 0,
             damageQty: -Number(qty),
             rtvQty: 0,
+            tpnQty: 0,
             status: "active",
             createdAt: new Date(Date.now()),
             updatedAt: new Date(Date.now()),
@@ -399,6 +415,7 @@ const updateInventoryInOnDamageOut = async (req, res, next) => {
                 soldQty: 0,
                 damageQty: -Number(qty),
                 rtvQty: 0,
+                tpnQty: 0,
               },
             ],
 
@@ -493,6 +510,7 @@ const updateInventoryOutOnRTVIn = async (req, res, next) => {
                 soldQty: success.soldQty,
                 damageQty: Number(success.damageQty),
                 rtvQty: success.rtvQty + Number(qty),
+                tpnQty: success?.tpnQty ? success?.tpnQty : 0,
                 status: success.status,
                 createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
                 updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -506,6 +524,7 @@ const updateInventoryOutOnRTVIn = async (req, res, next) => {
                     soldQty: checked[0].get("soldQty") ? checked[0].get("soldQty") : 0,
                     damageQty: checked[0].get("damageQty") ? Number(checked[0].get("damageQty")) : 0,
                     rtvQty: checked[0].get("rtvQty") ? checked[0].get("rtvQty") + Number(qty) : 0 + Number(qty),
+                    tpnQty: checked[0].get("tpnQty") ? checked[0].get("tpnQty") : 0,
 
                   }
                 ]
@@ -523,6 +542,7 @@ const updateInventoryOutOnRTVIn = async (req, res, next) => {
                 soldQty: success.soldQty,
                 damageQty: Number(success.damageQty),
                 rtvQty: success.rtvQty + Number(qty),
+                tpnQty: success?.tpnQty ? success?.tpnQty : 0,
                 status: success.status,
                 createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
                 updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -536,6 +556,7 @@ const updateInventoryOutOnRTVIn = async (req, res, next) => {
                     soldQty: 0,
                     damageQty: 0,
                     rtvQty: 0 + Number(qty),
+                    tpnQty: 0,
 
                   }
                 ]
@@ -554,6 +575,7 @@ const updateInventoryOutOnRTVIn = async (req, res, next) => {
               soldQty: 0,
               damageQty: 0,
               rtvQty: Number(qty),
+              tpnQty: 0,
               status: success.status,
               createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
               updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -567,6 +589,7 @@ const updateInventoryOutOnRTVIn = async (req, res, next) => {
                   soldQty: 0,
                   damageQty: 0,
                   rtvQty: Number(qty),
+                  tpnQty: 0,
                 },
               ],
 
@@ -583,6 +606,7 @@ const updateInventoryOutOnRTVIn = async (req, res, next) => {
             soldQty: 0,
             damageQty: 0,
             rtvQty: Number(qty),
+            tpnQty: 0,
             status: "active",
             createdAt: new Date(Date.now()),
             updatedAt: new Date(Date.now()),
@@ -596,6 +620,7 @@ const updateInventoryOutOnRTVIn = async (req, res, next) => {
                 soldQty: 0,
                 damageQty: 0,
                 rtvQty: Number(qty),
+                tpnQty: 0,
               },
             ],
 
@@ -715,6 +740,7 @@ const updateInventoryINOnRTVOut = async (req, res, next) => {
                 soldQty: success.soldQty,
                 damageQty: Number(success.damageQty),
                 rtvQty: success.rtvQty - Number(qty),
+                tpnQty: success?.tpnQty ? success?.tpnQty : 0,
                 status: success.status,
                 createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
                 updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -728,6 +754,7 @@ const updateInventoryINOnRTVOut = async (req, res, next) => {
                     soldQty: checked[0].get("soldQty") ? checked[0].get("soldQty") : 0,
                     damageQty: checked[0].get("damageQty") ? Number(checked[0].get("damageQty")) : 0,
                     rtvQty: checked[0].get("rtvQty") ? checked[0].get("rtvQty") - Number(qty) : 0 - Number(qty),
+                    tpnQty: checked[0].get("tpnQty") ? Number(checked[0].get("tpnQty")) : 0,
 
                   }
                 ]
@@ -745,6 +772,7 @@ const updateInventoryINOnRTVOut = async (req, res, next) => {
                 soldQty: success.soldQty,
                 damageQty: Number(success.damageQty),
                 rtvQty: success.rtvQty - Number(qty),
+                tpnQty: success?.tpnQty ? success?.tpnQty : 0,
                 status: success.status,
                 createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
                 updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -758,6 +786,7 @@ const updateInventoryINOnRTVOut = async (req, res, next) => {
                     soldQty: 0,
                     damageQty: 0,
                     rtvQty: 0 - Number(qty),
+                    tpnQty: 0,
 
                   }
                 ]
@@ -776,6 +805,7 @@ const updateInventoryINOnRTVOut = async (req, res, next) => {
               soldQty: 0,
               damageQty: 0,
               rtvQty: -Number(qty),
+              tpnQty: 0,
               status: success.status,
               createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
               updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -788,6 +818,7 @@ const updateInventoryINOnRTVOut = async (req, res, next) => {
                   totalQty: Number(qty),
                   soldQty: 0,
                   damageQty: 0,
+                  tpnQty: 0,
                   rtvQty: -Number(qty),
                 },
               ],
@@ -805,6 +836,7 @@ const updateInventoryINOnRTVOut = async (req, res, next) => {
             soldQty: 0,
             damageQty: 0,
             rtvQty: -Number(qty),
+            tpnQty: 0,
             status: "active",
             createdAt: new Date(Date.now()),
             updatedAt: new Date(Date.now()),
@@ -818,6 +850,7 @@ const updateInventoryINOnRTVOut = async (req, res, next) => {
                 soldQty: 0,
                 damageQty: 0,
                 rtvQty: -Number(qty),
+                tpnQty: 0,
               },
             ],
 
@@ -938,6 +971,7 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
                 soldQty: success.soldQty - Number(qty),
                 damageQty: Number(success.damageQty),
                 rtvQty: success.rtvQty,
+                tpnQty: success?.tpnQty ? success?.tpnQty : 0,
                 status: success.status,
                 createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
                 updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -951,6 +985,7 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
                     soldQty: checked[0].get("soldQty") ? checked[0].get("soldQty") - Number(qty) : 0 - Number(qty),
                     damageQty: checked[0].get("damageQty") ? Number(checked[0].get("damageQty")) : 0,
                     rtvQty: checked[0].get("rtvQty") ? checked[0].get("rtvQty") : 0,
+                    tpnQty: checked[0].get("tpnQty") ? checked[0].get("tpnQty") : 0,
 
                   }
                 ]
@@ -968,6 +1003,7 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
                 soldQty: success.soldQty - Number(qty),
                 damageQty: Number(success.damageQty),
                 rtvQty: success.rtvQty,
+                tpnQty: success?.tpnQty ? success?.tpnQty : 0,
                 status: success.status,
                 createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
                 updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -981,6 +1017,7 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
                     soldQty: 0 - Number(qty),
                     damageQty: 0,
                     rtvQty: 0,
+                    tpnQty: 0,
 
                   }
                 ]
@@ -997,9 +1034,9 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
               openingQty: success.openingQty,
               totalQty: success.totalQty,
               soldQty: success.soldQty - Number(qty),
-
               damageQty: 0,
               rtvQty: Number(qty),
+              tpnQty: success?.tpnQty ? success?.tpnQty : 0,
               status: success.status,
               createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
               updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -1013,6 +1050,8 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
                   soldQty: -Number(qty),
                   damageQty: 0,
                   rtvQty: 0,
+                  tpnQty: 0,
+
                 },
               ],
 
@@ -1029,6 +1068,7 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
             soldQty: - Number(qty),
             damageQty: 0,
             rtvQty: 0,
+            tpnQty: 0,
             status: "active",
             createdAt: new Date(Date.now()),
             updatedAt: new Date(Date.now()),
@@ -1042,6 +1082,7 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
                 soldQty: - Number(qty),
                 damageQty: 0,
                 rtvQty: 0,
+                tpnQty: 0,
               },
             ],
 
@@ -1133,6 +1174,7 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
                 soldQty: success.soldQty + Number(qty),
                 damageQty: Number(success.damageQty),
                 rtvQty: success.rtvQty,
+                tpnQty: success?.tpnQty ? success?.tpnQty : 0,
                 status: success.status,
                 createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
                 updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -1146,6 +1188,7 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
                     soldQty: checked[0].get("soldQty") ? checked[0].get("soldQty") + Number(qty) : 0 + Number(qty),
                     damageQty: checked[0].get("damageQty") ? Number(checked[0].get("damageQty")) : 0,
                     rtvQty: checked[0].get("rtvQty") ? checked[0].get("rtvQty") : 0,
+                    tpnQty: checked[0].get("tpnQty") ? checked[0].get("tpnQty") : 0,
 
                   }
                 ]
@@ -1163,6 +1206,7 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
                 soldQty: success.soldQty + Number(qty),
                 damageQty: Number(success.damageQty),
                 rtvQty: success.rtvQty,
+                tpnQty: success?.tpnQty ? success?.tpnQty : 0,
                 status: success.status,
                 createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
                 updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -1176,6 +1220,7 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
                     soldQty: 0 + Number(qty),
                     damageQty: 0,
                     rtvQty: 0,
+                    tpnQty: 0,
 
                   }
                 ]
@@ -1195,6 +1240,7 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
 
               damageQty: 0,
               rtvQty: Number(qty),
+              tpnQty: success?.tpnQty ? success?.tpnQty : 0,
               status: success.status,
               createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
               updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -1208,6 +1254,7 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
                   soldQty: Number(qty),
                   damageQty: 0,
                   rtvQty: 0,
+                  tpnQty: 0,
                 },
               ],
 
@@ -1224,6 +1271,7 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
             soldQty: Number(qty),
             damageQty: 0,
             rtvQty: 0,
+            tpnQty: 0,
             status: "active",
             createdAt: new Date(Date.now()),
             updatedAt: new Date(Date.now()),
@@ -1237,6 +1285,7 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
                 soldQty: Number(qty),
                 damageQty: 0,
                 rtvQty: 0,
+                tpnQty: 0,
               },
             ],
 
@@ -1258,6 +1307,179 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
   }
 };
 // Generate Sale in -> inventory Out
+const adjustInventoryOnSale = async (req, res, next) => {
+  // TODO:: todays total
+
+
+  try {
+    const products = await req.body;
+    console.log("pp", products)
+    if (products.length > 0) {
+      products.map(async (product) => {
+        // console.log("single product", product);
+        const { code: article_code, qty, priceId, name } = product;
+        console.log("article_code", article_code?.length);
+        if (article_code?.length > 0) {
+          let inventory = {};
+          const success = await Inventory.findOne({ article_code: article_code });
+
+          if (success) {
+
+            if (success.priceTable.length > 0) {
+
+              const checked = success.priceTable.filter(
+                (p) => p.get("id") === priceId
+              );
+              const rest = success.priceTable.filter(
+                (p) => p.get("id") !== priceId
+              );
+              if (checked?.length > 0) {
+                inventory = {
+                  name: success.name,
+                  article_code: success.article_code,
+                  warehouse: "62b5b575b4facb87eef3b47c",
+                  currentQty: Number(success.currentQty)
+                    - Number(qty),
+                  openingQty: success.openingQty,
+                  totalQty: Number(success.totalQty),
+                  soldQty: Number(success.soldQty) + Number(qty),
+                  damageQty: Number(success.damageQty),
+                  rtvQty: success.rtvQty,
+                  tpnQty: success?.tpnQty ? success?.tpnQty : 0,
+                  status: success.status,
+                  createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
+                  updatedAt: new Date(Date.parse(success.updatedAt)),
+                  priceTable: [
+                    ...rest,
+                    {
+                      id: checked[0].get("id"),
+                      currentQty: checked[0].get("currentQty") ? Number(checked[0].get("currentQty")) - Number(qty) : 0 - Number(qty),
+                      openingQty: checked[0].get("openingQty") ? checked[0].get("openingQty") : 0,
+                      totalQty: checked[0].get("totalQty") ? checked[0].get("totalQty") : 0,
+                      soldQty: checked[0].get("soldQty") ? checked[0].get("soldQty") + Number(qty) : 0,
+                      damageQty: checked[0].get("damageQty") ? Number(checked[0].get("damageQty")) : 0,
+                      rtvQty: checked[0].get("rtvQty") ? checked[0].get("rtvQty") : 0,
+                      tpnQty: checked[0].get("tpnQty") ? checked[0].get("tpnQty") : 0,
+
+                    }
+                  ]
+
+                }
+                // console.log("inventory", inventory);
+              } else {
+                inventory = {
+                  name: success.name,
+                  article_code: success.article_code,
+                  warehouse: "62b5b575b4facb87eef3b47c",
+                  currentQty: Number(success.currentQty) - Number(qty),
+                  openingQty: Number(success.openingQty),
+                  totalQty: Number(success.totalQty),
+                  soldQty: success.soldQty + Number(qty),
+                  damageQty: Number(success.damageQty),
+                  rtvQty: success.rtvQty,
+                  tpnQty: success?.tpnQty ? success?.tpnQty : 0,
+                  status: success.status,
+                  createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
+                  updatedAt: new Date(Date.parse(success.updatedAt)),
+                  priceTable: [
+                    ...rest,
+                    {
+                      id: priceId,
+                      currentQty: -Number(qty),
+                      openingQty: -Number(qty),
+                      totalQty: - Number(qty),
+                      soldQty: Number(qty),
+                      damageQty: 0,
+                      rtvQty: 0,
+                      tpnQty: 0,
+
+                    }
+                  ]
+
+                }
+                // console.log("inventory", inventory);
+              }
+            } else {
+              inventory = {
+                name: success.name,
+                article_code: success.article_code,
+                warehouse: "62b5b575b4facb87eef3b47c",
+                currentQty: - Number(qty),
+                openingQty: - Number(qty),
+                totalQty: - Number(qty),
+                soldQty: Number(qty),
+                damageQty: 0,
+                rtvQty: 0,
+                tpnQty: 0,
+                status: success.status,
+                createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
+                updatedAt: new Date(Date.parse(success.updatedAt)),
+                priceTable: [
+                  ...success.priceTable,
+                  {
+                    id: priceId,
+                    openingQty: - Number(qty),
+                    currentQty: - Number(qty),
+                    totalQty: -Number(qty),
+                    soldQty: Number(qty),
+                    damageQty: 0,
+                    rtvQty: 0,
+                    tpnQty: 0,
+                  },
+                ],
+
+              };
+            }
+          } else {
+            inventory = {
+              name: name,
+              article_code: article_code,
+              warehouse: "62b5b575b4facb87eef3b47c",
+              currentQty: - Number(qty),
+              openingQty: - Number(qty),
+              totalQty: -Number(qty),
+              soldQty: Number(qty),
+              damageQty: 0,
+              rtvQty: 0,
+              tpnQty: 0,
+              status: "active",
+              createdAt: new Date(Date.now()),
+              updatedAt: new Date(Date.now()),
+              priceTable: [
+
+                {
+                  id: priceId,
+                  openingQty: - Number(qty),
+                  currentQty: - Number(qty),
+                  totalQty: -Number(qty),
+                  soldQty: Number(qty),
+                  damageQty: 0,
+                  rtvQty: 0,
+                  tpnQty: 0,
+                },
+              ],
+
+            };
+          }
+          const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
+          if (update) {
+            req.body.update = update
+          }
+        } else {
+          console.log("no update")
+        }
+      });
+    }
+  } catch (err) {
+    console.log(err)
+  } finally {
+    next()
+  }
+
+
+
+};
+
 const updateInventoryOutOnSaleIn = async (req, res, next) => {
   // TODO:: todays total
 
@@ -1320,6 +1542,7 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
                 soldQty: success.soldQty + Number(qty),
                 damageQty: Number(success.damageQty),
                 rtvQty: success.rtvQty,
+                tpnQty: success?.tpnQty ? success?.tpnQty : 0,
                 status: success.status,
                 createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
                 updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -1333,6 +1556,7 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
                     soldQty: checked[0].get("soldQty") ? checked[0].get("soldQty") + Number(qty) : 0 + Number(qty),
                     damageQty: checked[0].get("damageQty") ? Number(checked[0].get("damageQty")) : 0,
                     rtvQty: checked[0].get("rtvQty") ? checked[0].get("rtvQty") : 0,
+                    tpnQty: checked[0].get("tpnQty") ? checked[0].get("tpnQty") : 0,
 
                   }
                 ]
@@ -1350,6 +1574,7 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
                 soldQty: success.soldQty + Number(qty),
                 damageQty: Number(success.damageQty),
                 rtvQty: success.rtvQty,
+                tpnQty: success?.tpnQty ? success?.tpnQty : 0,
                 status: success.status,
                 createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
                 updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -1363,6 +1588,7 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
                     soldQty: 0 + Number(qty),
                     damageQty: 0,
                     rtvQty: 0,
+                    tpnQty: 0,
 
                   }
                 ]
@@ -1381,6 +1607,7 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
               soldQty: Number(qty),
               damageQty: 0,
               rtvQty: 0,
+              tpnQty: 0,
               status: success.status,
               createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
               updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -1394,6 +1621,7 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
                   soldQty: Number(qty),
                   damageQty: 0,
                   rtvQty: 0,
+                  tpnQty: 0,
                 },
               ],
 
@@ -1410,6 +1638,7 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
             soldQty: Number(qty),
             damageQty: 0,
             rtvQty: 0,
+            tpnQty: 0,
             status: "active",
             createdAt: new Date(Date.now()),
             updatedAt: new Date(Date.now()),
@@ -1423,6 +1652,7 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
                 soldQty: Number(qty),
                 damageQty: 0,
                 rtvQty: 0,
+                tpnQty: 0,
               },
             ],
 
@@ -1489,6 +1719,7 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
                 soldQty: success.soldQty - Number(qty),
                 damageQty: Number(success.damageQty),
                 rtvQty: success.rtvQty,
+                tpnQty: success?.tpnQty ? success?.tpnQty : 0,
                 status: success.status,
                 createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
                 updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -1502,6 +1733,7 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
                     soldQty: checked[0].get("soldQty") ? checked[0].get("soldQty") - Number(qty) : 0 - Number(qty),
                     damageQty: checked[0].get("damageQty") ? Number(checked[0].get("damageQty")) : 0,
                     rtvQty: checked[0].get("rtvQty") ? checked[0].get("rtvQty") : 0,
+                    tpnQty: checked[0].get("tpnQty") ? checked[0].get("tpnQty") : 0,
 
                   }
                 ]
@@ -1519,6 +1751,7 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
                 soldQty: success.soldQty - Number(qty),
                 damageQty: Number(success.damageQty),
                 rtvQty: success.rtvQty,
+                tpnQty: success?.tpnQty ? success?.tpnQty : 0,
                 status: success.status,
                 createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
                 updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -1532,6 +1765,7 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
                     soldQty: 0 - Number(qty),
                     damageQty: 0,
                     rtvQty: 0,
+                    tpnQty: 0,
 
                   }
                 ]
@@ -1550,6 +1784,7 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
               soldQty: -Number(qty),
               damageQty: 0,
               rtvQty: 0,
+              tpnQty: 0,
               status: success.status,
               createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
               updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -1563,6 +1798,7 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
                   soldQty: -Number(qty),
                   damageQty: 0,
                   rtvQty: 0,
+                  tpnQty: 0,
                 },
               ],
 
@@ -1579,6 +1815,7 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
             soldQty: -Number(qty),
             damageQty: 0,
             rtvQty: 0,
+            tpnQty: 0,
             status: "active",
             createdAt: new Date(Date.now()),
             updatedAt: new Date(Date.now()),
@@ -1592,6 +1829,7 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
                 soldQty: - Number(qty),
                 damageQty: 0,
                 rtvQty: 0,
+                tpnQty: 0,
               },
             ],
 
@@ -1688,6 +1926,7 @@ const updateInventoryInOnGRNIn = async (req, res, next) => {
                 soldQty: success.soldQty,
                 damageQty: Number(success.damageQty),
                 rtvQty: success.rtvQty,
+                tpnQty: success?.tpnQty ? success?.tpnQty : 0,
                 status: success.status,
                 createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
                 updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -1701,6 +1940,7 @@ const updateInventoryInOnGRNIn = async (req, res, next) => {
                     soldQty: checked[0].get("soldQty") ? checked[0].get("soldQty") : 0,
                     damageQty: checked[0].get("damageQty") ? Number(checked[0].get("damageQty")) : 0,
                     rtvQty: checked[0].get("rtvQty") ? checked[0].get("rtvQty") : 0,
+                    tpnQty: checked[0].get("tpnQty") ? checked[0].get("tpnQty") : 0,
 
                   }
                 ]
@@ -1718,6 +1958,7 @@ const updateInventoryInOnGRNIn = async (req, res, next) => {
                 soldQty: success.soldQty,
                 damageQty: Number(success.damageQty),
                 rtvQty: success.rtvQty,
+                tpnQty: success?.tpnQty ? success?.tpnQty : 0,
                 status: success.status,
                 createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
                 updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -1750,6 +1991,7 @@ const updateInventoryInOnGRNIn = async (req, res, next) => {
 
               damageQty: 0,
               rtvQty: Number(qty),
+              tpnQty: success?.tpnQty ? success?.tpnQty : 0,
               status: success.status,
               createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
               updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -1763,6 +2005,7 @@ const updateInventoryInOnGRNIn = async (req, res, next) => {
                   soldQty: 0,
                   damageQty: 0,
                   rtvQty: 0,
+                  tpnQty: 0,
                 },
               ],
 
@@ -1779,6 +2022,7 @@ const updateInventoryInOnGRNIn = async (req, res, next) => {
             soldQty: 0,
             damageQty: 0,
             rtvQty: 0,
+            tpnQty: 0,
             status: "active",
             createdAt: new Date(Date.now()),
             updatedAt: new Date(Date.now()),
@@ -1792,6 +2036,7 @@ const updateInventoryInOnGRNIn = async (req, res, next) => {
                 soldQty: 0,
                 damageQty: 0,
                 rtvQty: 0,
+                tpnQty: 0,
               },
             ],
 
@@ -1911,6 +2156,7 @@ const updateInventoryOutOnGRNDel = async (req, res, next) => {
                 soldQty: success.soldQty,
                 damageQty: Number(success.damageQty),
                 rtvQty: success.rtvQty,
+                tpnQty: success?.tpnQty ? success?.tpnQty : 0,
                 status: success.status,
                 createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
                 updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -1924,6 +2170,7 @@ const updateInventoryOutOnGRNDel = async (req, res, next) => {
                     soldQty: checked[0].get("soldQty") ? checked[0].get("soldQty") : 0,
                     damageQty: checked[0].get("damageQty") ? Number(checked[0].get("damageQty")) : 0,
                     rtvQty: checked[0].get("rtvQty") ? checked[0].get("rtvQty") : 0,
+                    tpnQty: checked[0].get("tpnQty") ? checked[0].get("tpnQty") : 0,
 
                   }
                 ]
@@ -1941,6 +2188,7 @@ const updateInventoryOutOnGRNDel = async (req, res, next) => {
                 soldQty: success.soldQty,
                 damageQty: Number(success.damageQty),
                 rtvQty: success.rtvQty,
+                tpnQty: success?.tpnQty ? success?.tpnQty : 0,
                 status: success.status,
                 createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
                 updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -1954,6 +2202,7 @@ const updateInventoryOutOnGRNDel = async (req, res, next) => {
                     soldQty: 0,
                     damageQty: 0,
                     rtvQty: 0,
+                    tpnQty: 0,
 
                   }
                 ]
@@ -1972,6 +2221,7 @@ const updateInventoryOutOnGRNDel = async (req, res, next) => {
               soldQty: 0,
               damageQty: 0,
               rtvQty: 0,
+              tpnQty: 0,
               status: success.status,
               createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
               updatedAt: new Date(Date.parse(success.updatedAt)),
@@ -1985,6 +2235,7 @@ const updateInventoryOutOnGRNDel = async (req, res, next) => {
                   soldQty: 0,
                   damageQty: 0,
                   rtvQty: 0,
+                  tpnQty: 0,
                 },
               ],
 
@@ -2001,6 +2252,7 @@ const updateInventoryOutOnGRNDel = async (req, res, next) => {
             soldQty: 0,
             damageQty: 0,
             rtvQty: 0,
+            tpnQty: 0,
             status: "active",
             createdAt: new Date(Date.now()),
             updatedAt: new Date(Date.now()),
@@ -2014,6 +2266,442 @@ const updateInventoryOutOnGRNDel = async (req, res, next) => {
                 soldQty: 0,
                 damageQty: 0,
                 rtvQty: 0,
+                tpnQty: 0,
+              },
+            ],
+
+          };
+        }
+        // res.send(inventory)
+        // console.log("inventory final", inventory);
+        const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
+        if (update) {
+          // console.log("update", update)
+        }
+      });
+    } else {
+      return;
+    }
+  } catch (err) {
+    console.log(err)
+  } finally {
+    next()
+  }
+};
+
+
+// Generate tpn in -> inventory Out
+const updateInventoryOutOnTPNIn = async (req, res, next) => {
+  // TODO:: todays total
+
+  // const todayTotal = await Damage.countDocuments({
+  //     createdAt: { $gte: startOfDay(new Date()), $lte: endOfDay(new Date()) },
+  // });
+  try {
+    const products = await req.body.products;
+
+    // console.log("req Products", products);
+
+    if (products.length > 0) {
+      products.map(async (product) => {
+        // console.log("single product", product);
+        const { _id, article_code, qty, priceId, name } = product;
+        // console.log(article_code);
+        let inventory = {};
+        const success = await Inventory.findOne({ article_code: article_code });
+
+        if (success) {
+          // console.log("success", success);
+          // res.send(success)
+          // console.log("PriceTable", success.priceTable);
+
+          if (success.priceTable.length > 0) {
+            // console.log("priceid", priceId);
+            // console.log("pricetable", success.priceTable);
+            // const prices = success.priceTable
+            // const prices = success.priceTable[0].get('id')
+            // prices.forEach((value, key) => {
+            //     console.log(`${key}: ${value}`);
+            // });
+            // console.log("Prices", prices)
+            // console.log("Prices-id", prices.get('id'))
+            // console.log("prices", prices)
+
+            const checked = success.priceTable.filter(
+              (p) => p.get("id") === priceId
+            );
+            const rest = success.priceTable.filter(
+              (p) => p.get("id") !== priceId
+            );
+
+            //   console.log("checked", qty);
+            // console.log("checked", checked[0]);
+            // console.log("checkedid", checked[0].get("id"));
+            // console.log("rest", rest);
+            if (checked?.length > 0) {
+              // console.log(
+              //     checked,
+              //     "exist",
+              //     qty,
+              //     Number(checked[0].get("currentQty"))
+              // );
+
+              // const d = new Date.parse(success.createdAt);
+              // console.log("date", success.createdAt)
+              // console.log("qty", qty)
+
+
+              inventory = {
+                name: success.name,
+                article_code: success.article_code,
+                warehouse: "62b5b575b4facb87eef3b47c",
+                currentQty: Number(success.currentQty) - Number(qty),
+                openingQty: success.openingQty,
+                totalQty: success.totalQty,
+                soldQty: success.soldQty,
+                damageQty: Number(success.damageQty),
+                rtvQty: success.rtvQty,
+                tpnQty: success?.tpnQty ? success?.tpnQty + Number(qty) : 0 + Number(qty),
+                status: success.status,
+                createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
+                updatedAt: new Date(Date.parse(success.updatedAt)),
+                priceTable: [
+                  ...rest,
+                  {
+                    id: checked[0].get("id"),
+                    currentQty: checked[0].get("currentQty") ? Number(checked[0].get("currentQty")) - Number(qty) : 0 - Number(qty),
+                    openingQty: checked[0].get("openingQty") ? checked[0].get("openingQty") : 0,
+                    totalQty: checked[0].get("totalQty") ? checked[0].get("totalQty") : 0,
+                    soldQty: checked[0].get("soldQty") ? checked[0].get("soldQty") : 0,
+                    damageQty: checked[0].get("damageQty") ? Number(checked[0].get("damageQty")) : 0,
+                    rtvQty: checked[0].get("rtvQty") ? checked[0].get("rtvQty") : 0,
+                    tpnQty: checked[0].get("tpnQty") ? checked[0].get("tpnQty") + Number(qty) : 0 + Number(qty),
+
+                  }
+                ]
+
+              }
+              // console.log("inventory", inventory);
+            } else {
+              inventory = {
+                name: success.name,
+                article_code: success.article_code,
+                warehouse: "62b5b575b4facb87eef3b47c",
+                currentQty: Number(success.currentQty) - Number(qty),
+                openingQty: success.openingQty,
+                totalQty: success.totalQty,
+                soldQty: success.soldQty,
+                damageQty: Number(success.damageQty),
+                rtvQty: success.rtvQty,
+                tpnQty: success?.tpnQty ? success?.tpnQty + Number(qty) : 0 + Number(qty),
+                status: success.status,
+                createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
+                updatedAt: new Date(Date.parse(success.updatedAt)),
+                priceTable: [
+                  ...rest,
+                  {
+                    id: priceId,
+                    currentQty: -Number(qty),
+                    openingQty: -Number(qty),
+                    totalQty: -Number(qty),
+                    soldQty: 0,
+                    damageQty: 0,
+                    rtvQty: 0,
+                    tpnQty: Number(qty),
+                  }
+                ]
+
+              }
+              // console.log("inventory", inventory);
+            }
+          } else {
+            inventory = {
+              name: success.name,
+              article_code: success.article_code,
+              warehouse: "62b5b575b4facb87eef3b47c",
+              currentQty: Number(success.currentQty) - Number(qty),
+              openingQty: success.openingQty,
+              totalQty: success.totalQty,
+              soldQty: success.soldQty,
+
+              damageQty: 0,
+              rtvQty: Number(qty),
+              tpnQty: success?.tpnQty ? success?.tpnQty + Number(qty) : 0 + Number(qty),
+              status: success.status,
+              createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
+              updatedAt: new Date(Date.parse(success.updatedAt)),
+              priceTable: [
+                ...success.priceTable,
+                {
+                  id: priceId,
+                  openingQty: -Number(qty),
+                  currentQty: -Number(qty),
+                  totalQty: -Number(qty),
+                  soldQty: 0,
+                  damageQty: 0,
+                  rtvQty: 0,
+                  tpnQty: Number(qty),
+                },
+              ],
+
+            };
+          }
+        } else {
+          inventory = {
+            name: name,
+            article_code: article_code,
+            warehouse: "62b5b575b4facb87eef3b47c",
+            currentQty: -Number(qty),
+            openingQty: - Number(qty),
+            totalQty: - Number(qty),
+            soldQty: 0,
+            damageQty: 0,
+            rtvQty: 0,
+            tpnQty: Number(qty),
+            status: "active",
+            createdAt: new Date(Date.now()),
+            updatedAt: new Date(Date.now()),
+            priceTable: [
+
+              {
+                id: priceId,
+                openingQty: -Number(qty),
+                currentQty: -Number(qty),
+                totalQty: -Number(qty),
+                soldQty: 0,
+                damageQty: 0,
+                rtvQty: 0,
+                tpnQty: Number(qty),
+              },
+            ],
+
+          };
+        }
+        // res.send(inventory)
+        // console.log("inventory final", inventory);
+        const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
+        if (update) {
+          // console.log("update", update)
+        }
+      });
+    } else {
+      return;
+    }
+  } catch (err) {
+    console.log(err)
+  } finally {
+    next()
+  }
+};
+// Generate tpn del -> inventory in
+const updateInventoryInOnTpnDel = async (req, res, next) => {
+  // TODO:: todays total
+
+  // const todayTotal = await Damage.countDocuments({
+  //     createdAt: { $gte: startOfDay(new Date()), $lte: endOfDay(new Date()) },
+  // });
+  const id = req.params.id;
+  // console.log("grn delete", id)
+  const tpnData = await Tpn.find({ _id: id })
+  // console.log("GRN Data", grnData)
+  const products = tpnData[0].products;
+  // console.log("inventory Products", products);
+  try {
+    // const products = await req.body.products;
+
+    // console.log("inventory Products", products);
+
+    if (products.length > 0) {
+
+      products.map(async (product) => {
+        // console.log("single product", product);
+        // console.log("single product", product);
+        const id = product.get("id");
+        const name = product.get("name");
+        const article_code = product.get("article_code");
+        const qty = product.get("qty")
+        const order = product.get("order");
+        const priceId = product.get("priceId");
+        const reason = product.get("reason")
+        const tp = product.get("tp")
+
+        const newProduct = {
+          id: id,
+          name: name,
+          article_code: article_code,
+          qty: qty,
+          order: order,
+          priceId: priceId,
+          tp: tp,
+        }
+        // console.log("newProduct", newProduct)
+        // const { article_code, qty, priceId, name } = product;
+        // console.log(article_code);
+        let inventory = {};
+        const success = await Inventory.findOne({ article_code: article_code });
+
+        if (success) {
+          // console.log("success", success);
+          // res.send(success)
+          // console.log("PriceTable", success.priceTable);
+
+          if (success.priceTable.length > 0) {
+            // console.log("priceid", priceId);
+            // console.log("pricetable", success.priceTable);
+            // const prices = success.priceTable
+            // const prices = success.priceTable[0].get('id')
+            // prices.forEach((value, key) => {
+            //     console.log(`${key}: ${value}`);
+            // });
+            // console.log("Prices", prices)
+            // console.log("Prices-id", prices.get('id'))
+            // console.log("prices", prices)
+
+            const checked = success.priceTable.filter(
+              (p) => p.get("id") === priceId
+            );
+            const rest = success.priceTable.filter(
+              (p) => p.get("id") !== priceId
+            );
+
+            //   console.log("checked", qty);
+            // console.log("checked", checked[0]);
+            // console.log("checkedid", checked[0].get("id"));
+            // console.log("rest", rest);
+            if (checked?.length > 0) {
+              // console.log(
+              //     checked,
+              //     "exist",
+              //     qty,
+              //     Number(checked[0].get("currentQty"))
+              // );
+
+              // const d = new Date.parse(success.createdAt);
+              // console.log("date", success.createdAt)
+
+
+              inventory = {
+                name: success.name,
+                article_code: success.article_code,
+                warehouse: "62b5b575b4facb87eef3b47c",
+                currentQty: Number(success.currentQty)
+                  + Number(qty),
+                openingQty: success.openingQty,
+                totalQty: success.totalQty,
+                soldQty: success.soldQty,
+                damageQty: Number(success.damageQty),
+                rtvQty: success.rtvQty,
+                tpnQty: success?.tpnQty ? success?.tpnQty - Number(qty) : 0 - Number(qty),
+                status: success.status,
+                createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
+                updatedAt: new Date(Date.parse(success.updatedAt)),
+                priceTable: [
+                  ...rest,
+                  {
+                    id: checked[0].get("id"),
+                    currentQty: checked[0].get("currentQty") ? Number(checked[0].get("currentQty")) - Number(qty) : 0 - Number(qty),
+                    openingQty: checked[0].get("openingQty") ? checked[0].get("openingQty") : 0,
+                    totalQty: checked[0].get("totalQty") ? checked[0].get("totalQty") : 0,
+                    soldQty: checked[0].get("soldQty") ? checked[0].get("soldQty") : 0,
+                    damageQty: checked[0].get("damageQty") ? Number(checked[0].get("damageQty")) : 0,
+                    rtvQty: checked[0].get("rtvQty") ? checked[0].get("rtvQty") : 0,
+                    tpnQty: checked[0].get("tpnQty") - Number(qty) ? checked[0].get("tpnQty") - Number(qty) : 0 - Number(qty),
+
+                  }
+                ]
+
+              }
+              // console.log("inventory", inventory);
+            } else {
+              inventory = {
+                name: success.name,
+                article_code: success.article_code,
+                warehouse: "62b5b575b4facb87eef3b47c",
+                currentQty: Number(success.currentQty) + Number(qty),
+                openingQty: success.openingQty,
+                totalQty: success.totalQty,
+                soldQty: success.soldQty,
+                damageQty: Number(success.damageQty),
+                rtvQty: success.rtvQty,
+                tpnQty: success?.tpnQty ? success?.tpnQty - Number(qty) : 0 - Number(qty),
+                status: success.status,
+                createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
+                updatedAt: new Date(Date.parse(success.updatedAt)),
+                priceTable: [
+                  ...rest,
+                  {
+                    id: priceId,
+                    currentQty: Number(qty),
+                    openingQty: Number(qty),
+                    totalQty: Number(qty),
+                    soldQty: 0,
+                    damageQty: 0,
+                    rtvQty: 0,
+                    tpnQty: 0 - Number(qty),
+
+                  }
+                ]
+
+              }
+              // console.log("inventory", inventory);
+            }
+          } else {
+            inventory = {
+              name: success.name,
+              article_code: success.article_code,
+              warehouse: "62b5b575b4facb87eef3b47c",
+              currentQty: Number(qty),
+              openingQty: Number(qty),
+              totalQty: Number(qty),
+              soldQty: 0,
+              damageQty: 0,
+              rtvQty: 0,
+              tpnQty: 0 - Number(qty),
+              status: success.status,
+              createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
+              updatedAt: new Date(Date.parse(success.updatedAt)),
+              priceTable: [
+                ...success.priceTable,
+                {
+                  id: priceId,
+                  openingQty: Number(qty),
+                  currentQty: Number(qty),
+                  totalQty: Number(qty),
+                  soldQty: 0,
+                  damageQty: 0,
+                  rtvQty: 0,
+                  tpnQty: 0 - Number(qty),
+                },
+              ],
+
+            };
+          }
+        } else {
+          inventory = {
+            name: name,
+            article_code: article_code,
+            warehouse: "62b5b575b4facb87eef3b47c",
+            currentQty: Number(qty),
+            openingQty: Number(qty),
+            totalQty: Number(qty),
+            soldQty: 0,
+            damageQty: 0,
+            rtvQty: 0,
+            tpnQty: 0 - Number(qty),
+            status: "active",
+            createdAt: new Date(Date.now()),
+            updatedAt: new Date(Date.now()),
+            priceTable: [
+
+              {
+                id: priceId,
+                openingQty: Number(qty),
+                currentQty: Number(qty),
+                totalQty: Number(qty),
+                soldQty: 0,
+                damageQty: 0,
+                rtvQty: 0,
+                tpnQty: 0 - Number(qty),
               },
             ],
 
@@ -2047,6 +2735,9 @@ module.exports = {
   updateInventoryINOnRTVOut,
   updateInventoryInOnSaleDel,
   updateInventoryOutOnSaleIn,
+  adjustInventoryOnSale,
   updateInventoryInOnGRNIn,
-  updateInventoryOutOnGRNDel
+  updateInventoryOutOnGRNDel,
+  updateInventoryOutOnTPNIn,
+  updateInventoryInOnTpnDel
 };

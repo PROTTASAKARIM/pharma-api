@@ -47,7 +47,7 @@ const purchaseSchema = mongoose.Schema(
     shipping_cost: { type: Number, default: 0 },
     status: {
       type: String,
-      enum: ["Pending", "Ordered", "Partial", "Received"],
+      enum: ["Pending", "Ordered", "Partial", "Received", "Canceled"],
     },
   },
   {

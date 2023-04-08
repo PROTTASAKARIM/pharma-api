@@ -14,6 +14,12 @@ const expressAsyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 const Tpn = require("../models/tpnModel");
 const checklogin = require("../middlewares/checkLogin");
+const { generateTpnId } = require("../middlewares/generateId");
+const { startOfDay, endOfDay } = require("date-fns");
+const {
+  updateInventoryOutOnTPNIn,
+  updateInventoryInOnTpnDel,
+} = require("../middlewares/useInventory");
 
 const tpnRouter = express.Router();
 
@@ -22,18 +28,77 @@ tpnRouter.get(
   "/",
   expressAsyncHandler(async (req, res) => {
     const tpns = await Tpn.find();
-    res.send(tpns);
+    const sorted = tpns.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    res.send(sorted);
     // // res.send('removed');
     console.log(tpns);
   })
 );
 
+tpnRouter.get(
+  "/grn/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    try {
+      const tpn = await Tpn.find({ _id: id })
+        // .populate("supplier", { company: 1, email: 1, phone: 1, address: 1 })
+        .populate("warehouseTo", "name")
+        .populate("warehouseFrom", "name")
+        .populate("userId", "name")
+        .populate({
+          path: "products",
+          populate: {
+            path: "priceId",
+            model: "Price",
+          },
+        });
+      console.log(tpn);
+      res.send(tpn[0]);
+    } catch (err) {
+      console.log(err);
+    }
+    // // res.send('removed');
+  })
+);
+//tpn load by two dates
+tpnRouter.get(
+  "/byDate/:start/:end",
+  expressAsyncHandler(async (req, res) => {
+    const start = req.params.start
+      ? startOfDay(new Date(req.params.start))
+      : startOfDay(new Date.now());
+    const end = req.params.end
+      ? endOfDay(new Date(req.params.end))
+      : endOfDay(new Date.now());
+
+    console.log(start, end, new Date());
+
+    try {
+      const tpn = await Tpn.find({
+        createdAt: { $gte: start, $lte: end },
+      })
+        .populate("warehouseTo", "name")
+        .populate("warehouseFrom", "name")
+        .populate("userId", "name");
+      res.send(tpn);
+    } catch (err) {
+      console.log(err)
+    }
+    // console.log(sales);
+    // // res.send('removed');
+  })
+);
 // GET ONE tpns
 tpnRouter.get(
   "/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
-    const tpns = await Tpn.find({ _id: id });
+    const tpns = await Tpn.find({ _id: id })
+      // .populate("warehouseTo", "name")
+      // .populate("warehouseFrom", "name")
+      .populate("warehouseTo", { name: 1, address: 1, phone: 1 })
+      .populate("warehouseFrom", { name: 1, address: 1, phone: 1 })
+      .populate("userId", "name");;
     res.send(tpns[0]);
     // // res.send('removed');
     console.log(tpns);
@@ -43,6 +108,8 @@ tpnRouter.get(
 // CREATE ONE Tpn
 tpnRouter.post(
   "/",
+  generateTpnId,
+  updateInventoryOutOnTPNIn,
   expressAsyncHandler(async (req, res) => {
     const newTpn = new Tpn(req.body);
     try {
@@ -97,6 +164,7 @@ tpnRouter.put(
 // DELETE ONE Tpn
 tpnRouter.delete(
   "/:id",
+  updateInventoryInOnTpnDel,
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     try {

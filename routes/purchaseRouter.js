@@ -13,6 +13,7 @@ const router = express.Router();
 const expressAsyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 const Purchase = require("../models/purchaseModel");
+const Category = require("../models/categoryModel");
 const checklogin = require("../middlewares/checkLogin");
 const { generatePoId } = require("../middlewares/generateId");
 const { startOfDay, endOfDay } = require("date-fns");
@@ -23,7 +24,7 @@ const purchaseRouter = express.Router();
 purchaseRouter.get(
   "/",
   expressAsyncHandler(async (req, res) => {
-    const Purchases = await Purchase.find({})
+    const purchases = await Purchase.find({})
       .select({
         poNo: 1,
         supplier: 1,
@@ -40,12 +41,13 @@ purchaseRouter.get(
       .populate("warehouse", "name")
       .populate("userId", "name");
     //   .exec(callback);
-
-    res.send(Purchases);
+    const sorted = purchases.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    res.send(sorted);
     // // res.send('removed');
     // console.log(Purchases);
   })
 );
+
 
 // GET weekly Purchases
 purchaseRouter.get(
@@ -103,6 +105,26 @@ purchaseRouter.get(
           }
         }
       ]);
+      // console.log(start, end);
+      // console.log(start, end);
+      // let filteredDate = []
+      // const match = purchases.map(purchase => {
+      //   console.log("o", new Date(purchase._id))
+      //   for (let i = 1; i <= 7; i++) {
+      //     console.log("p", new Date(last7Days[i]))
+      //     if (new Date(last7Days[i]) == new Date(purchase._id)) {
+      //       console.log("true")
+      //     } else {
+      //       console.log("false")
+      //     }
+      //   }
+      //   // filteredDate = [...filteredDate, p[0]]
+      // })
+
+
+
+
+      // console.log(match)
       res.send(purchases);
       // res.send(Purchases);
     } catch (err) {
@@ -112,6 +134,123 @@ purchaseRouter.get(
   })
 )
 
+//grn by category  between two dates
+purchaseRouter.get(
+  "/category/:start/:end",
+  expressAsyncHandler(async (req, res) => {
+    const start = req.params.start
+      ? startOfDay(new Date(req.params.start))
+      : startOfDay(new Date.now());
+    const end = req.params.end
+      ? endOfDay(new Date(req.params.end))
+      : endOfDay(new Date.now());
+
+    console.log(start, end, new Date());
+
+    try {
+      const purchase = await Purchase.aggregate([
+        {
+          $match: {
+            createdAt: {
+              $gte: start,
+              $lt: end
+            }
+          }
+        },
+        {
+          $unwind: '$products'
+        },
+        {
+          $group: {
+            _id: '$products.id',
+            article_code: { $first: '$products.article_code' },
+            totalQuantity: { $sum: { $toDouble: '$products.qty' } },
+            name: { $first: '$products.name' },
+            // mrp: { $last: '$products.mrp' },
+            tp: { $last: '$products.tp' },
+            priceId: { $first: '$products.priceId' }
+
+          }
+        },
+        {
+          $sort: { totalQuantity: -1 }
+        },
+        {
+          $lookup:
+          {
+            from: "products",
+            localField: "article_code",
+            foreignField: "article_code",
+            as: "productId"
+          }
+        },
+        {
+          $unwind: '$productId'
+        },
+        {
+          $lookup: {
+            from: 'categories',
+            localField: 'productId.category',
+            foreignField: '_id',
+            as: 'category'
+          }
+        },
+        {
+          $unwind: '$category'
+        },
+        {
+          $group: {
+            _id: '$category._id',
+            totalQuantity: { $sum: { $toDouble: '$totalQuantity' } },
+            totalValue: { $sum: { $multiply: [{ $toDouble: '$totalQuantity' }, { $toDouble: '$tp' }] } }
+          }
+        },
+        {
+          $sort: { totalQuantity: -1 }
+        },
+
+      ]);
+      const populatePurchase = await Category.populate(purchase, {
+        path: "_id",
+        model: "Category",
+      })
+      res.send(populatePurchase);
+    } catch (err) {
+      console.log(err)
+    }
+    // console.log(sales);
+    // // res.send('removed');
+  })
+);
+
+
+
+// GET ONE Purchases
+purchaseRouter.get(
+  "/supplier/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const Purchases = await Purchase.find({ _id: id })
+      .populate({
+        path: "supplier",
+        select: { company: 1, email: 1, phone: 1, address: 1, products: 1 },
+        populate: {
+          path: "products.id",
+          model: "Product",
+          populate: {
+            path: "priceList",
+            model: "Price",
+          },
+        },
+      })
+      .populate("warehouse", "name")
+      .populate("userId", "name");
+    // .populate("userId")
+    res.send(Purchases[0]);
+    // // res.send('removed');
+    // console.log(Purchases);
+  })
+);
 // GET ONE Purchases
 purchaseRouter.get(
   "/:id",
@@ -124,7 +263,7 @@ purchaseRouter.get(
     // .populate("userId")
     res.send(Purchases[0]);
     // // res.send('removed');
-    console.log(Purchases);
+    // console.log(Purchases);
   })
 );
 //purchase load by two dates
@@ -192,14 +331,7 @@ purchaseRouter.get(
     // // res.send('removed');
   })
 );
-purchaseRouter.get(
-  "/grnl",
-  // expressAsyncHandler(async 
-  (req, res) => {
-    console.log("err")
-  }
-  // })
-);
+
 
 
 
@@ -248,6 +380,46 @@ purchaseRouter.put(
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     const update = req.body;
+    try {
+      await Purchase.updateOne({ _id: id }, { $set: update })
+        .then((response) => {
+          res.send(response);
+        })
+        .catch((err) => {
+          res.send(err);
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  })
+);
+// UPDATE ONE Purchase
+purchaseRouter.put(
+  "/update/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const update = req.body.purchaseData;
+    console.log(id, update)
+    try {
+      await Purchase.updateOne({ _id: id }, { $set: update })
+        .then((response) => {
+          res.send(response);
+        })
+        .catch((err) => {
+          res.send(err);
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  })
+);
+// UPDATE ONE Purchase Status
+purchaseRouter.put(
+  "/status/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const update = req.body;
+    console.log("PO", id, update)
     try {
       await Purchase.updateOne({ _id: id }, { $set: update })
         .then((response) => {

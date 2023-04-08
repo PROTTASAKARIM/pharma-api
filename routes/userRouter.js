@@ -32,6 +32,7 @@ userRouter.get(
       phone: 1,
       type: 1,
       status: 1,
+      warehouse: 1
     });
     res.status(200).json(users);
     // // res.send('removed');
@@ -78,6 +79,7 @@ userRouter.get(
       type: 1,
       status: 1,
       username: 1,
+      warehouse: 1
     });
     res.send(user[0]);
   })

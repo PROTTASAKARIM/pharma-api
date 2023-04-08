@@ -16,6 +16,38 @@ const ecomRouter = express.Router();
 ===========================*/
 
 // GET FEATURED PRODUCTS
+//get all the offer type products 
+ecomRouter.get(
+  "/product/offer",
+  expressAsyncHandler(async (req, res) => {
+    const products = await Product.find({ product_type: "offer" })
+      .select({
+        _id: 1,
+        name: 1,
+        ean: 1,
+        unit: 1,
+        article_code: 1,
+        priceList: 1,
+        category: 1,
+        promo_price: 1,
+        promo_start: 1,
+        promo_end: 1,
+        promo_type: 1,
+        featured: 1,
+        photo: 1,
+        product_type: 1
+      })
+      .populate("category", "name")
+      .populate("priceList");
+    console.log("products", products)
+    const fProducts = products.filter(p => p.priceList.length > 0)
+    console.log("fProducts", fProducts)
+
+    if (fProducts) {
+      res.status(200).json(fProducts);
+    }
+  })
+);
 //get all the combo type products 
 ecomRouter.get(
   "/product/combo",
@@ -35,10 +67,17 @@ ecomRouter.get(
         promo_type: 1,
         featured: 1,
         photo: 1,
+        product_type: 1
       })
       .populate("category", "name")
       .populate("priceList");
-    res.status(200).json(products);
+    console.log("products", products)
+    const fProducts = products.filter(p => p.priceList.length > 0)
+    console.log("fProducts", fProducts)
+
+    if (fProducts) {
+      res.status(200).json(fProducts);
+    }
   })
 );
 
@@ -65,13 +104,17 @@ ecomRouter.get(
             promo_type: 1,
             promo_start: 1,
             promo_end: 1,
+            photo: 1,
             priceList: 1,
           }
         }
       ])
       const populatedProducts = await Product.populate(product, { path: 'priceList' })
+      console.log(populatedProducts);
+      const fProducts = populatedProducts.filter(p => p.priceList.length > 0)
+      console.log(fProducts);
       // .populate("priceList");
-      res.send(populatedProducts);
+      res.send(fProducts);
     } catch (err) {
       console.log(err);
     }
@@ -113,8 +156,9 @@ ecomRouter.get(
 
       const productDetails = await Product.find({ article_code: pProduct_AC }).populate("priceList")
       console.log("pProduct new", productDetails)
+      const fProducts = productDetails.filter(p => p.priceList.length > 0)
       // .populate("priceList");
-      res.send({ product: product, productDetails: productDetails });
+      res.send({ product: product, productDetails: fProducts });
     } catch (err) {
       console.log(err);
     }
@@ -145,9 +189,10 @@ ecomRouter.get(
       .populate("category", "name")
       .populate("priceList");
     if (product) {
-      console.log(product);
+      const fProducts = product.filter(p => p.priceList.length > 0)
+      console.log(fProducts);
+      res.status(200).json(fProducts);
     }
-    res.status(200).json(product);
   })
 );
 
@@ -219,7 +264,9 @@ ecomRouter.get(
         .limit(100)
         .populate("category", "name")
         .populate("priceList");
-      res.status(200).json(product);
+
+      const fProducts = product.filter(p => p.priceList.length > 0)
+      res.status(200).json(fProducts);
     } else {
       console.log("no query");
 
@@ -244,7 +291,9 @@ ecomRouter.get(
         .skip(size * page)
         .populate("category", "name")
         .populate("priceList");
-      res.status(200).json(product);
+
+      const fProducts = product.filter(p => p.priceList.length > 0)
+      res.status(200).json(fProducts);
       console.log("done:", query);
     }
   })
@@ -277,6 +326,97 @@ ecomRouter.get(
 // );
 
 // GET PRODUCTS BY SIZE AND PAGE
+ecomRouter.get(
+  "/product/search",
+  expressAsyncHandler(async (req, res) => {
+
+    const queryString = req.query?.q?.trim().toString().toLocaleLowerCase();
+
+
+    let query = {};
+    let product = [];
+    // const size = parseInt(req.query.size);
+    console.log("queryString", queryString);
+    console.log(typeof queryString);
+
+    //check if search or the pagenation
+
+    if (queryString) {
+      console.log("== query");
+
+      console.log("search:", query);
+      // search check if num or string
+      const isNumber = /^\d/.test(queryString);
+      console.log(isNumber);
+      if (!isNumber) {
+        // if text then search name
+        query = {
+          name: { $regex: new RegExp(".*" + queryString + ".*?", "i") },
+        };
+        // query = { name:  queryString  };
+      } else {
+        // if number search in ean and article code
+        query = {
+          $or: [
+            { ean: { $regex: RegExp("^" + queryString + ".*", "i") } },
+            {
+              article_code: {
+                $regex: RegExp("^" + queryString + ".*", "i"),
+              },
+            },
+          ],
+        };
+      }
+      console.log(query);
+
+      product = await Product.find(query)
+        .select({
+          _id: 1,
+          name: 1,
+          ean: 1,
+          unit: 1,
+          article_code: 1,
+          priceList: 1,
+          category: 1,
+          promo_price: 1,
+          promo_start: 1,
+          promo_end: 1,
+          promo_type: 1,
+        })
+        .limit(100)
+        .populate("category", "name")
+        .populate("priceList");
+      const fProducts = product.filter(p => p.priceList.length > 0)
+      res.status(200).json(fProducts);
+    } else {
+      console.log("no query");
+
+      // regular pagination
+      query = {};
+
+      product = await Product.find(query)
+        .select({
+          _id: 1,
+          name: 1,
+          ean: 1,
+          unit: 1,
+          article_code: 1,
+          priceList: 1,
+          category: 1,
+          promo_price: 1,
+          promo_start: 1,
+          promo_end: 1,
+          promo_type: 1,
+        })
+        .populate("category", "name")
+        .populate("priceList")
+
+      const fProducts = product.filter(p => p.priceList.length > 0)
+      res.status(200).json(fProducts);
+      console.log("done:", query);
+    }
+  })
+);
 ecomRouter.get(
   "/product/:page/:size",
   expressAsyncHandler(async (req, res) => {
@@ -338,7 +478,8 @@ ecomRouter.get(
         .limit(100)
         .populate("category", "name")
         .populate("priceList");
-      res.status(200).json(product);
+      const fProducts = product.filter(p => p.priceList.length > 0)
+      res.status(200).json(fProducts);
     } else {
       console.log("no query");
 
@@ -363,7 +504,9 @@ ecomRouter.get(
         .skip(size * page)
         .populate("category", "name")
         .populate("priceList");
-      res.status(200).json(product);
+
+      const fProducts = product.filter(p => p.priceList.length > 0)
+      res.status(200).json(fProducts);
       console.log("done:", query);
     }
   })
@@ -392,14 +535,50 @@ ecomRouter.get(
         photo: 1,
       })
       .populate("priceList", { mrp: 1, tp: 1, supplier: 1, _id: 1, status: 1 })
-      .populate("category", { name: 1 });
+      .populate("category", { name: 1 })
     if (products) {
-      console.log(products);
+      // const fProducts = products.filter(p => p.priceList.length > 0)
+      // console.log(fProducts);
       res.send(products);
     }
   })
 );
 
+// GET PRODUCT BY CATEGORY
+ecomRouter.get(
+  "/product-similar/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const products = await Product.findOne({ _id: id })
+    // const cProducts = await Product.find({ category: products?.category })
+    const cProducts = await Product.find({ category: products?.category, _id: { $ne: id } })
+      .select({
+        _id: 1,
+        name: 1,
+        ean: 1,
+        vat: 1,
+        unit: 1,
+        article_code: 1,
+        priceList: 1,
+        ean: 1,
+        promo_start: 1,
+        promo_end: 1,
+        promo_price: 1,
+        promo_type: 1,
+        category: 1,
+        photo: 1,
+      })
+      .limit(15)
+      .populate("priceList", { mrp: 1, tp: 1, supplier: 1, _id: 1, status: 1 })
+      .populate("category", { name: 1 })
+    // const similarP = cProducts.filter(p => p._id === id)
+    if (cProducts) {
+      const fProducts = cProducts.filter(p => p.priceList.length > 0)
+      res.send(fProducts);
+      // res.send({ products: products, cProducts: cProducts, similarP: similarP });
+    }
+  })
+);
 // GET PRODUCT BY CATEGORY
 ecomRouter.get(
   "/product_category/:id",
@@ -419,11 +598,13 @@ ecomRouter.get(
         promo_end: 1,
         promo_price: 1,
         promo_type: 1,
+        photo: 1,
       })
       .populate("priceList", { mrp: 1, tp: 1, supplier: 1, _id: 1, status: 1 });
     if (products) {
       //   console.log(products);
-      res.send(products);
+      const fProducts = products.filter(p => p.priceList.length > 0)
+      res.send(fProducts);
     }
   })
 );
@@ -476,6 +657,31 @@ ecomRouter.get(
       createdAt: 1,
       changeAmount: 1,
       status: 1,
+    });
+    // .populate("billerId", "name");
+    res.send(sales);
+    // // res.send('removed');
+  })
+);
+// GET ALL sales by customer
+ecomRouter.get(
+  "/sale/:cId",
+  expressAsyncHandler(async (req, res) => {
+    const cId = req.params.cId
+    const sales = await Sale.find({
+      customerId: cId,
+      source: "web",
+    }).select({
+      invoiceId: 1,
+      totalItem: 1,
+      grossTotalRound: 1,
+      total: 1,
+      status: 1,
+      billerId: 1,
+      createdAt: 1,
+      changeAmount: 1,
+      status: 1,
+      products: 1,
     });
     // .populate("billerId", "name");
     res.send(sales);
@@ -633,7 +839,8 @@ ecomRouter.get(
       .limit(100)
       .populate("category", "name")
       .populate("priceList");
-    res.status(200).json(product);
+    const fProducts = product.filter(p => p.priceList.length > 0)
+    res.status(200).json(fProducts);
   })
 );
 
@@ -652,7 +859,10 @@ ecomRouter.get(
       membership: 1,
       address: 1,
       point: 1,
-      phone: 1
+      phone: 1,
+      dob: 1,
+      gender: 1,
+      photo: 1,
     });
     if (customer) {
       console.log(customer);
@@ -661,6 +871,53 @@ ecomRouter.get(
   })
 );
 
+// UPDATE ONE Customer address
+ecomRouter.put(
+  "/customer/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const update = req.body.customerData;
+    console.log("id", id, "update", update)
+    try {
+      // const customer = await Customer.updateOne({ _id: id }, { $set: update })
+      // console.log("customer", customer)
+      // if (customer) {
+      //   res.send(customer);
+      // } else {
+      //   res.send({ message: "Server Side Error" })
+      // }
+      await Customer.updateOne({ _id: id }, { $set: update })
+        .then(async (response) => {
+          console.log(response)
+          await Customer.findOne({ _id: id }).select({
+            name: 1,
+            email: 1,
+            username: 1,
+            membership: 1,
+            dob: 1,
+            gender: 1,
+            // type:1,
+            point: 1,
+            phone: 1,
+
+          })
+            .then(resp => {
+              console.log("customer full info", resp)
+              res.send(resp);
+            }).catch(err => {
+              console.log(err)
+              res.send(err)
+            })
+          // res.send(customer);
+        })
+        .catch((err) => {
+          res.send(err);
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  })
+);
 // UPDATE ONE Customer address
 ecomRouter.put(
   "/customer/address/:id",
@@ -712,21 +969,27 @@ ecomRouter.post(
     console.table(req.body);
     const hashPassword = await bcrypt.hash(req.body.password, 10);
     console.log("hashpassss", hashPassword);
-    console.log(hashPassword);
-    const newUser = new Customer({
+    const updatedUser = {
       name: req.body.name,
-      email: req.body.email,
-      username: req.body.phone,
+      username: req.body.username,
       phone: req.body.phone,
       type: req.body.type,
       membership: req.body.membership,
-      address: "",
-      // privilege: {},
       password: hashPassword,
       status: req.body.status,
-    });
+    }
+    // console.log(hashPassword);
+    const newUser = new Customer(updatedUser);
     try {
       console.log("newUser", newUser);
+      // await newUser.save()
+      //   .then(savedCustomer => {
+      //     console.log('Customer saved:', savedCustomer);
+      //   })
+      //   .catch(error => {
+      //     console.error('Error saving customer:', error);
+      //   });
+
       const user = await newUser.save();
       console.log("p", user);
       if (user) {
@@ -751,10 +1014,19 @@ ecomRouter.post(
           access_token: token,
           status: true,
           message: "Registration Successful",
+          user: {
+            id: user._id,
+            name: user.name,
+            username: user.username,
+            phone: user.phone,
+            type: user.type,
+            point: user.point,
+          },
           //   newUser: user,
         });
       }
     } catch (error) {
+      console.log("some errors")
       // res.status(400).json({
       res
         .status(500)
@@ -840,6 +1112,119 @@ ecomRouter.post(
 // );
 
 ecomRouter.post(
+  "/customer/isPhone",
+  expressAsyncHandler(async (req, res) => {
+    const isPhone = req.body.phone;
+    console.log({ body: req.body, phone: isPhone });
+    try {
+      let user;
+      if (isPhone) {
+        user = await Customer.find({
+          status: "active",
+          phone: req.body.phone,
+        });
+      } else {
+        res.send({ isFound: false, message: "User is not Found" })
+      }
+      // console.log(user)
+      if (user && user.length > 0) {
+        console.log("user", user);
+
+        res.status(200).json({ isFound: true, message: "User is Found" });
+
+      } else {
+        res.status(401).json({
+          isFound: false,
+          message: "User is not Found",
+          error: "User Not Found",
+        });
+      }
+    } catch (err) {
+      res.status(404).json({
+        isFound: false,
+        message: "User is not Found",
+        error: err,
+      });
+    }
+  })
+);
+
+ecomRouter.put(
+  "/customer/password/:phone",
+  expressAsyncHandler(async (req, res) => {
+    const phone = req.params.phone;
+    console.log("phone", phone)
+    const password = req.body.password;
+    console.log("phone", phone, "password", password)
+    const hashPassword = await bcrypt.hash(req.body.password, 10);
+    console.log("hashPassword", hashPassword)
+    try {
+      // res.status(200).json({ message: "User is Found" });
+      if (phone) {
+        let user;
+        user = await Customer.find({
+          status: "active",
+          phone: phone,
+        });
+        console.log("user", user);
+        if (user && user.length > 0) {
+          console.log("user", user);
+          console.log("user", { password: hashPassword });
+          console.log("user", { _id: user[0]._id });
+          const updateCustomer = await Customer.updateOne({ _id: user[0]._id }, { $set: { password: hashPassword } })
+          console.log("updateCustomer", updateCustomer)
+          if (updateCustomer) {
+            const token = jwt.sign(
+              {
+                userId: user[0]._id,
+                name: user[0].name,
+                username: user[0].username,
+                phone: user[0].phone,
+                type: user[0].type,
+                point: user[0].point,
+              },
+              process.env.JWT_SECRET,
+              { expiresIn: "1h" }
+            );
+            res.status(200).json({
+              access_token: token,
+              status: true,
+              user: {
+                id: user[0]._id,
+                name: user[0].name,
+                username: user[0].username,
+                phone: user[0].phone,
+                type: user[0].type,
+                point: user[0].point,
+              },
+              message: "Password Reset Successful",
+            });
+
+          }
+          else {
+            res.status(403).json({
+              status: false,
+              error: "User Not Found",
+            });
+          }
+
+        }
+        else {
+          res.status(401).json({
+            status: false,
+            error: "User Not Found",
+          });
+        }
+      }
+    } catch {
+      res.status(404).json({
+        status: false,
+        error: err,
+      });
+    }
+  })
+);
+ecomRouter.post(
   "/customer/login",
   expressAsyncHandler(async (req, res) => {
     const isPhone = req.body.phone;
@@ -877,6 +1262,7 @@ ecomRouter.post(
               phone: user[0].phone,
               type: user[0].type,
               point: user[0].point,
+              // email: user[0]?.email,
             },
             process.env.JWT_SECRET,
             { expiresIn: "1h" }
@@ -913,6 +1299,58 @@ ecomRouter.post(
         error: err,
       });
     }
+  })
+);
+// PRODUCT PHOTO UPLOAD
+// Upload Endpoint
+ecomRouter.post(
+  "/upload/customer/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+
+    // APP ROOT
+
+    // APP ROOT
+    // const appRoot = process.env.PWD;
+    const appRoot = process.cwd();
+    console.log(appRoot);
+    // App Root
+
+    console.log("env", process.env);
+    // console.log("p", PWD)
+    console.log("approot", appRoot);
+    if (req.files === null) {
+      return res.status(400).json({ msg: "No file uploaded" });
+    }
+
+    const file = req.files.file;
+    const name = file.name.split(".");
+    const ext = name[1];
+    const time = Date.now();
+    const fileName = `${id}-${time}.${ext}`;
+    console.log(`../uploads/${fileName}`);
+
+    file.mv(`${appRoot}/uploads/customer/${fileName}`, async (err) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send(err);
+      } else {
+        await Customer.updateOne(
+          { _id: id },
+          { $set: { photo: `/uploads/customer/${fileName}` } }
+        )
+          .then((response) => {
+            // res.send(response);
+            res.json({
+              fileName: fileName,
+              filePath: `/uploads/customer/${fileName}`,
+            });
+          })
+          .catch((err) => {
+            res.send(err);
+          });
+      }
+    });
   })
 );
 

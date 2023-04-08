@@ -6,13 +6,15 @@ const customerSchema = mongoose.Schema(
     email: { type: String, unique: true, sparse: true },
     username: { type: String },
     password: { type: String },
-    membership: { type: String, unique: true },
+    membership: { type: String },
+    dob: { type: Date, default: null },
+    gender: { type: String, enum: ['Male', 'Female', 'Other'], default: "Male" },
     address: [
       {
         type: Map,
         of: new mongoose.Schema({
           id: { type: String },
-          type: { type: String, enum: ['Home', 'Work', 'Other'] },
+          type: { type: String, enum: ['Home', 'Work', 'Other'], default: "Home" },
           holdingNo: { type: String },
           sector: { type: String },
           street: { type: String },
@@ -21,11 +23,7 @@ const customerSchema = mongoose.Schema(
           division: { type: String },
           country: { type: String },
           zipCode: { type: String },
-
-        },
-          {
-            timestamps: true,
-          }
+        }
         ),
       },
 
@@ -38,6 +36,7 @@ const customerSchema = mongoose.Schema(
     },
     point: { type: Number, default: 0 },
     phone: { type: String, require: true, unique: true },
+    photo: { type: String },
     status: { type: String, enum: ["active", "inactive"], default: "active" },
   },
   {

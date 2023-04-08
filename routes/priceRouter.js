@@ -118,6 +118,30 @@ priceRouter.post(
     }
   })
 );
+// CREATE ONE Price
+priceRouter.post(
+  "/new",
+  // handleNewPrice,
+  expressAsyncHandler(async (req, res) => {
+    const newPrice = new Price(req.body);
+    console.log("price", req.body);
+    try {
+      console.log("before save");
+      let savePrice = await newPrice.save(); //when fail its goes to catch
+      console.log(savePrice); //when success it print.
+      console.log("after save");
+      res.status(200).json({
+        status: "success",
+        message: "Price is created Successfully",
+        id: savePrice._id,
+      });
+    } catch (err) {
+      res
+        .status(500)
+        .json({ message: "There was a server side error", error: err });
+    }
+  })
+);
 
 // CREATE MULTI prices
 priceRouter.post(
@@ -141,115 +165,8 @@ priceRouter.put(
 
     const allPrices = req.body
     console.log("allPrices", allPrices)
-    // const updatePriceList = allPrices.map(async price => {
-    //   if (price?._id) {
-    //     // try {
-    //     //   await Price.updateOne({ _id: price?._id }, { $set: price })
-    //     //     .then((response) => {
-    //     //       res.send(response);
-    //     //     })
-    //     //     .catch((err) => {
-    //     //       res.send(err);
-    //     //     });
-    //     // } catch (error) {
-    //     //   console.error(error);
-    //     // }
-    //     // const newPrice = new Price(price)
-    //     return new Promise(async (resolve, reject) => {
-    //       await Price.updateOne({ _id: price?._id }, { $set: price }).then(res => {
-    //         console.log("success", res)
-    //       }).catch(error => {
-    //         console.log(error)
-    //       })
-
-    //     });
-
-    //   }
-    //   else {
-    //     const newPrice = new Price(price)
-    //     // try {
-    //     //   let savePrice = await newPrice.save(); //when fail its goes to catch
-    //     //   console.log(savePrice); //when success it print.
-    //     //   console.log("after save");
-    //     //   res.status(200).json({
-    //     //     status: "success",
-    //     //     message: "Price is created Successfully",
-    //     //     // id: savePrice._id,
-    //     //   });
-    //     // } catch (err) {
-    //     //   res
-    //     //     .status(500)
-    //     //     .json({ message: "There was a server side error", error: err });
-    //     // }
-    //     return new Promise(async (resolve, reject) => {
-    //       await newPrice.save((error) => {
-    //         if (error) {
-    //           console.log(error);
-    //           reject(error);
-    //         } else {
-    //           resolve({ price })
-    //         }
-    //       });
-    //     });
-
-
-    //   }
-    // })
-    // Promise.all(updatePriceList)
-    //   .then((response) => {
-    //     res.send(response);
-    //   })
-    //   .catch((err) => {
-    //     res.send(err);
-    //   });
-    // await Price.insertMany(req.body, (err) => {
-    //   if (err) {
-    //     res.status(500).json({ error: err });
-    //   } else {
-    //     res.status(200).json({
-    //       message: "prices are created Successfully",
-    //     });
-    //   }
-    // });
 
     const updatePriceList = allPrices.map(async price => {
-      // if (price?._id) {
-      //   try {
-      //     await Price.updateOne({ _id: price?._id }, { $set: price }, { upsert: true })
-      //       .then((response) => {
-      //         console.log(response)
-      //         // res.status(200).json({
-      //         //   message: "prices are created Successfully",
-      //         // });
-      //         // res.send(response)
-      //       })
-      //       .catch((err) => {
-      //         // res.send(err);
-      //         // console.log("err", err)
-      //       });
-
-      //   } catch (err) {
-      //     // console.log("err", err)
-      //     // res.status(500).json({ error: err });
-      //   }
-
-      // } else {
-      //   const newPrice = new Price(price)
-      //   try {
-      //     let savePrice = await newPrice.save(); //when fail its goes to catch
-      //     console.log(savePrice); //when success it print.
-      //     console.log("after save");
-      //     // res.status(200).json({
-      //     //   status: "success",
-      //     //   message: "Price is created Successfully",
-      //     //   // id: savePrice._id,
-      //     // });
-      //   } catch (err) {
-      //     // res
-      //     //   .status(500)
-      //     //   .json({ message: "There was a server side error", error: err });
-      //   }
-      // }
 
       let priceList = []
       if (price?._id) {
@@ -285,7 +202,8 @@ priceRouter.put(
                 resolve([...priceList, newPrice._id])
 
               }
-            }); //when fail its goes to catch
+            });
+            //when fail its goes to catch
             // console.log(savePrice); //when success it print.
             // console.log("after save");
 
@@ -295,9 +213,6 @@ priceRouter.put(
             //   // id: savePrice._id,
             // });
           } catch (err) {
-            // res
-            //   .status(500)
-            //   .json({ message: "There was a server side error", error: err });
             reject()
           }
 
@@ -347,10 +262,31 @@ priceRouter.put(
 
 // UPDATE ONE Price
 priceRouter.put(
+  "/edit/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const update = req.body.priceList;
+    console.log(id, update)
+    try {
+      await Price.updateOne({ _id: id }, { $set: update })
+        .then((response) => {
+          res.send(response);
+        })
+        .catch((err) => {
+          res.send(err);
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  })
+);
+// UPDATE ONE Price
+priceRouter.put(
   "/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     const update = req.body;
+    console.log(id, update)
     try {
       await Price.updateOne({ _id: id }, { $set: update })
         .then((response) => {

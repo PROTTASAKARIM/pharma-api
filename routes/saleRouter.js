@@ -15,6 +15,8 @@ const router = express.Router();
 const expressAsyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 const Sale = require("../models/saleModel");
+const Product = require("../models/productModel");
+const Category = require("../models/categoryModel");
 const checklogin = require("../middlewares/checkLogin");
 const { generatePosId } = require("../middlewares/generateId");
 const { startOfDay, endOfDay } = require("date-fns");
@@ -43,6 +45,43 @@ saleRouter.get(
       .populate("billerId", "name");
     res.send(sales);
     // // res.send('removed');
+  })
+);
+// today point
+saleRouter.get(
+  "/todayPoint",
+  expressAsyncHandler(async (req, res) => {
+    // res.send("hi");
+    const today = new Date()
+    const start = startOfDay(new Date());
+    const end = endOfDay(new Date());
+    // console.log(start, end)
+    // console.log(today)
+    try {
+      const sales = await Sale.aggregate([
+        {
+          $match: {
+            createdAt: {
+              $gte: start,
+              $lt: end
+            },
+
+          }
+        },
+        // { $match: { "point.new": { $lt: "point.old" } } },
+        // { $group: { _id: null, total: { $sum: "$point.new" } } }
+      ]);
+      const filtered = sales.filter(sale => sale?.point?.old > sale?.point?.new)
+      console.log(filtered);
+      let todayPoint = 0;
+      filtered.map(sale => {
+        todayPoint = todayPoint + (Number(sale.point.old) - Number(sale.point.new) + Number(sale.todayPoint))
+      })
+      console.log(todayPoint)
+      res.send({ spentPoint: todayPoint });
+    } catch (err) {
+      console.log(err);
+    }
   })
 );
 // weekly SALE Count
@@ -124,9 +163,251 @@ saleRouter.get(
   })
 );
 
+//grn by category  between two dates
+saleRouter.get(
+  "/category/:start/:end",
+  expressAsyncHandler(async (req, res) => {
+    const start = req.params.start
+      ? startOfDay(new Date(req.params.start))
+      : startOfDay(new Date.now());
+    const end = req.params.end
+      ? endOfDay(new Date(req.params.end))
+      : endOfDay(new Date.now());
+
+    console.log(start, end, new Date());
+
+    try {
+      const sale = await Sale.aggregate([
+        {
+          $match: {
+            createdAt: {
+              $gte: start,
+              $lt: end
+            }
+          }
+        },
+        {
+          $unwind: '$products'
+        },
+        {
+          $group: {
+            _id: '$products.id',
+            article_code: { $first: '$products.article_code' },
+            totalQuantity: { $sum: { $toDouble: '$products.qty' } },
+            name: { $first: '$products.name' },
+            mrp: { $last: '$products.mrp' },
+            tp: { $last: '$products.tp' },
+            priceId: { $first: '$products.priceId' }
+
+          }
+        },
+        {
+          $sort: { totalQuantity: -1 }
+        },
+        {
+          $lookup:
+          {
+            from: "products",
+            localField: "article_code",
+            foreignField: "article_code",
+            as: "productId"
+          }
+        },
+        {
+          $unwind: '$productId'
+        },
+        {
+          $lookup: {
+            from: 'categories',
+            localField: 'productId.master_category',
+            foreignField: '_id',
+            as: 'category'
+          }
+        },
+        {
+          $unwind: '$category'
+        },
+        {
+          $group: {
+            _id: '$category._id',
+            totalQuantity: { $sum: { $toDouble: '$totalQuantity' } },
+            totalValue: { $sum: { $multiply: [{ $toDouble: '$totalQuantity' }, { $toDouble: '$mrp' }] } }
+          }
+        },
+        {
+          $sort: { totalQuantity: -1 }
+        },
+
+      ]);
+      const populateSale = await Category.populate(sale, {
+        path: "_id",
+        model: "Category",
+      })
+      res.send(populateSale);
+    } catch (err) {
+      console.log(err)
+    }
+    // console.log(sales);
+    // // res.send('removed');
+  })
+);
 
 
+// GET ALL sales by category
+saleRouter.get(
+  "/bySupplier/:start/:end/:supplierId",
+  expressAsyncHandler(async (req, res) => {
+    const start = req.params.start
+      ? startOfDay(new Date(req.params.start))
+      : startOfDay(new Date.now());
+    const end = req.params.end
+      ? endOfDay(new Date(req.params.end))
+      : endOfDay(new Date.now());
+    const supplierId = req.params.supplierId
+    console.log(supplierId)
+    console.log(start, end);
 
+    const product = await Sale.aggregate([
+      {
+        $match: {
+          status: "complete",
+          createdAt: { $gte: start, $lte: end },
+        }
+      },
+      {
+        $unwind: '$products'
+      },
+      {
+        $group: {
+          _id: '$products.id',
+          article_code: { $first: '$products.article_code' },
+          totalQuantity: { $sum: '$products.qty' },
+          name: { $first: '$products.name' },
+          mrp: { $last: '$products.mrp' },
+          tp: { $last: '$products.tp' },
+          priceId: { $first: '$products.priceId' },
+          supplier: { $first: '$products.supplier' },
+          // discount: { $first:  '$products.promo.promo_type' }
+          // discount: {
+          //   $sum: {
+          //     $cond: {
+          //       if: { $eq: ['$products.promo.promo_type', false] },
+          //       then: { $multiply: [{ $last: '$products.mrp' }, '$products.promo.promo_price'] },
+          //       else: { $multiply: [{ $last: '$products.mrp' }, { $divide: ['$products.promo.promo_price', 100] }] },
+          //     }
+          //   }
+
+          // },
+          // discount: {
+          //   $sum: {
+          //     $cond: [
+          //       {
+          //         $and: [
+          //           { $ne: ['$products.promo', null] },
+          //           { $eq: ['$products.promo.promo_type', false] }
+          //         ]
+          //       },
+          //       { $multiply: [{ $last: '$products.mrp' }, '$products.promo.promo_price'] },
+          //       {
+          //         $cond: [
+          //           {
+          //             $and: [
+          //               { $ne: ['$products.promo', null] },
+          //               { $eq: ['$products.promo.promo_type', true] }
+          //             ]
+          //           },
+          //           { $multiply: [{ $last: '$products.mrp' }, { $divide: ['$products.promo.promo_price', 100] }] },
+          //           0
+          //         ]
+          //       }
+          //     ]
+          //   }
+
+          // },
+
+        }
+      },
+      {
+        $sort: { totalQuantity: -1 }
+      }
+    ])
+    // const populated = product.populate("priceId", "mrp")
+    // res.send(populated);
+
+    let pProduct_supplier = []
+    product.map(pro => {
+      pProduct_supplier = [...pProduct_supplier, pro.supplier]
+    })
+    const supplierProducts = product.filter(pro => pro.supplier == supplierId)
+
+    res.send(supplierProducts);
+
+  })
+);
+// GET ALL sales by category
+saleRouter.get(
+  "/byCategory/:start/:end/:catID",
+  expressAsyncHandler(async (req, res) => {
+    const start = req.params.start
+      ? startOfDay(new Date(req.params.start))
+      : startOfDay(new Date.now());
+    const end = req.params.end
+      ? endOfDay(new Date(req.params.end))
+      : endOfDay(new Date.now());
+    const catId = req.params.catID
+    console.log(catId)
+    console.log(start, end);
+
+    const product = await Sale.aggregate([
+      {
+        $match: {
+          status: "complete",
+          createdAt: { $gte: start, $lte: end },
+        }
+      },
+      {
+        $unwind: '$products'
+      },
+      {
+        $group: {
+          _id: '$products.id',
+          article_code: { $first: '$products.article_code' },
+          totalQuantity: { $sum: '$products.qty' },
+          name: { $first: '$products.name' },
+          mrp: { $last: '$products.mrp' },
+          tp: { $last: '$products.tp' },
+          priceId: { $first: '$products.priceId' }
+
+        }
+      },
+      {
+        $sort: { totalQuantity: -1 }
+      }
+    ])
+    // const populated = product.populate("priceId", "mrp")
+    // res.send(populated);
+
+    let pProduct_AC = []
+    product.map(pro => {
+      pProduct_AC = [...pProduct_AC, pro.article_code]
+    })
+    // console.log("pProduct", pProduct_AC)
+    const matchProducts = await Product.find({ article_code: pProduct_AC })
+    const catProduct = matchProducts.filter(pro => pro.master_category == catId || pro.category == catId)
+    let filteredProducts = []
+    catProduct.map(pro => {
+      const p = product.filter(pp => pp.article_code === pro.article_code)
+      filteredProducts = [...filteredProducts, p[0]]
+    })
+    console.log(product.length)
+    console.log(catProduct.length)
+    console.log(filteredProducts.length)
+    const sortedProducts = filteredProducts.slice().sort((a, b) => b.totalQuantity - a.totalQuantity)
+    console.log(sortedProducts.length)
+    res.send(sortedProducts);
+
+  })
+);
 // GET ALL sales
 saleRouter.get(
   "/byDate/:start/:end",
@@ -301,6 +582,7 @@ saleRouter.get(
           $project: {
             "invoiceId": 1,
             "products.article_code": 1,
+            "products.priceId": 1,
             "products.name": 1,
             "products.tp": 1,
             "products.mrp": 1,
@@ -308,6 +590,7 @@ saleRouter.get(
             "products.vat": 1,
             "createdAt": 1,
             "returnProducts.article_code": 1,
+            "returnProducts.priceId": 1,
             "returnProducts.name": 1,
             "returnProducts.tp": 1,
             "returnProducts.mrp": 1,

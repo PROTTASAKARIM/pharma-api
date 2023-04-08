@@ -14,6 +14,8 @@ const expressAsyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 const Inventory = require("../models/inventoryModel");
 const checklogin = require("../middlewares/checkLogin");
+const { adjustInventoryOnSale } = require("../middlewares/useInventory");
+
 
 const inventoryRouter = express.Router();
 
@@ -45,6 +47,7 @@ inventoryRouter.get(
         soldQty: 1,
         damageQty: 1,
         rtvQty: 1,
+        tpnQty: 1,
       })
       .populate("priceTable", {
         path: "priceTable",
@@ -68,6 +71,16 @@ inventoryRouter.get(
   })
 );
 
+// Adjust Inventory
+inventoryRouter.put(
+  "/adjust",
+  adjustInventoryOnSale,
+  expressAsyncHandler(async (req, res) => {
+    console.log("update", req.body.update)
+    // const total = await Inventory.countDocuments({});
+    res.status(200).json("success");
+  })
+);
 // COUNT Inventory
 inventoryRouter.get(
   "/count",
@@ -132,6 +145,7 @@ inventoryRouter.get(
           soldQty: 1,
           damageQty: 1,
           rtvQty: 1,
+          tpnQty: 1,
         })
         .limit(100);
       // .populate("category", "name")
@@ -158,6 +172,7 @@ inventoryRouter.get(
           soldQty: 1,
           damageQty: 1,
           rtvQty: 1,
+          tpnQty: 1,
         })
         .limit(size)
         .skip(size * page);
@@ -189,6 +204,7 @@ inventoryRouter.get(
         soldQty: 1,
         damageQty: 1,
         rtvQty: 1,
+        tpnQty: 1,
       })
       // .populate("warehouse", "name")
       .populate({
@@ -235,8 +251,9 @@ inventoryRouter.get(
 inventoryRouter.post(
   "/",
   expressAsyncHandler(async (req, res) => {
+    console.log("hi", req.body)
     const newInventory = new Inventory(req.body);
-    console.log(newInventory);
+    console.log("newInventory", newInventory);
     try {
       await newInventory.save();
       res.status(200).json({
@@ -297,12 +314,17 @@ inventoryRouter.put(
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     const update = req.body;
+    console.log("in id", id)
+    console.log("in up", update)
     try {
       await Inventory.updateOne({ _id: id }, { $set: update })
         .then((response) => {
+          // console.log("inventory updating")
+          console.log("inventory updating", response)
           res.send(response);
         })
         .catch((err) => {
+          console.log("inventory not updating", err)
           res.send(err);
         });
     } catch (error) {
