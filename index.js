@@ -22,6 +22,7 @@ const companyRouter = require("./routes/companyRouter");
 const damageRouter = require("./routes/damageRouter");
 const ecomRouter = require("./routes/ecomRouter");
 const accountHeadRouter = require("./routes/accountHeadRouter");
+const accountRouter = require("./routes/accountRouter");
 const multer = require("multer");
 const fileUpload = require("express-fileupload");
 
@@ -88,6 +89,7 @@ app.use("/api/company", companyRouter);
 app.use("/api/damage", damageRouter);
 app.use("/api/ecom", ecomRouter);
 app.use("/api/accounthead", accountHeadRouter);
+app.use("/api/account", accountRouter);
 app.use("/uploads", express.static("uploads"));
 // Home
 app.get("/", async (req, res) => {

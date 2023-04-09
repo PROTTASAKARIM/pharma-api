@@ -1,70 +1,39 @@
 const express = require("express");
 const expressAsyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
-const AccountHead = require("../models/accountHeadModal");
+const Account = require("../models/accountModel");
 const checklogin = require("../middlewares/checkLogin");
 
-const accountHeadRouter = express.Router();
-// accountHead
+const accountRouter = express.Router();
 
-accountHeadRouter.get(
+accountRouter.get(
     "/",
     expressAsyncHandler(async (req, res) => {
-        const accountHead = await AccountHead.find({}).populate("maId", {
-            name: 1, code: 1, description: 1,
-            status: 1
-        });
-        res.send(accountHead);
+        const account = await Account.find({})
+        res.send(account);
         // // res.send('removed');
-        console.log(accountHead);
+        console.log(account);
     })
 );
-accountHeadRouter.get(
-    "/master",
-    expressAsyncHandler(async (req, res) => {
-        const accountHead = await AccountHead.find({
-            status: "active",
-            maId: { $exists: false },
-        });
-        res.send(accountHead);
-        // // res.send('removed');
-        console.log(accountHead);
-    })
-);
-// GET ONE AccountHead
-accountHeadRouter.get(
+accountRouter.get(
     "/:id",
     expressAsyncHandler(async (req, res) => {
         const id = req.params.id;
-        const accountHead = await AccountHead.findOne({ _id: id, status: "active" })
-            .select({
-                name: 1,
-                code: 1,
-                maId: 1,
-                photo: 1,
-                description: 1,
-                status: 1
-            })
-            .populate("maId", {
-                name: 1, code: 1, description: 1,
-                status: 1
-            });
-        res.send(accountHead);
+        const account = await Account.findOne({ _id: id, status: "active" })
+        res.send(account);
         // // res.send('removed');
-        console.log(accountHead);
+        console.log(account);
     })
 );
-
-// CREATE ONE AccountHead
-accountHeadRouter.post(
+accountRouter.post(
     "/",
     expressAsyncHandler(async (req, res) => {
-        const newAccountHead = new AccountHead(req.body);
+        const newAccount = new Account(req.body);
 
         try {
-            await newAccountHead.save();
+            await newAccount.save();
             res.status(200).json({
-                message: "AccountHead is created Successfully",
+                message: "Account is created Successfully",
             });
         } catch (err) {
             res
@@ -74,29 +43,30 @@ accountHeadRouter.post(
     })
 );
 
-// CREATE MULTI AccountHead
-accountHeadRouter.post(
+// CREATE MULTI Account
+accountRouter.post(
     "/all",
     expressAsyncHandler(async (req, res) => {
-        await AccountHead.insertMany(req.body, (err) => {
+        await Account.insertMany(req.body, (err) => {
             if (err) {
                 res.status(500).json({ error: err });
             } else {
                 res.status(200).json({
-                    message: "AccountHead are created Successfully",
+                    message: "Accounts are created Successfully",
                 });
             }
         });
     })
 );
-// UPDATE ONE AccountHead
-accountHeadRouter.put(
+
+// UPDATE ONE Account
+accountRouter.put(
     "/:id",
     expressAsyncHandler(async (req, res) => {
         const id = req.params.id;
         const update = req.body;
         try {
-            await AccountHead.updateOne({ _id: id }, { $set: update })
+            await Account.updateOne({ _id: id }, { $set: update })
                 .then((response) => {
                     res.send(response);
                 })
@@ -108,13 +78,13 @@ accountHeadRouter.put(
         }
     })
 );
-// DELETE ONE AccountHead
-accountHeadRouter.delete(
+// DELETE ONE Account
+accountRouter.delete(
     "/:id",
     expressAsyncHandler(async (req, res) => {
         const id = req.params.id;
         try {
-            await AccountHead.deleteOne({ _id: id })
+            await Account.deleteOne({ _id: id })
                 .then((response) => {
                     res.send(response);
                 })
@@ -126,9 +96,8 @@ accountHeadRouter.delete(
         }
     })
 );
-
 // Upload Endpoint
-accountHeadRouter.post(
+accountRouter.post(
     "/upload/:id",
     expressAsyncHandler(async (req, res) => {
         const id = req.params.id;
@@ -149,20 +118,20 @@ accountHeadRouter.post(
         const fileName = `${id}-${time}.${ext}`;
         // console.log(`../uploads/${fileName}`);
 
-        file.mv(`${appRoot}/uploads/accounthead/${fileName}`, async (err) => {
+        file.mv(`${appRoot}/uploads/account/${fileName}`, async (err) => {
             if (err) {
                 console.error(err);
                 return res.status(500).send(err);
             } else {
-                await AccountHead.updateOne(
+                await Account.updateOne(
                     { _id: id },
-                    { $set: { photo: `/uploads/accounthead/${fileName}` } }
+                    { $set: { photo: `/uploads/account/${fileName}` } }
                 )
                     .then((response) => {
                         // res.send(response);
                         res.json({
                             fileName: fileName,
-                            filePath: `/uploads/accounthead/${fileName}`,
+                            filePath: `/uploads/account/${fileName}`,
                         });
                     })
                     .catch((err) => {
@@ -173,4 +142,4 @@ accountHeadRouter.post(
     })
 );
 
-module.exports = accountHeadRouter;
+module.exports = accountRouter;
