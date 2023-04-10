@@ -24,7 +24,7 @@ const accountSchema = mongoose.Schema(
         }),
         photo: { type: String },
         accountHead: { type: mongoose.Types.ObjectId, ref: "AccountHead" },
-        User: { type: mongoose.Types.ObjectId, ref: "User" },
+        user: { type: mongoose.Types.ObjectId, ref: "User" },
         date: { type: Date },
         amount: { type: String },
         due: { type: String },
