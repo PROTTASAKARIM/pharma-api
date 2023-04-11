@@ -3,6 +3,7 @@ const expressAsyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 const Account = require("../models/accountModel");
 const checklogin = require("../middlewares/checkLogin");
+const { generateAccId } = require("../middlewares/generateId");
 
 const accountRouter = express.Router();
 
@@ -10,6 +11,7 @@ accountRouter.get(
     "/",
     expressAsyncHandler(async (req, res) => {
         const account = await Account.find({})
+            .populate("supplier", "company")
         res.send(account);
         // // res.send('removed');
         console.log(account);
@@ -27,6 +29,7 @@ accountRouter.get(
 );
 accountRouter.post(
     "/",
+    generateAccId,
     expressAsyncHandler(async (req, res) => {
         const newAccount = new Account(req.body);
 
