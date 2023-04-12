@@ -33,6 +33,29 @@ accountHeadRouter.get(
 );
 // GET ONE AccountHead
 accountHeadRouter.get(
+    "/sub/:id",
+    expressAsyncHandler(async (req, res) => {
+        const id = req.params.id;
+        const accountHead = await AccountHead.find({ maId: id, status: "active" })
+            .select({
+                name: 1,
+                code: 1,
+                maId: 1,
+                photo: 1,
+                description: 1,
+                status: 1
+            })
+            .populate("maId", {
+                name: 1, code: 1, description: 1,
+                status: 1
+            });
+        res.send(accountHead);
+        // // res.send('removed');
+        console.log(accountHead);
+    })
+);
+// GET ONE AccountHead
+accountHeadRouter.get(
     "/:id",
     expressAsyncHandler(async (req, res) => {
         const id = req.params.id;
