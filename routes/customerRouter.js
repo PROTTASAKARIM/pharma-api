@@ -31,10 +31,13 @@ customerRouter.get(
 customerRouter.get(
   "/",
   expressAsyncHandler(async (req, res) => {
-    const customers = await Customer.find({ status: "active" });
+    const customers = await Customer.find({ status: "active" }).select({
+      name: 1,
+      // gender: 1,
+      point: 1,
+      phone: 1,
+    });
     res.send(customers);
-    // console.log(customers);
-    // // res.send('removed');
   })
 );
 // GET ALL customers
@@ -49,14 +52,13 @@ customerRouter.get(
       // address: 1,
       // point: 1,
       phone: 1,
-      status: 1
+      status: 1,
     });
     res.send(customers);
     // console.log(customers);
     // // res.send('removed');
   })
 );
-
 
 // GET customers by phone
 customerRouter.get(
@@ -135,6 +137,73 @@ customerRouter.get(
   })
 );
 
+// GET ALL CUSTOMER WITH PAGENATION & SEARCH
+customerRouter.get(
+  "/contact/:page/:size",
+  expressAsyncHandler(async (req, res) => {
+    const page = parseInt(req.params.page);
+    const size = parseInt(req.params.size);
+    const queryString = req.query?.q?.trim().toString().toLocaleLowerCase();
+    const currentPage = page + 0;
+
+    let query = {};
+    let customer = [];
+    // const size = parseInt(req.query.size);
+    console.log("page:", currentPage, "size:", size, "search:", queryString);
+
+    //check if search or the pagenation
+
+    if (queryString) {
+      console.log("search:", query);
+      // search check if num or string
+      const isNumber = /^\d/.test(queryString);
+      console.log(isNumber);
+      if (!isNumber) {
+        // if text then search name
+        query = {
+          $or: [
+            { name: { $regex: new RegExp(queryString + ".*?", "i") } },
+            { email: { $regex: new RegExp("^" + queryString + ".*", "i") } },
+          ],
+        };
+        // query = { name:  queryString  };
+      } else {
+        // if number search in ean and article code
+        query = {
+          phone: {
+            $regex: RegExp("^" + queryString + ".*", "i"),
+          },
+        };
+      }
+
+      customer = await Customer.find(query)
+        .select({
+          _id: 1,
+          name: 1,
+          phone: 1,
+          point: 1,
+        })
+        .limit(50);
+      res.status(200).json(customer);
+    } else {
+      // regular pagination
+      query = {};
+
+      customer = await Customer.find(query)
+        .select({
+          _id: 1,
+          name: 1,
+          phone: 1,
+          point: 1,
+        })
+        .limit(size)
+        .skip(size * page);
+      res.status(200).json(customer);
+      console.log("done:", query);
+    }
+  })
+);
+
 // GET ALL CUSTOMER DW
 customerRouter.get(
   "/dw",
@@ -146,7 +215,6 @@ customerRouter.get(
       point: 1,
     });
     res.send(customers);
-    // console.log(customers);
     // // res.send('removed');
   })
 );
@@ -296,11 +364,11 @@ customerRouter.put(
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     const update = req.body.newCustomer;
-    console.log("id", id, "update", update)
+    console.log("id", id, "update", update);
     try {
       await Customer.updateOne({ _id: id }, { $set: update })
         .then((response) => {
-          console.log(response)
+          console.log(response);
           res.send(response);
         })
         .catch((err) => {
@@ -317,12 +385,12 @@ customerRouter.put(
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     const update = req.body;
-    console.log("id", id, "update", update)
-    console.log("req.body", req.body)
+    console.log("id", id, "update", update);
+    console.log("req.body", req.body);
     try {
       await Customer.updateOne({ _id: id }, { $set: update })
         .then((response) => {
-          console.log(response)
+          console.log(response);
           res.send(response);
         })
         .catch((err) => {
