@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const Account = require("../models/accountModel");
 const checklogin = require("../middlewares/checkLogin");
 const { generateAccId } = require("../middlewares/generateId");
+const { startOfDay, endOfDay } = require("date-fns");
 
 const accountRouter = express.Router();
 
@@ -11,6 +12,24 @@ accountRouter.get(
     "/",
     expressAsyncHandler(async (req, res) => {
         const account = await Account.find({})
+            .populate("supplier", "company")
+        res.send(account);
+        // // res.send('removed');
+        console.log(account);
+    })
+);
+accountRouter.get(
+    "/byDate/:start/:end",
+    expressAsyncHandler(async (req, res) => {
+        const start = req.params.start
+            ? startOfDay(new Date(req.params.start))
+            : startOfDay(new Date.now());
+        const end = req.params.end
+            ? endOfDay(new Date(req.params.end))
+            : endOfDay(new Date.now());
+
+        console.log(start, end, new Date());
+        const account = await Account.find({ createdAt: { $gte: start, $lte: end } })
             .populate("supplier", "company")
         res.send(account);
         // // res.send('removed');

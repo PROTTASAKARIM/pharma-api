@@ -410,6 +410,55 @@ saleRouter.get(
 );
 // GET ALL sales
 saleRouter.get(
+  "/aftersale/:start/:end/:supplier",
+  expressAsyncHandler(async (req, res) => {
+    const supplier = req.params.supplier
+    const start = req.params.start
+      ? startOfDay(new Date(req.params.start))
+      : startOfDay(new Date.now());
+    const end = req.params.end
+      ? endOfDay(new Date(req.params.end))
+      : endOfDay(new Date.now());
+    // console.log(start, end, new Date());
+    const product = await Sale.aggregate([
+      {
+        $match: {
+          status: "complete",
+          createdAt: { $gte: start, $lte: end },
+        }
+      },
+      {
+        $unwind: '$products'
+      },
+      {
+        $group: {
+          _id: '$products.id',
+          article_code: { $first: '$products.article_code' },
+          totalQuantity: { $sum: '$products.qty' },
+          name: { $first: '$products.name' },
+          mrp: { $last: '$products.mrp' },
+          tp: { $last: '$products.tp' },
+          priceId: { $first: '$products.priceId' },
+          supplier: { $first: '$products.supplier' }
+
+        }
+      },
+      {
+        $match: {
+          supplier: supplier
+        }
+      },
+      {
+        $sort: { totalQuantity: -1 }
+      }
+    ])
+    res.send(product);
+    // console.log(sales);
+    // // res.send('removed');
+  })
+);
+// GET ALL sales
+saleRouter.get(
   "/byDate/:start/:end",
   expressAsyncHandler(async (req, res) => {
     const start = req.params.start
