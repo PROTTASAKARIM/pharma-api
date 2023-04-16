@@ -387,7 +387,7 @@ grnRouter.get(
 grnRouter.post(
   "/",
   generateGrnId,
-  // updateInventoryInOnGRNIn,
+  updateInventoryInOnGRNIn,
   handleNewPrice,
   expressAsyncHandler(async (req, res) => {
     console.log("New:", req.body.products);
