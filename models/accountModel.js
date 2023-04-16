@@ -32,6 +32,8 @@ const accountSchema = mongoose.Schema(
         accountHead: { type: mongoose.Types.ObjectId, ref: "AccountHead" },
         user: { type: mongoose.Types.ObjectId, ref: "User" },
         date: { type: String },
+        toDate: { type: String },
+        fromDate: { type: String },
         amount: { type: String },
         due: { type: String },
         type: { type: String, enum: ["Debit", "Credit"] },

@@ -452,7 +452,16 @@ saleRouter.get(
         $sort: { totalQuantity: -1 }
       }
     ])
-    res.send(product);
+    let totalTP = 0;
+    let totalMRP = 0;
+    let totalItemOty = 0;
+    product?.length > 0 &&
+      product?.map((item) => {
+        totalItemOty = totalItemOty + item.totalQuantity;
+        totalTP = parseFloat(totalTP) + parseFloat(parseFloat(item.totalQuantity) * parseFloat(item.tp));
+        totalMRP = parseFloat(totalMRP) + parseFloat(parseFloat(item.totalQuantity) * parseFloat(item.mrp));
+      });
+    res.send({ product: product, totalTP: totalTP, totalMRP: totalMRP, totalItemOty: totalItemOty });
     // console.log(sales);
     // // res.send('removed');
   })
