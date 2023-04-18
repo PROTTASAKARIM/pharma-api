@@ -124,6 +124,84 @@ saleRouter.get(
       const sales = await Sale.aggregate([
         {
           $match: {
+            $and: [
+              {
+                status: "complete",
+              },
+              {
+                createdAt: {
+                  $gt: start,
+                  $lt: end,
+                },
+              },
+              {
+                source: "POS"
+              }
+            ],
+          },
+        },
+        {
+          $group: {
+            _id: {
+              $dateToString: {
+                format: "%Y-%m-%d",
+                date: "$createdAt"
+              }
+            },
+            grossTotalRound: {
+              $sum: "$grossTotalRound"
+            },
+            total: {
+              $sum: "$total"
+            },
+            vat: {
+              $sum: "$vat"
+            },
+          }
+        },
+        {
+          $sort: {
+            "_id": 1
+          }
+        }
+      ]);
+      console.log(sales);
+      res.send(sales);
+    } catch (err) {
+      console.log(err);
+    }
+  })
+);
+
+// weekly SALE Count
+saleRouter.get(
+  "/testing",
+  expressAsyncHandler(async (req, res) => {
+    // const today = new Date();
+    const currentDate = new Date();
+    console.log(currentDate)
+    const last7Days = [];
+
+    for (let i = 0; i <= 10; i++) {
+      let day = new Date(currentDate.getTime());
+      day.setDate(currentDate.getDate() - i);
+      last7Days.push(day);
+    }
+
+    console.log(last7Days);
+    const to = endOfDay(currentDate)
+    // const end = startOfDay(new Date(last7Days[0]))
+    // const start = endOfDay(new Date(last7Days[8]))
+    // console.log("test1", start)
+    // console.log("test2", end)
+    // console.log("test2", to)
+    const start = startOfDay(last7Days[1]);
+    const end = endOfDay(last7Days[1]);
+    console.log("testing", start, end)
+    try {
+      const sales = await Sale.aggregate([
+        {
+          $match: {
             createdAt: {
               $gte: start,
               $lt: end
@@ -162,7 +240,162 @@ saleRouter.get(
     }
   })
 );
+saleRouter.get(
+  "/testingi",
+  expressAsyncHandler(async (req, res) => {
+    // const today = new Date();
+    const currentDate = new Date();
+    console.log(currentDate)
+    const last7Days = [];
 
+    for (let i = 0; i <= 10; i++) {
+      let day = new Date(currentDate.getTime());
+      day.setDate(currentDate.getDate() - i);
+      last7Days.push(day);
+    }
+
+    console.log(last7Days);
+    const to = endOfDay(currentDate)
+    // const end = startOfDay(new Date(last7Days[0]))
+    // const start = endOfDay(new Date(last7Days[8]))
+    // console.log("test1", start)
+    // console.log("test2", end)
+    // console.log("test2", to)
+    const start = startOfDay(last7Days[2]);
+    const end = endOfDay(last7Days[2]);
+    console.log("testing", start, end)
+    try {
+      const sales = await Sale.aggregate([
+        {
+          $match: {
+            $and: [
+              {
+                status: "complete",
+              },
+              {
+                createdAt: {
+                  $gt: start,
+                  $lt: end,
+                },
+              },
+              {
+                source: "POS"
+              }
+            ],
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            grossTotalRound: { $sum: "$grossTotalRound" },
+            total: { $sum: "$total" },
+            vat: { $sum: "$vat" },
+          },
+        },
+      ]);
+      console.log(sales);
+      res.send(sales);
+    } catch (err) {
+      console.log(err);
+    }
+  })
+);
+
+//grn by category  between two dates
+saleRouter.get(
+  "/testingnew/:start/:end",
+  expressAsyncHandler(async (req, res) => {
+    const start = req.params.start
+      ? startOfDay(new Date(req.params.start))
+      : startOfDay(new Date.now());
+    const end = req.params.end
+      ? endOfDay(new Date(req.params.end))
+      : endOfDay(new Date.now());
+
+    console.log(start, end, new Date());
+
+    try {
+      const sale = await Sale.aggregate([
+        {
+          $match: {
+            $and: [
+              {
+                status: "complete",
+              },
+              {
+                createdAt: {
+                  $gt: start,
+                  $lt: end,
+                },
+              },
+              {
+                source: "POS"
+              }
+            ],
+          }
+        },
+        {
+          $unwind: '$paidAmount'
+        },
+        {
+          $group: {
+            _id: '$paidAmount.id',
+            cash: { $sum: '$paidAmount.cash' },
+            // totalQuantity: { $sum: { $toDouble: '$products.qty' } },
+            mfs: { $sum: '$paidAmount.mfs.amount' },
+            card: { $sum: '$paidAmount.card.amount' },
+            point: { $sum: '$paidAmount.point' },
+            // priceId: { $first: '$products.priceId' }
+
+          }
+        },
+        // {
+        //   $sort: { totalQuantity: -1 }
+        // },
+        // {
+        //   $lookup:
+        //   {
+        //     from: "products",
+        //     localField: "article_code",
+        //     foreignField: "article_code",
+        //     as: "productId"
+        //   }
+        // },
+        // {
+        //   $unwind: '$productId'
+        // },
+        // {
+        //   $lookup: {
+        //     from: 'categories',
+        //     localField: 'productId.master_category',
+        //     foreignField: '_id',
+        //     as: 'category'
+        //   }
+        // },
+        // {
+        //   $unwind: '$category'
+        // },
+        // {
+        //   $group: {
+        //     _id: '$category._id',
+        //     totalQuantity: { $sum: { $toDouble: '$totalQuantity' } },
+        //     totalValue: { $sum: { $multiply: [{ $toDouble: '$totalQuantity' }, { $toDouble: '$mrp' }] } }
+        //   }
+        // },
+        // {
+        //   $sort: { totalQuantity: -1 }
+        // },
+
+      ]);
+
+      res.send(sale);
+    } catch (err) {
+      console.log(err)
+    }
+    // console.log(sales);
+    // // res.send('removed');
+  })
+);
 //grn by category  between two dates
 saleRouter.get(
   "/category/:start/:end",
@@ -573,8 +806,8 @@ saleRouter.get(
       .populate("billerId", "name")
       .populate("updateUser", "name")
       .populate("customerId", "phone");
+    console.log(sales);
     res.send(sales);
-    // console.log(sales);
     // // res.send('removed');
   })
 );
@@ -591,34 +824,6 @@ saleRouter.get(
     const end = req.params.end
       ? endOfDay(new Date(req.params.end))
       : endOfDay(new Date.now());
-    // console.log(start, end, new Date());
-
-    // const sales = await Sale.find({
-    //   status: "complete",
-    //   createdAt: { $gte: start, $lte: end },
-    // }).select({
-    //   invoiceId: 1,
-    //   // totalItem: 1,
-    //   // grossTotalRound: 1,
-    //   // total: 1,
-    //   // vat: 1,
-    //   // status: 1,
-    //   // paidAmount: 1,
-    //   // billerId: 1,
-    //   // totalReceived: 1,
-    //   createdAt: 1,
-    //   // changeAmount: 1,
-    //   // customerId: 1,
-    //   products: 1,
-    //   // tp:1
-    // });
-    // // .populate("billerId", "name")
-    // // .populate("customerId", "phone");
-
-    // res.send(sales);
-    // console.log(sales);
-    // // res.send('removed');
-
     try {
       const sales = await Sale.aggregate([
         {
@@ -677,7 +882,7 @@ saleRouter.get(
     const end = req.params.end
       ? endOfDay(new Date(req.params.end))
       : endOfDay(new Date.now());
-    // console.log(start, end, new Date());
+    console.log("date", start, end);
     // const day = parseInt(1);
     try {
       const sales = await Sale.aggregate([

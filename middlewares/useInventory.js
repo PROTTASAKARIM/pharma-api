@@ -1855,6 +1855,11 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
 };
 
 
+/** 
+ * ====================================================================================
+ * GRN INVENTORY OPERATIONS
+ * =====================================================================================
+ * **/
 // Generate grn in -> inventory in
 const updateInventoryInOnGRNIn = async (req, res, next) => {
   // TODO:: todays total

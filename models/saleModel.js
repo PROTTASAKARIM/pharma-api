@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const saleSchema = mongoose.Schema(
   {
     invoiceId: { type: String, require: true },
-    source: { type: String, enum: ["web", "POS"], require: true },
+    source: { type: String, enum: ["web", "POS", "app"], require: true },
     note: { type: String },
     // delivery_address: { type: String, require: true },
     warehouse: { type: String, require: true },

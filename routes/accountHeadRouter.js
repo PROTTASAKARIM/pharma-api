@@ -13,7 +13,8 @@ accountHeadRouter.get(
         const accountHead = await AccountHead.find({}).populate("maId", {
             name: 1, code: 1, description: 1,
             status: 1
-        });
+        })
+            ;
         res.send(accountHead);
         // // res.send('removed');
         console.log(accountHead);
@@ -137,6 +138,9 @@ accountHeadRouter.delete(
     expressAsyncHandler(async (req, res) => {
         const id = req.params.id;
         try {
+            if (id == "643e3ff315c557ac29f9d7e7" || id == "643e3fd515c557ac29f9d7e2") {
+                res.send("can not delete");
+            }
             await AccountHead.deleteOne({ _id: id })
                 .then((response) => {
                     res.send(response);

@@ -31,6 +31,7 @@ accountRouter.get(
         console.log(start, end, new Date());
         const account = await Account.find({ createdAt: { $gte: start, $lte: end } })
             .populate("supplier", "company")
+            .populate("accountHead", "name");
         res.send(account);
         // // res.send('removed');
         console.log(account);
