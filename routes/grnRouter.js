@@ -351,12 +351,43 @@ grnRouter.get(
     // console.log(grns);
   })
 );
+// GET grns by supplier
+grnRouter.get(
+  "/supplier/account/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const grns = await Grn.find({ supplier: id })
+      .select({
+        tpnNo: 1,
+        poNo: 1,
+        grnNo: 1,
+        userId: 1,
+        supplier: 1,
+        warehouse: 1,
+        products: 1,
+        type: 1,
+        totalItem: 1,
+        total: 1,
+        status: 1,
+        createdAt: 1,
+        shipping_cost: 1,
+        note: 1,
+      })
+      .populate("poNo", "poNo")
+      .populate("supplier", { company: 1, email: 1, phone: 1, address: 1 })
+      .populate("warehouse", "name")
+      .populate("userId", "name");
+    res.send(grns);
+    // // res.send('removed');
+    // console.log(grns);
+  })
+);
 
 // CREATE ONE Grn
 grnRouter.post(
   "/",
   generateGrnId,
-  // updateInventoryInOnGRNIn,
+  updateInventoryInOnGRNIn,
   handleNewPrice,
   expressAsyncHandler(async (req, res) => {
     console.log("New:", req.body.products);

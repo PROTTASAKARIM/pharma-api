@@ -21,6 +21,8 @@ const tpnRouter = require("./routes/tpnRouter");
 const companyRouter = require("./routes/companyRouter");
 const damageRouter = require("./routes/damageRouter");
 const ecomRouter = require("./routes/ecomRouter");
+const accountHeadRouter = require("./routes/accountHeadRouter");
+const accountRouter = require("./routes/accountRouter");
 const multer = require("multer");
 const fileUpload = require("express-fileupload");
 
@@ -45,7 +47,8 @@ app.use(express.json());
 app.use(express.static(__dirname + "/template"));
 
 // const dbUrl = `mongodb+srv://posdb-user:IOK6faeoehDttV7o@cluster0.jmnaf.mongodb.net/pos-api-v1?retryWrites=true&w=majority`;
-const dbUrl = `mongodb+srv://pos-tester:vgQJZDIxungr8ywt@cluster0.3sihhom.mongodb.net/?retryWrites=true&w=majority`;
+// const dbUrl = `mongodb+srv://pos-tester:vgQJZDIxungr8ywt@cluster0.3sihhom.mongodb.net/?retryWrites=true&w=majority`;
+const dbUrl = `mongodb+srv://pos-tester:vgQJZDIxungr8ywt@cluster0.3sihhom.mongodb.net/testInventory?retryWrites=true&w=majority`;
 // const dbUrl = `mongodb+srv://pos-tester:vgQJZDIxungr8ywt@cluster0.3sihhom.mongodb.net/?retryWrites=true&w=majority`;
 // const dbUrl = `mongodb+srv://tcm:rXWmC6cp4Q3FZ2ef@cluster0.0s2yh4f.mongodb.net/?retryWrites=true&w=majority`;
 // const dbUrl = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.3sihhom.mongodb.net/?retryWrites=true&w=majority`;
@@ -86,6 +89,8 @@ app.use("/api/tpn", tpnRouter);
 app.use("/api/company", companyRouter);
 app.use("/api/damage", damageRouter);
 app.use("/api/ecom", ecomRouter);
+app.use("/api/accounthead", accountHeadRouter);
+app.use("/api/account", accountRouter);
 app.use("/uploads", express.static("uploads"));
 // Home
 app.get("/", async (req, res) => {

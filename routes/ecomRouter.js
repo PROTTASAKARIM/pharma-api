@@ -663,6 +663,98 @@ ecomRouter.get(
     // // res.send('removed');
   })
 );
+// GET ALL order sales
+ecomRouter.get(
+  "/sale/order",
+  expressAsyncHandler(async (req, res) => {
+    const sales = await Sale.find({
+      source: "web",
+      status: "order"
+    }).select({
+      invoiceId: 1,
+      totalItem: 1,
+      grossTotalRound: 1,
+      total: 1,
+      status: 1,
+      billerId: 1,
+      createdAt: 1,
+      changeAmount: 1,
+      status: 1,
+    });
+    // .populate("billerId", "name");
+    res.send(sales);
+    // // res.send('removed');
+  })
+);
+// GET ALL order sales
+ecomRouter.get(
+  "/sale/process",
+  expressAsyncHandler(async (req, res) => {
+    const sales = await Sale.find({
+      source: "web",
+      status: { $in: ["confirm", "deliver", "process"] }
+    }).select({
+      invoiceId: 1,
+      totalItem: 1,
+      grossTotalRound: 1,
+      total: 1,
+      status: 1,
+      billerId: 1,
+      createdAt: 1,
+      changeAmount: 1,
+      status: 1,
+    });
+    // .populate("billerId", "name");
+    res.send(sales);
+    // // res.send('removed');
+  })
+);
+// GET ALL order sales
+ecomRouter.get(
+  "/sale/cancel",
+  expressAsyncHandler(async (req, res) => {
+    const sales = await Sale.find({
+      source: "web",
+      status: "cancel"
+    }).select({
+      invoiceId: 1,
+      totalItem: 1,
+      grossTotalRound: 1,
+      total: 1,
+      status: 1,
+      billerId: 1,
+      createdAt: 1,
+      changeAmount: 1,
+      status: 1,
+    });
+    // .populate("billerId", "name");
+    res.send(sales);
+    // // res.send('removed');
+  })
+);
+// GET ALL order sales
+ecomRouter.get(
+  "/sale/complete",
+  expressAsyncHandler(async (req, res) => {
+    const sales = await Sale.find({
+      source: "web",
+      status: "complete"
+    }).select({
+      invoiceId: 1,
+      totalItem: 1,
+      grossTotalRound: 1,
+      total: 1,
+      status: 1,
+      billerId: 1,
+      createdAt: 1,
+      changeAmount: 1,
+      status: 1,
+    });
+    // .populate("billerId", "name");
+    res.send(sales);
+    // // res.send('removed');
+  })
+);
 // GET ALL sales by customer
 ecomRouter.get(
   "/sale/:cId",
@@ -688,41 +780,43 @@ ecomRouter.get(
     // // res.send('removed');
   })
 );
-// GET ALL type sale
-ecomRouter.get(
-  "/sale/:status",
-  expressAsyncHandler(async (req, res) => {
-    let query = {};
-    let statusType = {};
-    let status = req.params.status;
-    console.log(status);
-    if (status === "process") {
-      statusType = { status: { $in: ["confirm", "deliver", "process"] } };
-    } else {
-      statusType = { status: status };
-    }
-    query = {
-      source: "web",
-      status: statusType.status,
-    };
+// // GET ALL type sale
+// ecomRouter.get(
+//   "/sale/:status",
+//   expressAsyncHandler(async (req, res) => {
+//     let query = {};
+//     let statusType = {};
+//     let status = req.params.status;
 
-    console.log(query);
-    const sales = await Sale.find(query).select({
-      invoiceId: 1,
-      totalItem: 1,
-      grossTotalRound: 1,
-      total: 1,
-      status: 1,
-      billerId: 1,
-      createdAt: 1,
-      changeAmount: 1,
-      status: 1,
-    });
-    console.log("billerId", sales);
-    res.send(sales);
-    // // res.send('removed');
-  })
-);
+//     console.log("status", status);
+
+//     if (status === "process") {
+//       statusType = { status: { $in: ["confirm", "deliver", "process"] } };
+//     } else {
+//       statusType = { status: status };
+//     }
+//     query = {
+//       source: "web",
+//       status: statusType.status,
+//     };
+
+//     console.log(query);
+//     const sales = await Sale.find(query).select({
+//       invoiceId: 1,
+//       totalItem: 1,
+//       grossTotalRound: 1,
+//       total: 1,
+//       status: 1,
+//       billerId: 1,
+//       createdAt: 1,
+//       changeAmount: 1,
+//       status: 1,
+//     });
+//     console.log("billerId", sales);
+//     res.send(sales);
+//     // // res.send('removed');
+//   })
+// );
 
 // GET ONE sales
 ecomRouter.get(

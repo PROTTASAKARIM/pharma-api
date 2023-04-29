@@ -154,6 +154,7 @@ router.get(
           article_code: 1,
           priceList: 1,
           category: 1,
+          photo: 1,
           promo_price: 1,
           promo_start: 1,
           promo_end: 1,
@@ -178,6 +179,7 @@ router.get(
           article_code: 1,
           priceList: 1,
           category: 1,
+          photo: 1,
           promo_price: 1,
           promo_start: 1,
           promo_end: 1,
@@ -586,6 +588,7 @@ router.get(
         unit: 1,
         vat: 1,
         article_code: 1,
+        photo: 1,
         priceList: 1,
         promo_start: 1,
         promo_end: 1,
@@ -672,6 +675,27 @@ router.put(
   })
 );
 // UPDATE ONE PRODUCT pricelist
+router.put(
+  "/priceList/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const update = { priceList: req.body };
+    console.log(id, update)
+    try {
+      await Product.updateOne({ _id: id }, { $set: update })
+        .then((response) => {
+          console.log("update", response);
+          res.send(response);
+        })
+        .catch((err) => {
+          console.log("update", response);
+          res.send(err);
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  })
+);
 router.put(
   "/price/:id",
   expressAsyncHandler(async (req, res) => {

@@ -6,6 +6,7 @@ const accountHeadSchema = mongoose.Schema(
         code: { type: String, require: true },
         maId: { type: mongoose.Types.ObjectId, ref: "AccountHead" },
         photo: { type: String },
+        description: { type: String },
         status: { type: String, enum: ["active", "inactive"] },
     },
     {

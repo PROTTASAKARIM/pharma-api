@@ -5,6 +5,7 @@ const Purchase = require("../models/purchaseModel");
 const Rtv = require("../models/rtvModel");
 const Sale = require("../models/saleModel");
 const Tpn = require("../models/tpnModel");
+const Account = require("../models/accountModel");
 
 // Generate POS Sales ID
 const generatePosId = async (req, res, next) => {
@@ -107,6 +108,21 @@ const generateTpnId = async (req, res, next) => {
   req.body.tpnNo = newId;
   next();
 };
+const generateAccId = async (req, res, next) => {
+  // TODO:: todays total
+
+  const todayTotal = await Account.countDocuments({
+    createdAt: { $gte: startOfDay(new Date()), $lte: endOfDay(new Date()) },
+  });
+
+  const number = ("000" + (todayTotal + 1)).toString();
+  const current = number.substring(number.length - 4);
+  const date = format(new Date(new Date()), "MMddyyyy");
+  const newId = process.env.ID_PREFIX + "-ACC-" + date + "-" + current;
+  console.log(newId);
+  req.body.acId = newId;
+  next();
+};
 
 // Generate Damage Id
 const generateDamageId = async (req, res, next) => {
@@ -142,4 +158,5 @@ module.exports = {
   generateRtvId,
   generateTpnId,
   generateDamageId,
+  generateAccId
 };
