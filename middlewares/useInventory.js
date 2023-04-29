@@ -1599,6 +1599,7 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
 
             };
           }
+          const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
         } else {
           inventory = {
             name: name,
@@ -1629,14 +1630,16 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
             ],
 
           };
+          const newInventory = new Inventory(inventory);
+          const update = await newInventory.save()
         }
         // res.send(inventory)
         // res.send(inventory)
         // console.log("inventory final", inventory);
-        const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
-        if (update) {
-          // console.log("update", update)
-        }
+
+        // if (update) {
+        //   // console.log("update", update)
+        // }
       });
     }
 
@@ -1988,6 +1991,8 @@ const updateInventoryInOnGRNIn = async (req, res, next) => {
 
             };
           }
+          const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
+
         } else {
           inventory = {
             name: name,
@@ -2018,13 +2023,12 @@ const updateInventoryInOnGRNIn = async (req, res, next) => {
             ],
 
           };
+          const newInventory = new Inventory(inventory);
+          const update = await newInventory.save()
         }
         // res.send(inventory)
         // console.log("inventory final", inventory);
-        const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
-        if (update) {
-          // console.log("update", update)
-        }
+
       });
     } else {
       return;
