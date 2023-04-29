@@ -28,22 +28,7 @@ const updateInventoryOutOnDamageIn = async (req, res, next) => {
         const success = await Inventory.findOne({ article_code: article_code });
 
         if (success) {
-          // console.log("success", success);
-          // res.send(success)
-          // console.log("PriceTable", success.priceTable);
-
           if (success.priceTable.length > 0) {
-            // console.log("priceid", priceId);
-            // console.log("pricetable", success.priceTable);
-            // const prices = success.priceTable
-            // const prices = success.priceTable[0].get('id')
-            // prices.forEach((value, key) => {
-            //     console.log(`${key}: ${value}`);
-            // });
-            // console.log("Prices", prices)
-            // console.log("Prices-id", prices.get('id'))
-            // console.log("prices", prices)
-
             const checked = success.priceTable.filter(
               (p) => p.get("id") === priceId
             );
@@ -51,21 +36,8 @@ const updateInventoryOutOnDamageIn = async (req, res, next) => {
               (p) => p.get("id") !== priceId
             );
 
-            //   console.log("checked", qty);
-            // console.log("checked", checked[0]);
-            // console.log("checkedid", checked[0].get("id"));
-            // console.log("rest", rest);
+
             if (checked?.length > 0) {
-              // console.log(
-              //     checked,
-              //     "exist",
-              //     qty,
-              //     Number(checked[0].get("currentQty"))
-              // );
-
-              // const d = new Date.parse(success.createdAt);
-              // console.log("date", success.createdAt)
-
 
               inventory = {
                 name: success.name,
@@ -85,9 +57,9 @@ const updateInventoryOutOnDamageIn = async (req, res, next) => {
                   ...rest,
                   {
                     id: checked[0].get("id"),
-                    currentQty: checked[0].get("currentQty") ? Number(checked[0].get("currentQty")) - Number(qty) : 0,
-                    openingQty: checked[0].get("openingQty") ? checked[0].get("openingQty") - Number(qty) : 0 - Number(qty),
-                    totalQty: checked[0].get("totalQty") ? checked[0].get("totalQty") - Number(qty) : 0 - Number(qty),
+                    currentQty: checked[0].get("currentQty") ? Number(checked[0].get("currentQty")) - Number(qty) : 0 - Number(qty),
+                    openingQty: checked[0].get("openingQty") ? checked[0].get("openingQty") : 0,
+                    totalQty: checked[0].get("totalQty") ? checked[0].get("totalQty") : 0,
                     soldQty: checked[0].get("soldQty") ? checked[0].get("soldQty") : 0,
                     damageQty: checked[0].get("damageQty") ? Number(checked[0].get("damageQty")) + Number(qty) : 0 + Number(qty),
                     rtvQty: checked[0].get("rtvQty") ? checked[0].get("rtvQty") : 0,
@@ -117,9 +89,9 @@ const updateInventoryOutOnDamageIn = async (req, res, next) => {
                   ...rest,
                   {
                     id: priceId,
-                    currentQty: -Number(qty),
-                    openingQty: -Number(qty),
-                    totalQty: -Number(qty),
+                    currentQty: 0 - Number(qty),
+                    openingQty: 0 + Number(qty),
+                    totalQty: 0 + Number(qty),
                     soldQty: 0,
                     damageQty: 0 + Number(qty),
                     rtvQty: 0,
@@ -137,8 +109,8 @@ const updateInventoryOutOnDamageIn = async (req, res, next) => {
               article_code: success.article_code,
               warehouse: "62b5b575b4facb87eef3b47c",
               currentQty: -Number(qty),
-              openingQty: -Number(qty),
-              totalQty: -Number(qty),
+              openingQty: Number(qty),
+              totalQty: Number(qty),
               soldQty: 0,
               damageQty: Number(qty),
               rtvQty: 0,
@@ -150,9 +122,9 @@ const updateInventoryOutOnDamageIn = async (req, res, next) => {
                 ...success.priceTable,
                 {
                   id: priceId,
-                  openingQty: -Number(qty),
+                  openingQty: Number(qty),
                   currentQty: -Number(qty),
-                  totalQty: -Number(qty),
+                  totalQty: Number(qty),
                   soldQty: 0,
                   damageQty: Number(qty),
                   rtvQty: 0,
@@ -168,8 +140,8 @@ const updateInventoryOutOnDamageIn = async (req, res, next) => {
             article_code: article_code,
             warehouse: "62b5b575b4facb87eef3b47c",
             currentQty: -Number(qty),
-            openingQty: -Number(qty),
-            totalQty: -Number(qty),
+            openingQty: Number(qty),
+            totalQty: Number(qty),
             soldQty: 0,
             damageQty: Number(qty),
             rtvQty: 0,
@@ -182,8 +154,8 @@ const updateInventoryOutOnDamageIn = async (req, res, next) => {
               {
                 id: priceId,
                 openingQty: - Number(qty),
-                currentQty: -Number(qty),
-                totalQty: -Number(qty),
+                currentQty: Number(qty),
+                totalQty: Number(qty),
                 soldQty: 0,
                 damageQty: Number(qty),
                 rtvQty: 0,
@@ -314,8 +286,8 @@ const updateInventoryInOnDamageOut = async (req, res, next) => {
                   {
                     id: checked[0].get("id"),
                     currentQty: checked[0].get("currentQty") ? Number(checked[0].get("currentQty")) + Number(qty) : 0,
-                    openingQty: checked[0].get("openingQty") ? checked[0].get("openingQty") + Number(qty) : 0 + Number(qty),
-                    totalQty: checked[0].get("totalQty") ? checked[0].get("totalQty") + Number(qty) : 0 + Number(qty),
+                    openingQty: checked[0].get("openingQty") ? checked[0].get("openingQty") : 0,
+                    totalQty: checked[0].get("totalQty") ? checked[0].get("totalQty") : 0,
                     soldQty: checked[0].get("soldQty") ? checked[0].get("soldQty") : 0,
                     damageQty: checked[0].get("damageQty") ? Number(checked[0].get("damageQty")) - Number(qty) : 0 - Number(qty),
                     rtvQty: checked[0].get("rtvQty") ? checked[0].get("rtvQty") : 0,
@@ -519,8 +491,8 @@ const updateInventoryOutOnRTVIn = async (req, res, next) => {
                   {
                     id: checked[0].get("id"),
                     currentQty: checked[0].get("currentQty") ? Number(checked[0].get("currentQty")) - Number(qty) : 0 - Number(qty),
-                    openingQty: checked[0].get("openingQty") ? checked[0].get("openingQty") - Number(qty) : 0 - Number(qty),
-                    totalQty: checked[0].get("totalQty") ? checked[0].get("totalQty") - Number(qty) : 0 - Number(qty),
+                    openingQty: checked[0].get("openingQty") ? checked[0].get("openingQty") : 0,
+                    totalQty: checked[0].get("totalQty") ? checked[0].get("totalQty") : 0,
                     soldQty: checked[0].get("soldQty") ? checked[0].get("soldQty") : 0,
                     damageQty: checked[0].get("damageQty") ? Number(checked[0].get("damageQty")) : 0,
                     rtvQty: checked[0].get("rtvQty") ? checked[0].get("rtvQty") + Number(qty) : 0 + Number(qty),
@@ -538,7 +510,7 @@ const updateInventoryOutOnRTVIn = async (req, res, next) => {
                 warehouse: "62b5b575b4facb87eef3b47c",
                 currentQty: Number(success.currentQty) - Number(qty),
                 openingQty: success.openingQty,
-                totalQty: success.totalQty - Number(qty),
+                totalQty: success.totalQty,
                 soldQty: success.soldQty,
                 damageQty: Number(success.damageQty),
                 rtvQty: success.rtvQty + Number(qty),
@@ -551,8 +523,8 @@ const updateInventoryOutOnRTVIn = async (req, res, next) => {
                   {
                     id: priceId,
                     currentQty: -Number(qty),
-                    openingQty: -Number(qty),
-                    totalQty: -Number(qty),
+                    openingQty: Number(qty),
+                    totalQty: Number(qty),
                     soldQty: 0,
                     damageQty: 0,
                     rtvQty: 0 + Number(qty),
@@ -570,8 +542,8 @@ const updateInventoryOutOnRTVIn = async (req, res, next) => {
               article_code: success.article_code,
               warehouse: "62b5b575b4facb87eef3b47c",
               currentQty: -Number(qty),
-              openingQty: -Number(qty),
-              totalQty: -Number(qty),
+              openingQty: Number(qty),
+              totalQty: Number(qty),
               soldQty: 0,
               damageQty: 0,
               rtvQty: Number(qty),
@@ -584,8 +556,8 @@ const updateInventoryOutOnRTVIn = async (req, res, next) => {
                 {
                   id: priceId,
                   openingQty: -Number(qty),
-                  currentQty: -Number(qty),
-                  totalQty: -Number(qty),
+                  currentQty: Number(qty),
+                  totalQty: Number(qty),
                   soldQty: 0,
                   damageQty: 0,
                   rtvQty: Number(qty),
@@ -601,8 +573,8 @@ const updateInventoryOutOnRTVIn = async (req, res, next) => {
             article_code: article_code,
             warehouse: "62b5b575b4facb87eef3b47c",
             currentQty: -Number(qty),
-            openingQty: -Number(qty),
-            totalQty: -Number(qty),
+            openingQty: Number(qty),
+            totalQty: Number(qty),
             soldQty: 0,
             damageQty: 0,
             rtvQty: Number(qty),
@@ -615,8 +587,8 @@ const updateInventoryOutOnRTVIn = async (req, res, next) => {
               {
                 id: priceId,
                 openingQty: -Number(qty),
-                currentQty: -Number(qty),
-                totalQty: -Number(qty),
+                currentQty: Number(qty),
+                totalQty: Number(qty),
                 soldQty: 0,
                 damageQty: 0,
                 rtvQty: Number(qty),
@@ -749,8 +721,8 @@ const updateInventoryINOnRTVOut = async (req, res, next) => {
                   {
                     id: checked[0].get("id"),
                     currentQty: checked[0].get("currentQty") ? Number(checked[0].get("currentQty")) + Number(qty) : 0 + Number(qty),
-                    openingQty: checked[0].get("openingQty") ? checked[0].get("openingQty") + Number(qty) : 0 + Number(qty),
-                    totalQty: checked[0].get("totalQty") ? checked[0].get("totalQty") + Number(qty) : 0 + Number(qty),
+                    openingQty: checked[0].get("openingQty") ? checked[0].get("openingQty") : 0,
+                    totalQty: checked[0].get("totalQty") ? checked[0].get("totalQty") : 0,
                     soldQty: checked[0].get("soldQty") ? checked[0].get("soldQty") : 0,
                     damageQty: checked[0].get("damageQty") ? Number(checked[0].get("damageQty")) : 0,
                     rtvQty: checked[0].get("rtvQty") ? checked[0].get("rtvQty") - Number(qty) : 0 - Number(qty),
@@ -1214,9 +1186,9 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
                   ...rest,
                   {
                     id: priceId,
-                    currentQty: - Number(qty),
-                    openingQty: -Number(qty),
-                    totalQty: -Number(qty),
+                    currentQty: 0 - Number(qty),
+                    openingQty: Number(qty),
+                    totalQty: Number(qty),
                     soldQty: 0 + Number(qty),
                     damageQty: 0,
                     rtvQty: 0,
@@ -1249,8 +1221,8 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
                 {
                   id: priceId,
                   openingQty: - Number(qty),
-                  currentQty: -Number(qty),
-                  totalQty: -Number(qty),
+                  currentQty: Number(qty),
+                  totalQty: Number(qty),
                   soldQty: Number(qty),
                   damageQty: 0,
                   rtvQty: 0,
@@ -1266,8 +1238,8 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
             article_code: article_code,
             warehouse: "62b5b575b4facb87eef3b47c",
             currentQty: - Number(qty),
-            openingQty: -Number(qty),
-            totalQty: -Number(qty),
+            openingQty: Number(qty),
+            totalQty: Number(qty),
             soldQty: Number(qty),
             damageQty: 0,
             rtvQty: 0,
@@ -1280,8 +1252,8 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
               {
                 id: priceId,
                 openingQty: - Number(qty),
-                currentQty: -Number(qty),
-                totalQty: -Number(qty),
+                currentQty: Number(qty),
+                totalQty: Number(qty),
                 soldQty: Number(qty),
                 damageQty: 0,
                 rtvQty: 0,
@@ -1385,9 +1357,9 @@ const adjustInventoryOnSale = async (req, res, next) => {
                     ...rest,
                     {
                       id: priceId,
-                      currentQty: -Number(qty),
-                      openingQty: -Number(qty),
-                      totalQty: - Number(qty),
+                      currentQty: 0 - Number(qty),
+                      openingQty: Number(qty),
+                      totalQty: Number(qty),
                       soldQty: Number(qty),
                       damageQty: 0,
                       rtvQty: 0,
@@ -1404,9 +1376,9 @@ const adjustInventoryOnSale = async (req, res, next) => {
                 name: success.name,
                 article_code: success.article_code,
                 warehouse: "62b5b575b4facb87eef3b47c",
-                currentQty: - Number(qty),
-                openingQty: - Number(qty),
-                totalQty: - Number(qty),
+                currentQty: 0 - Number(qty),
+                openingQty: Number(qty),
+                totalQty: Number(qty),
                 soldQty: Number(qty),
                 damageQty: 0,
                 rtvQty: 0,
@@ -1418,9 +1390,9 @@ const adjustInventoryOnSale = async (req, res, next) => {
                   ...success.priceTable,
                   {
                     id: priceId,
-                    openingQty: - Number(qty),
-                    currentQty: - Number(qty),
-                    totalQty: -Number(qty),
+                    openingQty: 0 - Number(qty),
+                    currentQty: Number(qty),
+                    totalQty: Number(qty),
                     soldQty: Number(qty),
                     damageQty: 0,
                     rtvQty: 0,
@@ -1435,9 +1407,9 @@ const adjustInventoryOnSale = async (req, res, next) => {
               name: name,
               article_code: article_code,
               warehouse: "62b5b575b4facb87eef3b47c",
-              currentQty: - Number(qty),
-              openingQty: - Number(qty),
-              totalQty: -Number(qty),
+              currentQty: 0 - Number(qty),
+              openingQty: Number(qty),
+              totalQty: Number(qty),
               soldQty: Number(qty),
               damageQty: 0,
               rtvQty: 0,
@@ -1449,9 +1421,9 @@ const adjustInventoryOnSale = async (req, res, next) => {
 
                 {
                   id: priceId,
-                  openingQty: - Number(qty),
-                  currentQty: - Number(qty),
-                  totalQty: -Number(qty),
+                  openingQty: 0 - Number(qty),
+                  currentQty: Number(qty),
+                  totalQty: Number(qty),
                   soldQty: Number(qty),
                   damageQty: 0,
                   rtvQty: 0,
@@ -1582,9 +1554,9 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
                   ...rest,
                   {
                     id: priceId,
-                    currentQty: -Number(qty),
-                    openingQty: -Number(qty),
-                    totalQty: - Number(qty),
+                    currentQty: 0 - Number(qty),
+                    openingQty: Number(qty),
+                    totalQty: Number(qty),
                     soldQty: 0 + Number(qty),
                     damageQty: 0,
                     rtvQty: 0,
@@ -1601,9 +1573,9 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
               name: success.name,
               article_code: success.article_code,
               warehouse: "62b5b575b4facb87eef3b47c",
-              currentQty: - Number(qty),
-              openingQty: - Number(qty),
-              totalQty: - Number(qty),
+              currentQty: 0 - Number(qty),
+              openingQty: Number(qty),
+              totalQty: Number(qty),
               soldQty: Number(qty),
               damageQty: 0,
               rtvQty: 0,
@@ -1615,9 +1587,9 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
                 ...success.priceTable,
                 {
                   id: priceId,
-                  openingQty: - Number(qty),
-                  currentQty: - Number(qty),
-                  totalQty: -Number(qty),
+                  openingQty: 0 - Number(qty),
+                  currentQty: Number(qty),
+                  totalQty: Number(qty),
                   soldQty: Number(qty),
                   damageQty: 0,
                   rtvQty: 0,
@@ -1632,9 +1604,9 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
             name: name,
             article_code: article_code,
             warehouse: "62b5b575b4facb87eef3b47c",
-            currentQty: - Number(qty),
-            openingQty: - Number(qty),
-            totalQty: -Number(qty),
+            currentQty: 0 - Number(qty),
+            openingQty: Number(qty),
+            totalQty: Number(qty),
             soldQty: Number(qty),
             damageQty: 0,
             rtvQty: 0,
@@ -1646,9 +1618,9 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
 
               {
                 id: priceId,
-                openingQty: - Number(qty),
-                currentQty: - Number(qty),
-                totalQty: -Number(qty),
+                openingQty: 0 - Number(qty),
+                currentQty: Number(qty),
+                totalQty: Number(qty),
                 soldQty: Number(qty),
                 damageQty: 0,
                 rtvQty: 0,
@@ -1781,7 +1753,7 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
               currentQty: Number(qty),
               openingQty: Number(qty),
               totalQty: Number(qty),
-              soldQty: -Number(qty),
+              soldQty: 0 - Number(qty),
               damageQty: 0,
               rtvQty: 0,
               tpnQty: 0,
@@ -1795,7 +1767,7 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
                   openingQty: Number(qty),
                   currentQty: Number(qty),
                   totalQty: Number(qty),
-                  soldQty: -Number(qty),
+                  soldQty: 0 - Number(qty),
                   damageQty: 0,
                   rtvQty: 0,
                   tpnQty: 0,
@@ -1995,7 +1967,7 @@ const updateInventoryInOnGRNIn = async (req, res, next) => {
               soldQty: success.soldQty,
 
               damageQty: 0,
-              rtvQty: Number(qty),
+              rtvQty: Number(success.rtvQty),
               tpnQty: success?.tpnQty ? success?.tpnQty : 0,
               status: success.status,
               createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
@@ -2188,7 +2160,7 @@ const updateInventoryOutOnGRNDel = async (req, res, next) => {
                 article_code: success.article_code,
                 warehouse: "62b5b575b4facb87eef3b47c",
                 currentQty: Number(success.currentQty) - Number(qty),
-                openingQty: success.openingQty - Number(qty),
+                openingQty: success.openingQty,
                 totalQty: success.totalQty - Number(qty),
                 soldQty: success.soldQty,
                 damageQty: Number(success.damageQty),
@@ -2221,8 +2193,8 @@ const updateInventoryOutOnGRNDel = async (req, res, next) => {
               article_code: success.article_code,
               warehouse: "62b5b575b4facb87eef3b47c",
               currentQty: - Number(qty),
-              openingQty: - Number(qty),
-              totalQty: - Number(qty),
+              openingQty: Number(qty),
+              totalQty: -Number(qty),
               soldQty: 0,
               damageQty: 0,
               rtvQty: 0,
@@ -2234,8 +2206,8 @@ const updateInventoryOutOnGRNDel = async (req, res, next) => {
                 ...success.priceTable,
                 {
                   id: priceId,
-                  openingQty: - Number(qty),
-                  currentQty: - Number(qty),
+                  currentQty: -Number(qty),
+                  openingQty: Number(qty),
                   totalQty: -Number(qty),
                   soldQty: 0,
                   damageQty: 0,
@@ -2252,7 +2224,7 @@ const updateInventoryOutOnGRNDel = async (req, res, next) => {
             article_code: article_code,
             warehouse: "62b5b575b4facb87eef3b47c",
             currentQty: - Number(qty),
-            openingQty: - Number(qty),
+            openingQty: Number(qty),
             totalQty: -Number(qty),
             soldQty: 0,
             damageQty: 0,
@@ -2265,7 +2237,7 @@ const updateInventoryOutOnGRNDel = async (req, res, next) => {
 
               {
                 id: priceId,
-                openingQty: - Number(qty),
+                openingQty: Number(qty),
                 currentQty: - Number(qty),
                 totalQty: -Number(qty),
                 soldQty: 0,
@@ -2406,9 +2378,9 @@ const updateInventoryOutOnTPNIn = async (req, res, next) => {
                   ...rest,
                   {
                     id: priceId,
-                    currentQty: -Number(qty),
-                    openingQty: -Number(qty),
-                    totalQty: -Number(qty),
+                    currentQty: 0 - Number(qty),
+                    openingQty: Number(qty),
+                    totalQty: Number(qty),
                     soldQty: 0,
                     damageQty: 0,
                     rtvQty: 0,
@@ -2439,9 +2411,9 @@ const updateInventoryOutOnTPNIn = async (req, res, next) => {
                 ...success.priceTable,
                 {
                   id: priceId,
-                  openingQty: -Number(qty),
+                  openingQty: Number(qty),
                   currentQty: -Number(qty),
-                  totalQty: -Number(qty),
+                  totalQty: Number(qty),
                   soldQty: 0,
                   damageQty: 0,
                   rtvQty: 0,
@@ -2457,8 +2429,8 @@ const updateInventoryOutOnTPNIn = async (req, res, next) => {
             article_code: article_code,
             warehouse: "62b5b575b4facb87eef3b47c",
             currentQty: -Number(qty),
-            openingQty: - Number(qty),
-            totalQty: - Number(qty),
+            openingQty: Number(qty),
+            totalQty: Number(qty),
             soldQty: 0,
             damageQty: 0,
             rtvQty: 0,
@@ -2470,9 +2442,9 @@ const updateInventoryOutOnTPNIn = async (req, res, next) => {
 
               {
                 id: priceId,
-                openingQty: -Number(qty),
+                openingQty: Number(qty),
                 currentQty: -Number(qty),
-                totalQty: -Number(qty),
+                totalQty: Number(qty),
                 soldQty: 0,
                 damageQty: 0,
                 rtvQty: 0,
