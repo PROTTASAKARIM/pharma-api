@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const brandSchema = mongoose.Schema(
   {
     name: { type: String, require: true },
-    generic: { type: mongoose.Types.ObjectId, ref: "Generic", require: true },
+    company: { type: String },
     photo: { type: String },
     details: { type: String },
     status: { type: String, enum: ["active", "inactive"] },

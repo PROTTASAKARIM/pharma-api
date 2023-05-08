@@ -32,10 +32,10 @@ brandRouter.get(
   "/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
-    const brands = await Brand.find({ _id: id, status: "active" });
-    res.send(brands[0]);
+    const brand = await Brand.findOne({ _id: id });
+    res.send(brand);
     // // res.send('removed');
-    console.log(brands);
+    console.log(brand);
   })
 );
 
