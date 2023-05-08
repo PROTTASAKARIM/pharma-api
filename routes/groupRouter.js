@@ -33,7 +33,7 @@ groupRouter.get(
   "/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
-    const group = await Group.findOne({ _id: id, status: "active" });
+    const group = await Group.findOne({ _id: id });
     res.send(group);
     // // res.send('removed');
     console.log(group);
