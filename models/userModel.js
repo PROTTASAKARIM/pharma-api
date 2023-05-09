@@ -11,6 +11,7 @@ const userSchema = mongoose.Schema(
     address: { type: String },
     phone: { type: String, require: true, unique: true },
     warehouse: { type: mongoose.Types.ObjectId, ref: "Warehouse", require: true },
+    company: { type: mongoose.Schema.Types.ObjectId, ref: "Company", default: null },
     status: { type: String, enum: ["active", "inactive"] },
   },
   {

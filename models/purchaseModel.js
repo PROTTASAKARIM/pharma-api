@@ -45,6 +45,7 @@ const purchaseSchema = mongoose.Schema(
     tax: { type: Number, default: 0 },
     userId: { type: mongoose.Types.ObjectId, ref: "User", require: true },
     shipping_cost: { type: Number, default: 0 },
+    company: { type: mongoose.Schema.Types.ObjectId, ref: "Company", default: null },
     status: {
       type: String,
       enum: ["Pending", "Ordered", "Partial", "Received", "Canceled"],

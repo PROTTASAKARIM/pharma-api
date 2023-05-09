@@ -17,6 +17,7 @@ const priceSchema = mongoose.Schema(
     tp: { type: Number, require: true },
     mrp: { type: Number, require: true },
     order: { type: String },
+    company: { type: mongoose.Schema.Types.ObjectId, ref: "Company", default: null },
     status: { type: String, enum: ["active", "inactive"] },
   },
   {

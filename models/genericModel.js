@@ -16,6 +16,7 @@ const genericSchema = mongoose.Schema(
         // group: { type: mongoose.Types.ObjectId, ref: "Group", require: true },
         photo: { type: String },
         details: { type: String },
+        company: { type: mongoose.Schema.Types.ObjectId, ref: "Company", default: null },
         status: { type: String, enum: ["active", "inactive"] },
     },
     {

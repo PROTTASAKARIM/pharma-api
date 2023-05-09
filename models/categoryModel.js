@@ -9,6 +9,7 @@ const categorySchema = mongoose.Schema(
     group: { type: String },
     photo: { type: String },
     description: { type: String },
+    company: { type: mongoose.Schema.Types.ObjectId, ref: "Company", default: null },
     status: { type: String, enum: ["active", "inactive"] },
   },
   {

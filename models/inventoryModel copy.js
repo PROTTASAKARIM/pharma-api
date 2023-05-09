@@ -31,6 +31,7 @@ const inventorySchema = new mongoose.Schema(
     soldQty: { type: Number, require: true },
     damageQty: { type: Number, require: true },
     rtvQty: { type: Number, require: true },
+    company: { type: mongoose.Schema.Types.ObjectId, ref: "Company", default: null },
     status: { type: String, enum: ["active", "inactive"] },
   },
   {
