@@ -30,6 +30,18 @@ router.get(
     res.status(200).json(total);
   })
 );
+// last PRODUCT
+router.get(
+  "/last",
+  expressAsyncHandler(async (req, res) => {
+    const total = await Product.aggregate([
+      { $sort: { createdAt: -1 } },
+      { $limit: 1 },
+      { $project: { article_code: 1 } }
+    ])
+    res.status(200).json(total);
+  })
+);
 
 
 
@@ -96,15 +108,12 @@ router.get(
         .select({
           _id: 1,
           name: 1,
-          ean: 1,
           unit: 1,
           article_code: 1,
-          priceList: 1,
           photo: 1,
 
         })
         .limit(100)
-        .populate("priceList");
       res.status(200).json(product);
     } else {
       console.log("no query");
@@ -116,16 +125,13 @@ router.get(
         .select({
           _id: 1,
           name: 1,
-          ean: 1,
           unit: 1,
           article_code: 1,
-          priceList: 1,
           photo: 1,
 
         })
         .limit(size)
         .skip(size * page)
-        .populate("priceList");
       res.status(200).json(product);
       console.log("done:", query);
     }
