@@ -108,6 +108,7 @@ const saleSchema = mongoose.Schema(
       ref: "Customer",
     },
     updateUser: { type: mongoose.Types.ObjectId, ref: "User" },
+    company: { type: mongoose.Schema.Types.ObjectId, ref: "Company", default: null },
     status: { type: String, enum: ["order", "process", "confirm", "complete", "delete", "cancel", "deliver"] },
   },
   {

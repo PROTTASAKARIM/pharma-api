@@ -42,6 +42,7 @@ const accountSchema = mongoose.Schema(
         grnId: { type: mongoose.Types.ObjectId, ref: "Grn" },
         poId: { type: mongoose.Types.ObjectId, ref: "Purchase" },
         note: { type: String },
+        company: { type: mongoose.Schema.Types.ObjectId, ref: "Company", default: null },
         status: { type: String, enum: ["active", "inactive"] },
     },
     {

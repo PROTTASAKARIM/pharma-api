@@ -38,6 +38,7 @@ const rtvSchema = mongoose.Schema(
     totalItem: { type: Number, default: 0, require: true },
     total: { type: Number, default: 0, require: true },
     userId: { type: mongoose.Types.ObjectId, ref: "User", require: true },
+    company: { type: mongoose.Schema.Types.ObjectId, ref: "Company", default: null },
     status: {
       type: String,
       enum: ["Partial", "Complete"],

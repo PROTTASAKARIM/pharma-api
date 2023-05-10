@@ -33,10 +33,10 @@ groupRouter.get(
   "/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
-    const groups = await Group.find({ _id: id, status: "active" });
-    res.send(groups[0]);
+    const group = await Group.findOne({ _id: id });
+    res.send(group);
     // // res.send('removed');
-    console.log(groups);
+    console.log(group);
   })
 );
 
@@ -81,13 +81,16 @@ groupRouter.put(
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     const update = req.body;
+    console.log('id', id, 'update', update)
     try {
       await Group.updateOne({ _id: id }, { $set: update })
         .then((response) => {
           res.send(response);
+          console.error(response);
         })
         .catch((err) => {
           res.send(err);
+          console.error(err);
         });
     } catch (error) {
       console.error(error);

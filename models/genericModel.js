@@ -3,9 +3,20 @@ const mongoose = require("mongoose");
 const genericSchema = mongoose.Schema(
     {
         name: { type: String, require: true },
-        group: { type: mongoose.Types.ObjectId, ref: "Group", require: true },
+        // group: [
+        //     {
+        //         type: Map,
+        //         of: new mongoose.Schema({
+        //             id: { type: mongoose.Types.ObjectId, ref: "Group", require: true },
+        //             name: { type: String, require: true },
+
+        //         }),
+        //     },
+        // ],
+        // group: { type: mongoose.Types.ObjectId, ref: "Group", require: true },
         photo: { type: String },
         details: { type: String },
+        company: { type: mongoose.Schema.Types.ObjectId, ref: "Company", default: null },
         status: { type: String, enum: ["active", "inactive"] },
     },
     {

@@ -37,6 +37,7 @@ const customerSchema = mongoose.Schema(
     point: { type: Number, default: 0 },
     phone: { type: String, require: true, unique: true },
     photo: { type: String },
+    company: { type: mongoose.Schema.Types.ObjectId, ref: "Company", default: null },
     status: { type: String, enum: ["active", "inactive"], default: "active" },
   },
   {

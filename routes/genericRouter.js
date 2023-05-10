@@ -33,8 +33,8 @@ genericRouter.get(
   "/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
-    const generics = await Generic.find({ _id: id, status: "active" });
-    res.send(generics[0]);
+    const generic = await Generic.findOne({ _id: id });
+    res.send(generic);
     // // res.send('removed');
     console.log(generics);
   })

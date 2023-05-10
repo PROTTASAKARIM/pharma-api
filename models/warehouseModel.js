@@ -8,6 +8,7 @@ const warehouseSchema = mongoose.Schema(
     company: { type: String },
     type: { type: String, enum: ["Outlet", "Warehouse"] },
     phone: { type: String },
+    company: { type: mongoose.Schema.Types.ObjectId, ref: "Company", default: null },
     status: { type: String, enum: ["active", "inactive"] },
   },
   {

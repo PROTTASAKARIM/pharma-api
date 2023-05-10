@@ -25,6 +25,7 @@ const damageSchema = mongoose.Schema(
     total: { type: Number, require: true },
     totalItem: { type: Number, require: true },
     userId: { type: mongoose.Types.ObjectId, ref: "User", require: true },
+    company: { type: mongoose.Schema.Types.ObjectId, ref: "Company", default: null },
     status: {
       type: String,
       enum: ["active", "inactive"],

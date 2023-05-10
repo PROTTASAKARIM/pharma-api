@@ -19,6 +19,7 @@ const inventoryCountSchema = mongoose.Schema(
     },
     qty: { type: Number, require: true },
     userId: { type: mongoose.Types.ObjectId, ref: "User" },
+    company: { type: mongoose.Schema.Types.ObjectId, ref: "Company", default: null },
     status: { type: String, enum: ["active", "inactive"] },
   },
   {
