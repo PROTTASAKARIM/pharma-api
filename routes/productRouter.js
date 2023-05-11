@@ -19,7 +19,7 @@ const Sale = require("../models/saleModel");
 const { startOfDay, endOfDay } = require("date-fns");
 const path = require("path");
 const {
-  updateSupplierProducts
+  updateSupplierProducts,
 } = require("../middlewares/supplierProductRemove");
 
 // COUNT PRODUCT
@@ -37,14 +37,11 @@ router.get(
     const total = await Product.aggregate([
       { $sort: { createdAt: -1 } },
       { $limit: 1 },
-      { $project: { article_code: 1 } }
-    ])
+      { $project: { article_code: 1 } },
+    ]);
     res.status(200).json(total);
   })
 );
-
-
-
 
 // GET PRODUCT PRICE
 router.get(
@@ -111,9 +108,8 @@ router.get(
           unit: 1,
           article_code: 1,
           photo: 1,
-
         })
-        .limit(100)
+        .limit(100);
       res.status(200).json(product);
     } else {
       console.log("no query");
@@ -128,10 +124,9 @@ router.get(
           unit: 1,
           article_code: 1,
           photo: 1,
-
         })
         .limit(size)
-        .skip(size * page)
+        .skip(size * page);
       res.status(200).json(product);
       console.log("done:", query);
     }
@@ -149,7 +144,6 @@ router.get(
           ean: 1,
           article_code: 1,
           priceList: 1,
-
         })
         .populate("priceList");
 
@@ -160,6 +154,51 @@ router.get(
   })
 );
 
+// PRODUCTS SRARCH
+router.get(
+  "/search/:q",
+  expressAsyncHandler(async (req, res) => {
+    // let payload = req.query?.q?.trim().toString().toLocaleLowerCase();
+    const payload = req.params?.q?.trim().toString().toLocaleLowerCase();
+    // console.log(payload);
+
+    const isNumber = /^\d/.test(payload);
+    let query = {};
+    if (!isNumber) {
+      query = { name: { $regex: new RegExp("\\b" + payload + ".*?", "i") } };
+    } else {
+      query = {
+        $or: [
+          { article_code: { $regex: new RegExp("^" + payload + ".*", "i") } },
+        ],
+      };
+    }
+
+    const search = await Product.find(query)
+      // TODO:: UPDATE AGREEGET FOR GET STOCK VALUE
+      .select({
+        _id: 1,
+        name: 1,
+        unit: 1,
+        vat: 1,
+        article_code: 1,
+        tp: 1,
+        mrp: 1,
+        discount: 1,
+        brand: 1,
+        size: 1,
+        pcsBox: 1,
+      })
+      .populate("brand", "name")
+      .populate("unit", "symbol")
+      .limit(10);
+    if (payload === "") {
+      res.send([]);
+    } else {
+      res.send(search);
+    }
+  })
+);
 
 // GET ONE PRODUCT
 router.get(
@@ -171,6 +210,7 @@ router.get(
     res.send(products[0]);
   })
 );
+
 // GET ONE PRODUCT
 router.get(
   "/promo-update/:id",
@@ -180,7 +220,6 @@ router.get(
     res.send(product);
   })
 );
-
 
 
 
@@ -207,8 +246,6 @@ router.get(
     res.send(products[0]);
   })
 );
-
-
 
 // CREATE ONE PRODUCT
 router.post(
@@ -250,7 +287,6 @@ router.post(
   })
 );
 
-
 // UPDATE ONE PRODUCT
 router.put(
   "/:id",
@@ -279,7 +315,7 @@ router.put(
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     const update = { priceList: req.body };
-    console.log(id, update)
+    console.log(id, update);
     try {
       await Product.updateOne({ _id: id }, { $set: update })
         .then((response) => {
@@ -302,7 +338,7 @@ router.delete(
   updateSupplierProducts,
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
-    console.log("id", id)
+    console.log("id", id);
     try {
       await Product.deleteOne({ _id: id })
         .then((response) => {
@@ -316,7 +352,6 @@ router.delete(
     }
   })
 );
-
 
 // PRODUCT PHOTO UPLOAD
 // Upload Endpoint
@@ -370,7 +405,5 @@ router.post(
     });
   })
 );
-
-
 
 module.exports = router;
