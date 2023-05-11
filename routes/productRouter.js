@@ -156,6 +156,49 @@ router.get(
 
 // PRODUCTS SRARCH
 router.get(
+  "/search/new/:q",
+  expressAsyncHandler(async (req, res) => {
+    // let payload = req.query?.q?.trim().toString().toLocaleLowerCase();
+    const payload = req.params?.q?.trim().toString().toLocaleLowerCase();
+    // console.log(payload);
+
+    const isNumber = /^\d/.test(payload);
+    let query = {};
+    if (!isNumber) {
+      query = { name: { $regex: new RegExp("\\b" + payload + ".*?", "i") } };
+    } else {
+      query = {
+        $or: [
+          { article_code: { $regex: new RegExp("^" + payload + ".*", "i") } },
+        ],
+      };
+    }
+
+    const search = await Product.find(query)
+      // TODO:: UPDATE AGREEGET FOR GET STOCK VALUE
+      .select({
+        _id: 1,
+        name: 1,
+        unit: 1,
+        vat: 1,
+        article_code: 1,
+        tp: 1,
+        mrp: 1,
+        discount: 1,
+        brand: 1,
+        size: 1,
+        pcsBox: 1,
+      })
+      .populate("unit", "name")
+      .limit(10);
+    if (payload === "") {
+      res.send([]);
+    } else {
+      res.send(search);
+    }
+  })
+);
+router.get(
   "/search/:q",
   expressAsyncHandler(async (req, res) => {
     // let payload = req.query?.q?.trim().toString().toLocaleLowerCase();
@@ -208,6 +251,31 @@ router.get(
     const products = await Product.find({ _id: id })
     // .populate("priceList", "mrp")
     res.send(products[0]);
+  })
+);
+router.get(
+  "/select/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const product = await Product.findOne({ _id: id })
+      .select({
+        _id: 1,
+        name: 1,
+        unit: 1,
+        vat: 1,
+        article_code: 1,
+        tp: 1,
+        mrp: 1,
+        discount: 1,
+        brand: 1,
+        size: 1,
+        pcsBox: 1,
+
+      })
+    // .populate("category", "name")
+
+    // .populate("priceList");
+    res.send(product);
   })
 );
 

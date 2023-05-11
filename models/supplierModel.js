@@ -22,7 +22,7 @@ const supplierSchema = mongoose.Schema(
     address: { type: String },
     type: { type: String },
     phone: { type: String, require: true },
-    company: { type: mongoose.Schema.Types.ObjectId, ref: "Company", default: null },
+    companyLayer: { type: mongoose.Schema.Types.ObjectId, ref: "Company", default: null },
     status: { type: String, enum: ["active", "inactive"] },
   },
   {
