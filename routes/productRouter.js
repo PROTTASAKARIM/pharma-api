@@ -205,14 +205,23 @@ router.get(
   "/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
-    const products = await Product.find({ _id: id }).populate(
-      "category",
-      "name"
-    );
+    const products = await Product.find({ _id: id })
     // .populate("priceList", "mrp")
     res.send(products[0]);
   })
 );
+
+// GET ONE PRODUCT
+router.get(
+  "/promo-update/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const product = await Product.findOne({ _id: id })
+    res.send(product);
+  })
+);
+
+
 
 // GET ONE PRODUCT BY ARTICLE CODE
 router.get(
