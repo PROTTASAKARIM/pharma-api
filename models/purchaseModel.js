@@ -19,11 +19,6 @@ const purchaseSchema = mongoose.Schema(
             require: true,
           },
           tp: { type: Number, default: 0, require: true },
-          priceId: {
-            type: mongoose.Types.ObjectId,
-            ref: "Price",
-            require: true,
-          },
           tax: { type: Number, default: 0, require: true },
           qty: { type: Number, default: 0, require: true },
           unit: { type: String, require: true },

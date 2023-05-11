@@ -108,6 +108,7 @@ router.get(
           unit: 1,
           article_code: 1,
           photo: 1,
+          tp: 1,
         })
         .limit(100);
       res.status(200).json(product);
@@ -143,7 +144,7 @@ router.get(
           name: 1,
           ean: 1,
           article_code: 1,
-          priceList: 1,
+          tp: 1,
         })
         .populate("priceList");
 
@@ -304,11 +305,7 @@ router.get(
         vat: 1,
         unit: 1,
         article_code: 1,
-        priceList: 1,
-        promo_start: 1,
-        promo_end: 1,
-        promo_price: 1,
-        promo_type: 1,
+        tp: 1,
       })
       .populate("priceList", { mrp: 1, tp: 1, _id: 0 });
     res.send(products[0]);
