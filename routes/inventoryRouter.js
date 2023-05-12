@@ -136,7 +136,6 @@ inventoryRouter.get(
           _id: 1,
           name: 1,
           article_code: 1,
-          priceTable: 1,
           currentQty: 1,
           openingQty: 1,
           totalQty: 1,
@@ -148,8 +147,7 @@ inventoryRouter.get(
           tpnQty: 1,
         })
         .limit(100);
-      // .populate("category", "name")
-      // .populate("priceList");
+
       console.log("res", product);
       res.status(200).json(product);
     } else {
@@ -163,7 +161,6 @@ inventoryRouter.get(
           _id: 1,
           name: 1,
           article_code: 1,
-          priceTable: 1,
           currentQty: 1,
           openingQty: 1,
           totalQty: 1,
@@ -176,7 +173,7 @@ inventoryRouter.get(
         })
         .limit(size)
         .skip(size * page);
-      // .populate("priceList");
+
       res.status(200).json(product);
       console.log("done:", query);
     }

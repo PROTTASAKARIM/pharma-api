@@ -9,6 +9,7 @@ const productSchema = mongoose.Schema(
     generic: { type: mongoose.Schema.Types.ObjectId, ref: "Generic", default: null },
     brand: { type: mongoose.Schema.Types.ObjectId, ref: "Brand", default: null },
     category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", default: null },
+    subCategory: { type: mongoose.Schema.Types.ObjectId, ref: "Category", default: null },
     tp: { type: Number, require: true },
     mrp: { type: Number, require: true },
     details: { type: String },

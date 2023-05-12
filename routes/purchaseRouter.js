@@ -237,16 +237,34 @@ purchaseRouter.get(
         populate: {
           path: "products.id",
           model: "Product",
-          populate: {
-            path: "priceList",
-            model: "Price",
-          },
         },
       })
       .populate("warehouse", "name")
       .populate("userId", "name");
     // .populate("userId")
     res.send(Purchases[0]);
+    // // res.send('removed');
+    // console.log(Purchases);
+  })
+);
+// GET ONE Purchases
+purchaseRouter.get(
+  "/supplier/new/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const Purchase = await Purchase.findOne({ _id: id })
+    // .populate({
+    //   path: "supplier",
+    //   select: { company: 1, email: 1, phone: 1, address: 1, products: 1 },
+    //   populate: {
+    //     path: "products.id",
+    //     model: "Product",
+    //   },
+    // })
+    // .populate("warehouse", "name")
+    // .populate("userId", "name");
+    // .populate("userId")
+    res.send(Purchase);
     // // res.send('removed');
     // console.log(Purchases);
   })

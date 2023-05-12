@@ -10,21 +10,6 @@ const inventorySchema = new mongoose.Schema(
       ref: "Warehouse",
       require: true,
     },
-    priceTable: [
-      {
-        type: Map,
-        of: new mongoose.Schema({
-          id: { type: mongoose.Types.ObjectId, ref: "Price" },
-          currentQty: { type: Number },
-          openingQty: { type: Number },
-          totalQty: { type: Number },
-          soldQty: { type: Number },
-          damageQty: { type: Number },
-          rtvQty: { type: Number },
-          tpnQty: { type: Number },
-        }),
-      },
-    ],
     name: { type: String, require: true },
     currentQty: { type: Number, require: true },
     openingQty: { type: Number, require: true },
