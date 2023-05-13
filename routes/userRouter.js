@@ -32,7 +32,7 @@ userRouter.get(
       phone: 1,
       type: 1,
       status: 1,
-      warehouse: 1
+      warehouse: 1,
     });
     res.status(200).json(users);
     // // res.send('removed');
@@ -79,7 +79,7 @@ userRouter.get(
       type: 1,
       status: 1,
       username: 1,
-      warehouse: 1
+      warehouse: 1,
     });
     res.send(user[0]);
   })
@@ -256,6 +256,8 @@ userRouter.post(
               username: user[0].username,
               userId: user[0]._id,
               type: user[0].type,
+              name: user[0].name,
+              email: user[0].email,
             },
             process.env.JWT_SECRET,
             { expiresIn: "1h" }
@@ -264,13 +266,13 @@ userRouter.post(
           res.status(200).json({
             access_token: token,
             status: true,
-            user: {
-              id: user[0]._id,
-              name: user[0].name,
-              username: user[0].username,
-              email: user[0].email,
-              type: user[0].type,
-            },
+            // user: {
+            //   id: user[0]._id,
+            //   name: user[0].name,
+            //   username: user[0].username,
+            //   email: user[0].email,
+            //   type: user[0].type,
+            // },
             message: "Login Successful",
           });
         } else {

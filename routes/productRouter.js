@@ -185,12 +185,14 @@ router.get(
         article_code: 1,
         tp: 1,
         mrp: 1,
+        group: 1,
         discount: 1,
         brand: 1,
         size: 1,
         pcsBox: 1,
       })
       .populate("unit", "name")
+      .populate("group", "name")
       .limit(10);
     if (payload === "") {
       res.send([]);
@@ -229,12 +231,14 @@ router.get(
         tp: 1,
         mrp: 1,
         discount: 1,
+        group: 1,
         brand: 1,
         size: 1,
         pcsBox: 1,
       })
       .populate("brand", "name")
       .populate("unit", "symbol")
+      .populate("group", "name")
       .limit(10);
     if (payload === "") {
       res.send([]);
@@ -249,7 +253,7 @@ router.get(
   "/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
-    const products = await Product.find({ _id: id })
+    const products = await Product.find({ _id: id });
     // .populate("priceList", "mrp")
     res.send(products[0]);
   })
@@ -258,21 +262,19 @@ router.get(
   "/select/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
-    const product = await Product.findOne({ _id: id })
-      .select({
-        _id: 1,
-        name: 1,
-        unit: 1,
-        vat: 1,
-        article_code: 1,
-        tp: 1,
-        mrp: 1,
-        discount: 1,
-        brand: 1,
-        size: 1,
-        pcsBox: 1,
-
-      })
+    const product = await Product.findOne({ _id: id }).select({
+      _id: 1,
+      name: 1,
+      unit: 1,
+      vat: 1,
+      article_code: 1,
+      tp: 1,
+      mrp: 1,
+      discount: 1,
+      brand: 1,
+      size: 1,
+      pcsBox: 1,
+    });
     // .populate("category", "name")
 
     // .populate("priceList");
@@ -285,12 +287,10 @@ router.get(
   "/promo-update/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
-    const product = await Product.findOne({ _id: id })
+    const product = await Product.findOne({ _id: id });
     res.send(product);
   })
 );
-
-
 
 // GET ONE PRODUCT BY ARTICLE CODE
 router.get(
