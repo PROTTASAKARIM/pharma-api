@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const productSchema = mongoose.Schema(
   {
     name: { type: String, require: true },
-    article_code: { type: String, require: true },
+    article_code: { type: String, require: true, unique: true },
     group: { type: mongoose.Schema.Types.ObjectId, ref: "Group", default: null },
     company: { type: mongoose.Schema.Types.ObjectId, ref: "Company", default: null },
     generic: { type: mongoose.Schema.Types.ObjectId, ref: "Generic", default: null },
@@ -12,6 +12,7 @@ const productSchema = mongoose.Schema(
     subCategory: { type: mongoose.Schema.Types.ObjectId, ref: "Category", default: null },
     tp: { type: Number, require: true },
     mrp: { type: Number, require: true },
+    profit: { type: Number, require: true },
     details: { type: String },
     unit: { type: mongoose.Schema.Types.ObjectId, ref: "Unit", default: null },
     alert_qty: { type: Number, require: true },
