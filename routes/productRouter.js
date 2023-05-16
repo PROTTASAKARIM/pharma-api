@@ -323,8 +323,9 @@ router.post(
           .status(500)
           .json({ error: err, message: "There was a server side error" });
       } else {
+
         res.status(200).json({
-          data: product._id,
+          data: product?._id,
           message: "Product is created Successfully",
         });
       }

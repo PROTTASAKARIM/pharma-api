@@ -40,6 +40,10 @@ const updateInventoryOutOnDamageIn = async (req, res, next) => {
             updatedAt: new Date(Date.parse(success.updatedAt)),
 
           }
+          const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
+          if (update) {
+            // console.log("update", update)
+          }
         } else {
           inventory = {
             name: name,
@@ -58,12 +62,11 @@ const updateInventoryOutOnDamageIn = async (req, res, next) => {
 
 
           };
+          const newInventory = new Inventory(inventory);
+          const update = await newInventory.save()
         }
 
-        const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
-        if (update) {
-          // console.log("update", update)
-        }
+
       });
     } else {
       return;
@@ -113,7 +116,10 @@ const updateInventoryInOnDamageOut = async (req, res, next) => {
             updatedAt: new Date(Date.parse(success.updatedAt)),
 
           }
-
+          const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
+          if (update) {
+            // console.log("update", update)
+          }
         } else {
           inventory = {
             name: name,
@@ -132,14 +138,13 @@ const updateInventoryInOnDamageOut = async (req, res, next) => {
 
 
           };
+          const newInventory = new Inventory(inventory);
+          const update = await newInventory.save()
         }
         // res.send(inventory)
         // console.log("id", id)
         // console.log("inventory final", inventory);
-        const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
-        if (update) {
-          // console.log("update", update)
-        }
+
       });
     } else {
       return;
@@ -188,6 +193,10 @@ const updateInventoryOutOnRTVIn = async (req, res, next) => {
             createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
             updatedAt: new Date(Date.parse(success.updatedAt)),
           }
+          const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
+          if (update) {
+            console.log("update", update)
+          }
         } else {
           inventory = {
             name: name,
@@ -206,12 +215,11 @@ const updateInventoryOutOnRTVIn = async (req, res, next) => {
 
 
           };
+          const newInventory = new Inventory(inventory);
+          const update = await newInventory.save()
         }
         // res.send(inventory)
-        const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
-        if (update) {
-          console.log("update", update)
-        }
+
       });
     } else {
       return;
@@ -262,6 +270,10 @@ const updateInventoryINOnRTVOut = async (req, res, next) => {
             updatedAt: new Date(Date.parse(success.updatedAt)),
 
           }
+          const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
+          if (update) {
+            // console.log("update", update)
+          }
 
         } else {
           inventory = {
@@ -281,12 +293,11 @@ const updateInventoryINOnRTVOut = async (req, res, next) => {
 
 
           };
+          const newInventory = new Inventory(inventory);
+          const update = await newInventory.save()
         }
         // res.send(inventory)
-        const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
-        if (update) {
-          // console.log("update", update)
-        }
+
       });
     } else {
       return;
@@ -337,6 +348,10 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
 
           }
           // con
+          const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
+          if (update) {
+            // console.log("update", update)
+          }
 
         } else {
           inventory = {
@@ -356,12 +371,11 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
 
 
           };
+          const newInventory = new Inventory(inventory);
+          const update = await newInventory.save()
         }
 
-        const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
-        if (update) {
-          // console.log("update", update)
-        }
+
       });
     }
     if (returnProducts.length > 0) {
@@ -399,6 +413,10 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
 
 
           }
+          const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
+          if (update) {
+            // console.log("return update", update)
+          }
         } else {
           inventory = {
             name: name,
@@ -416,13 +434,12 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
             updatedAt: new Date(Date.now()),
 
           };
+          const newInventory = new Inventory(inventory);
+          const update = await newInventory.save()
         }
         // res.send(inventory)
         // console.log(" return inventory final", inventory);
-        const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
-        if (update) {
-          // console.log("return update", update)
-        }
+
       });
     }
 
@@ -468,6 +485,10 @@ const adjustInventoryOnSale = async (req, res, next) => {
 
 
             }
+            const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
+            if (update) {
+              req.body.update = update
+            }
 
           } else {
             inventory = {
@@ -486,11 +507,10 @@ const adjustInventoryOnSale = async (req, res, next) => {
               updatedAt: new Date(Date.now()),
 
             };
+            const newInventory = new Inventory(inventory);
+            const update = await newInventory.save()
           }
-          const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
-          if (update) {
-            req.body.update = update
-          }
+
         } else {
           console.log("no update")
         }
@@ -598,6 +618,10 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
             updatedAt: new Date(Date.parse(success.updatedAt)),
 
           }
+          const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
+          if (update) {
+            // console.log("update", update)
+          }
         } else {
           inventory = {
             name: name,
@@ -615,14 +639,13 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
             updatedAt: new Date(Date.now()),
 
           };
+          const newInventory = new Inventory(inventory);
+          const update = await newInventory.save()
         }
         // res.send(inventory)
         // res.send(inventory)
         // console.log("inventory final", inventory);
-        const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
-        if (update) {
-          // console.log("update", update)
-        }
+
       });
     }
   } catch (err) {
@@ -753,6 +776,10 @@ const updateInventoryOutOnGRNDel = async (req, res, next) => {
             updatedAt: new Date(Date.parse(success.updatedAt)),
 
           }
+          const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
+          if (update) {
+            // console.log("update", update)
+          }
         } else {
           inventory = {
             name: name,
@@ -770,13 +797,12 @@ const updateInventoryOutOnGRNDel = async (req, res, next) => {
             updatedAt: new Date(Date.now()),
 
           };
+          const newInventory = new Inventory(inventory);
+          const update = await newInventory.save()
         }
         // res.send(inventory)
         // console.log("inventory final", inventory);
-        const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
-        if (update) {
-          // console.log("update", update)
-        }
+
       });
     } else {
       return;
@@ -826,6 +852,10 @@ const updateInventoryOutOnTPNIn = async (req, res, next) => {
             updatedAt: new Date(Date.parse(success.updatedAt)),
 
           }
+          const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
+          if (update) {
+            // console.log("update", update)
+          }
         } else {
           inventory = {
             name: name,
@@ -843,13 +873,12 @@ const updateInventoryOutOnTPNIn = async (req, res, next) => {
             updatedAt: new Date(Date.now()),
 
           };
+          const newInventory = new Inventory(inventory);
+          const update = await newInventory.save()
         }
         // res.send(inventory)
         // console.log("inventory final", inventory);
-        const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
-        if (update) {
-          // console.log("update", update)
-        }
+
       });
     } else {
       return;
@@ -901,6 +930,10 @@ const updateInventoryInOnTpnDel = async (req, res, next) => {
             createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
             updatedAt: new Date(Date.parse(success.updatedAt)),
           }
+          const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
+          if (update) {
+            // console.log("update", update)
+          }
         } else {
           inventory = {
             name: name,
@@ -918,13 +951,12 @@ const updateInventoryInOnTpnDel = async (req, res, next) => {
             updatedAt: new Date(Date.now()),
 
           };
+          const newInventory = new Inventory(inventory);
+          const update = await newInventory.save()
         }
         // res.send(inventory)
         // console.log("inventory final", inventory);
-        const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
-        if (update) {
-          // console.log("update", update)
-        }
+
       });
     } else {
       return;
