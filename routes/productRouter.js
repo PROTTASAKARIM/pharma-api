@@ -16,6 +16,7 @@ const router = express.Router();
 const expressAsyncHandler = require("express-async-handler");
 const Product = require("../models/productModel");
 const Sale = require("../models/saleModel");
+const Inventory = require("../models/inventoryModel");
 const { startOfDay, endOfDay } = require("date-fns");
 const path = require("path");
 const {
@@ -317,13 +318,30 @@ router.post(
   "/",
   expressAsyncHandler(async (req, res) => {
     const newProduct = new Product(req.body);
-    await newProduct.save((err, product) => {
+    await newProduct.save(async (err, product) => {
       if (err) {
         res
           .status(500)
           .json({ error: err, message: "There was a server side error" });
       } else {
+        // let inventory = {
+        //   name: product.name,
+        //   article_code: product.article_code,
+        //   warehouse: "645c9297ed6d5d94af257be9",
+        //   currentQty: 0,
+        //   openingQty: 0,
+        //   totalQty: 0,
+        //   soldQty: 0,
+        //   damageQty: 0,
+        //   rtvQty: 0,
+        //   tpnQty: 0,
+        //   status: "active",
+        //   createdAt: new Date(Date.now()),
+        //   updatedAt: new Date(Date.now()),
 
+        // };
+        // const newInventory = new Inventory(inventory);
+        // const update = await newInventory.save()
         res.status(200).json({
           data: product?._id,
           message: "Product is created Successfully",
