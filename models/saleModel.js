@@ -73,6 +73,7 @@ const saleSchema = mongoose.Schema(
       new: { type: Number },
     },
     todayPoint: { type: Number },
+    discountPercent: { type: Number, require: true },
     discount: { type: Number, require: true },
 
     billerId: { type: mongoose.Types.ObjectId, require: true, ref: "User" },
