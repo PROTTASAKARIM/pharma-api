@@ -27,6 +27,50 @@ genericRouter.get(
     console.log(generics);
   })
 );
+genericRouter.get(
+  "/new",
+  expressAsyncHandler(async (req, res) => {
+    const generics = await Generic.find({}).limit(20);
+    res.send(generics);
+    // // res.send('removed');
+    console.log(generics);
+  })
+);
+// GET ALL generics
+genericRouter.get(
+  "/search/:q",
+  expressAsyncHandler(async (req, res) => {
+
+    const payload = req.params?.q?.trim().toString().toLocaleLowerCase();
+    console.log("payload", payload);
+    if (payload) {
+      let query = {};
+      if (!isNumber) {
+        query = { name: { $regex: new RegExp("\\b" + payload + ".*?", "i") } };
+      } else {
+        query = {
+          $or: [
+            { code: { $regex: new RegExp("^" + payload + ".*", "i") } },
+          ],
+        };
+      }
+
+
+      const generics = await Generic.find(query).limit(20);
+      res.status(200).send(generics);
+    } else {
+      let query = {};
+      const generics = await Generic.find(query)
+        .limit(20);
+      res.send(generics);
+    }
+
+
+
+    // // res.send('removed');
+    console.log(generics);
+  })
+);
 
 // GET ONE generics
 genericRouter.get(

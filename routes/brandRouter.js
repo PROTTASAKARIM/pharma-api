@@ -16,11 +16,30 @@ const checklogin = require("../middlewares/checkLogin");
 
 const brandRouter = express.Router();
 
+// COUNT PRODUCT
+brandRouter.get(
+  "/count",
+  expressAsyncHandler(async (req, res) => {
+    const brand = await Brand.countDocuments({});
+    res.status(200).json(brand);
+  })
+);
+
 // GET ALL brands
 brandRouter.get(
   "/",
   expressAsyncHandler(async (req, res) => {
     const brands = await Brand.find({});
+    res.send(brands);
+    // // res.send('removed');
+    console.log(brands);
+  })
+);
+// GET ALL brands
+brandRouter.get(
+  "/new",
+  expressAsyncHandler(async (req, res) => {
+    const brands = await Brand.find({}).limit(20);
     res.send(brands);
     // // res.send('removed');
     console.log(brands);
@@ -43,6 +62,7 @@ brandRouter.get(
 brandRouter.post(
   "/",
   expressAsyncHandler(async (req, res) => {
+    console.log("Brand", req.body)
     const newBrand = new Brand(req.body);
 
     try {
