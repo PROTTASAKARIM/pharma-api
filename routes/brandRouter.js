@@ -46,6 +46,61 @@ brandRouter.get(
   })
 );
 
+
+brandRouter.get(
+  "/all/:page/:size",
+  expressAsyncHandler(async (req, res) => {
+    const page = parseInt(req.params.page);
+    const size = parseInt(req.params.size);
+    const queryString = req.query?.q?.trim().toString().toLocaleLowerCase();
+    const currentPage = page + 0;
+
+    let query = {};
+    let brand = [];
+    // const size = parseInt(req.query.size);
+    console.log("page:", currentPage, "size:", size, "search:", queryString);
+
+    //check if search or the pagenation
+
+    if (queryString) {
+      console.log("search:", query);
+      // search check if num or string
+      const isNumber = /^\d/.test(queryString);
+      console.log(isNumber);
+      if (!isNumber) {
+        // if text then search name
+        query = {
+          $or: [
+            { name: { $regex: new RegExp(queryString + ".*?", "i") } },
+          ],
+        };
+        // query = { name:  queryString  };
+      } else {
+        // if number search in ean and article code
+        query = {
+          code: {
+            $regex: RegExp("^" + queryString + ".*", "i"),
+          },
+        };
+      }
+      console.log("done:", query);
+
+      brand = await Brand.find(query)
+        .limit(100);
+      res.status(200).json(brand);
+    } else {
+      // regular pagination
+      query = {};
+      console.log("done:", query);
+
+      brand = await Brand.find(query)
+        .limit(size)
+        .skip(size * page);
+      res.status(200).json(brand);
+    }
+  })
+);
+
 // GET ONE brands
 brandRouter.get(
   "/:id",

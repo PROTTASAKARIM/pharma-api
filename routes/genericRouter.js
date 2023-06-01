@@ -17,6 +17,15 @@ const checklogin = require("../middlewares/checkLogin");
 
 const genericRouter = express.Router();
 
+
+// COUNT PRODUCT
+genericRouter.get(
+  "/count",
+  expressAsyncHandler(async (req, res) => {
+    const generic = await Generic.countDocuments({});
+    res.status(200).json(generic);
+  })
+);
 // GET ALL generics
 genericRouter.get(
   "/",
@@ -34,6 +43,59 @@ genericRouter.get(
     res.send(generics);
     // // res.send('removed');
     console.log(generics);
+  })
+);
+// GET ALL generic WITH PAGENATION & SEARCH
+genericRouter.get(
+  "/all/:page/:size",
+  expressAsyncHandler(async (req, res) => {
+    const page = parseInt(req.params.page);
+    const size = parseInt(req.params.size);
+    const queryString = req.query?.q?.trim().toString().toLocaleLowerCase();
+    const currentPage = page + 0;
+
+    let query = {};
+    let generic = [];
+    // const size = parseInt(req.query.size);
+    console.log("page:", currentPage, "size:", size, "search:", queryString);
+
+    //check if search or the pagenation
+
+    if (queryString) {
+      console.log("search:", query);
+      // search check if num or string
+      const isNumber = /^\d/.test(queryString);
+      console.log(isNumber);
+      if (!isNumber) {
+        // if text then search name
+        query = {
+          $or: [
+            { name: { $regex: new RegExp(queryString + ".*?", "i") } },
+          ],
+        };
+        // query = { name:  queryString  };
+      } else {
+        // if number search in ean and article code
+        query = {
+          code: {
+            $regex: RegExp("^" + queryString + ".*", "i"),
+          },
+        };
+      }
+
+      generic = await Generic.find(query)
+        .limit(100);
+      res.status(200).json(generic);
+    } else {
+      // regular pagination
+      query = {};
+
+      generic = await Generic.find(query)
+        .limit(size)
+        .skip(size * page);
+      res.status(200).json(generic);
+      console.log("done:", query);
+    }
   })
 );
 // GET ALL generics

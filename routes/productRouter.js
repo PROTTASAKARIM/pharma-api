@@ -43,7 +43,22 @@ router.get(
     res.status(200).json(total);
   })
 );
-
+// GET PRODUCT DETAILS FOR PURCHASE PRODUCT IMPORT
+router.get(
+  "/pro-details/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const products = await Product.findOne({ article_code: id })
+      .select({
+        _id: 1,
+        name: 1,
+        unit: 1,
+        article_code: 1,
+      })
+      .populate("unit", { _id: 1, name: 1 })
+    res.send(products);
+  })
+);
 
 //product details
 router.get(
