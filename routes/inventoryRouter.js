@@ -348,7 +348,177 @@ inventoryRouter.delete(
     }
   })
 );
+// GET ALL INVENTORY WITH PAGENATION & SEARCH
+inventoryRouter.get(
+  "/all/ttt/:page/:size",
+  expressAsyncHandler(async (req, res) => {
+    const page = parseInt(req.params.page);
+    const size = parseInt(req.params.size);
+    const queryString = req.query?.q?.trim().toString().toLocaleLowerCase();
+    const currentPage = parseInt(page) + 0;
 
+    let query = {};
+    let product = [];
+    // const size = parseInt(req.query.size);
+    console.log("page:", currentPage, "size:", size, "search:", queryString);
+    console.log(typeof queryString);
+
+    //check if search or the pagenation
+
+    if (queryString) {
+      console.log("== query");
+
+      console.log("search:", query);
+      // search check if num or string
+      const isNumber = /^\d/.test(queryString);
+      console.log(isNumber);
+      if (!isNumber) {
+        // if text then search name
+        query = {
+          name: { $regex: new RegExp(".*" + queryString + ".*?", "i") },
+        };
+        // query = { name:  queryString  };
+      } else {
+        query = {
+          article_code: {
+            $regex: RegExp(queryString + ".*", "i"),
+          },
+        };
+      }
+      console.log("qry", query);
+
+      product = await Inventory.aggregate([
+        {
+          $match: query,
+        },
+        {
+          $lookup: {
+            from: 'products', // The name of the price collection
+            localField: 'article_code',
+            foreignField: 'article_code',
+            as: 'products',
+          },
+        },
+        {
+          $limit: 100,
+        },
+        {
+          $unwind: '$products',
+        },
+        {
+          $lookup: {
+            from: 'prices', // The name of the price collection
+            localField: 'products._id',
+            foreignField: 'article_code',
+            as: 'prices',
+          },
+        },
+        {
+          $unwind: '$prices',
+        },
+        {
+          $sort: { 'prices.updatedAt': -1 },
+        },
+        {
+          $sort: { 'article_code': 1 },
+        },
+        {
+          $group: {
+            _id: '$_id', // Unique identifier field
+            name: { $first: '$name' },
+            article_code: { $first: '$article_code' },
+            warehouse: { $first: '$warehouse' },
+            openingQty: { $first: '$openingQty' },
+            currentQty: { $first: '$currentQty' },
+            totalQty: { $first: '$totalQty' },
+            soldQty: { $first: '$soldQty' },
+            damageQty: { $first: '$damageQty' },
+            rtvQty: { $first: '$rtvQty' },
+            tpnQty: { $first: '$tpnQty' },
+            priceTable: { $first: '$priceTable' },
+            status: { $first: '$status' },
+            createdAt: { $first: '$createdAt' },
+            updatedAt: { $first: '$updatedAt' },
+            __v: { $first: '$__v' },
+            products: { $first: '$products' },
+            prices: { $first: '$prices' },
+          },
+        },
+      ])
+      // console.log("res", product);
+      res.status(200).json(product);
+    } else {
+
+      product = await Inventory.aggregate([
+        {
+          $match: query,
+        },
+        {
+          $lookup: {
+            from: 'products', // The name of the price collection
+            localField: 'article_code',
+            foreignField: 'article_code',
+            as: 'products',
+          },
+        },
+        {
+          $skip: size * page,
+        },
+        {
+          $limit: size,
+        },
+        {
+          $unwind: '$products',
+        },
+        {
+          $lookup: {
+            from: 'prices', // The name of the price collection
+            localField: 'products._id',
+            foreignField: 'article_code',
+            as: 'prices',
+          },
+        },
+        {
+          $unwind: '$prices',
+        },
+        {
+          $sort: { 'prices.updatedAt': -1 },
+        },
+        {
+          $sort: { 'article_code': 1 },
+        },
+        {
+          $group: {
+            _id: '$_id', // Unique identifier field
+            name: { $first: '$name' },
+            article_code: { $first: '$article_code' },
+            warehouse: { $first: '$warehouse' },
+            openingQty: { $first: '$openingQty' },
+            currentQty: { $first: '$currentQty' },
+            totalQty: { $first: '$totalQty' },
+            soldQty: { $first: '$soldQty' },
+            damageQty: { $first: '$damageQty' },
+            rtvQty: { $first: '$rtvQty' },
+            tpnQty: { $first: '$tpnQty' },
+            priceTable: { $first: '$priceTable' },
+            status: { $first: '$status' },
+            createdAt: { $first: '$createdAt' },
+            updatedAt: { $first: '$updatedAt' },
+            __v: { $first: '$__v' },
+            products: { $first: '$products' },
+            prices: { $first: '$prices' },
+          },
+        },
+      ])
+
+      // .populate("priceList");
+      // console.log("res", product);
+
+      console.log("done:", query);
+      res.status(200).json(product);
+    }
+  })
+);
 // DELETE ALL
 // inventoryRouter.get(
 //   "/delete-all",

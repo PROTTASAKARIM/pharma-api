@@ -268,27 +268,6 @@ supplierRouter.get(
         phone: 1,
         products: 1,
       });
-      // .populate("products")
-      // .populate({
-      //   path: "products.id",
-      //   model: "Product",
-      //   depopulate: {
-      //     path: "priceList",
-      //     model: "Price",
-      //   },
-      // });
-      // populate();
-      // }).populate("Product.id", "name", "ean", "article_code", "unit");
-      // console.log(suppliers[0].products.length > 0);
-      // suppliers[0].products.length > 0 &&
-      //   (await suppliers.populate("products").populate({
-      //     path: "products.id",
-      //     model: "Product",
-      //     populate: {
-      //       path: "priceList",
-      //       model: "Price",
-      //     },
-      //   }));
 
       res.send(suppliers[0]);
       console.log("removed");
@@ -423,7 +402,8 @@ supplierRouter.get(
     let query = {};
     let suppliers = [];
     // const size = parseInt(req.query.size);
-    // console.log("page:", currentPage, "size:", size, "search:", queryString);
+    console.log("page:1", page, "size:1", size, "search:1", queryString);
+    console.log("page:", currentPage, "size:", size, "search:", queryString);
     // console.log(typeof queryString);
 
     //check if search or the pagenation
@@ -439,13 +419,21 @@ supplierRouter.get(
       if (!isNumber) {
         // if text then search name
         // query = { name:  queryString  };
-        query = { company: { $regex: RegExp(queryString + ".*", "i") } };
+        query = { company: { $regex: new RegExp(queryString + ".*?", "i") } };
       } else {
         // if number search in ean and article code
         query = {
           $or: [
-            { code: { $regex: RegExp("^" + queryString + ".*", "i") } },
-            { phone: { $regex: RegExp("^" + queryString + ".*", "i") } },
+            {
+              code: {
+                $regex: RegExp("^" + queryString + ".*", "i"),
+              },
+            },
+            {
+              phone: {
+                $regex: RegExp("^" + queryString + ".*", "i"),
+              },
+            },
           ],
         };
       }
@@ -459,7 +447,7 @@ supplierRouter.get(
           company: 1,
           phone: 1,
         })
-        .limit(50);
+        .limit(100);
       // .populate("userId", "name")
       // .populate("poNo", "poNo")
       // // .populate("supplier", { company: 1, email: 1, phone: 1, address: 1 })
@@ -477,9 +465,9 @@ supplierRouter.get(
         code: 1,
         company: 1,
         phone: 1,
-      });
-      // .limit(size)
-      // .skip(size * page)
+      })
+        .limit(size)
+        .skip(size * page)
       // .populate("warehouse", "name");
       res.status(200).json(suppliers);
       console.log("done:", query);

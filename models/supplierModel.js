@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const supplierSchema = mongoose.Schema(
   {
-    name: { type: String, require: true },
+    name: { type: String },
     email: { type: String },
     code: { type: String, require: true, unique: true },
     company: { type: String },

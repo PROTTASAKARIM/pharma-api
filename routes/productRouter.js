@@ -250,6 +250,65 @@ router.get(
   })
 );
 router.get(
+  "/search/nnew/test/:q",
+  expressAsyncHandler(async (req, res) => {
+    // let payload = req.query?.q?.trim().toString().toLocaleLowerCase();
+    const payload = req.params?.q?.trim().toString().toLocaleLowerCase();
+    console.log(payload);
+
+    const isNumber = /^\d/.test(payload);
+    let query = {};
+    if (!isNumber) {
+      query = { name: { $regex: new RegExp("\\b" + payload + ".*?", "i") } };
+    } else {
+      query = {
+        $or: [
+          { article_code: { $regex: new RegExp("^" + payload + ".*", "i") } },
+        ],
+      };
+    }
+
+    // const search = await Product.find(query)
+    //   // TODO:: UPDATE AGREEGET FOR GET STOCK VALUE
+    //   .select({
+    //     _id: 1,
+    //     name: 1,
+    //     unit: 1,
+    //     vat: 1,
+    //     article_code: 1,
+    //     tp: 1,
+    //     mrp: 1,
+    //     discount: 1,
+    //     group: 1,
+    //     brand: 1,
+    //     size: 1,
+    //     pcsBox: 1,
+    //   })
+    //   .populate("brand", "name")
+    //   .populate("unit", "symbol")
+    //   .populate("group", "name")
+    //   .limit(10);
+    // if (payload === "") {
+    //   res.send([]);
+    // } else {
+    //   res.send(search);
+    // }
+
+    const search = await Product.aggregate([
+      {
+        $match: query,
+      },
+    ])
+    if (payload === "") {
+      res.send([]);
+    } else {
+      res.send(search);
+    }
+  })
+);
+
+
+router.get(
   "/search/:q",
   expressAsyncHandler(async (req, res) => {
     // let payload = req.query?.q?.trim().toString().toLocaleLowerCase();

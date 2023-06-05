@@ -29,7 +29,7 @@ accountRouter.get(
             : endOfDay(new Date.now());
 
         console.log(start, end, new Date());
-        const account = await Account.find({ createdAt: { $gte: start, $lte: end } })
+        const account = await Account.find({ createdAt: { $gte: start, $lte: end }, status: "active" })
             .populate("supplier", "company")
             .populate("accountHead", "name");
         res.send(account);
@@ -42,11 +42,17 @@ accountRouter.get(
     expressAsyncHandler(async (req, res) => {
         const id = req.params.id;
         const account = await Account.findOne({ _id: id, status: "active" })
+            .populate("supplier", { name: 1, phone: 1, email: 1, address: 1, company: 1 })
+            .populate("accountHead", { name: 1, maId: 1 })
+            .populate("user", { name: 1 })
+            .populate("poId", { poNo: 1 })
+            .populate("grnId", { grnNo: 1 })
         res.send(account);
         // // res.send('removed');
         console.log(account);
     })
 );
+
 accountRouter.post(
     "/",
     generateAccId,
