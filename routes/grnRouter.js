@@ -352,6 +352,7 @@ grnRouter.get(
   })
 );
 // GET grns by supplier
+// GET grns by supplier
 grnRouter.get(
   "/supplier/account/:id",
   expressAsyncHandler(async (req, res) => {

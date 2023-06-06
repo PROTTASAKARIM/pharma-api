@@ -37,7 +37,7 @@ purchaseRouter.get(
         shipping_cost: 1,
         note: 1,
       })
-      .populate("supplier", "company")
+      .populate("supplier", "name")
       .populate("warehouse", "name")
       .populate("userId", "name");
     //   .exec(callback);
@@ -48,6 +48,24 @@ purchaseRouter.get(
   })
 );
 
+purchaseRouter.get(
+  "/supplier/account/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    try {
+      const Purchases = await Purchase.find({ supplier: id })
+        .populate("supplier", { company: 1, email: 1, phone: 1, address: 1 })
+        // .populate("warehouse", "name")
+        .populate("userId", "name")
+
+      console.log(Purchases);
+      res.send(Purchases);
+    } catch (err) {
+      console.log(err);
+    }
+    // // res.send('removed');
+  })
+);
 
 // GET weekly Purchases
 purchaseRouter.get(

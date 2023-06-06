@@ -43,6 +43,47 @@ router.get(
     res.status(200).json(total);
   })
 );
+// GET PRODUCT DETAILS FOR PURCHASE PRODUCT IMPORT
+router.get(
+  "/pro-details/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const products = await Product.findOne({ article_code: id })
+      .select({
+        _id: 1,
+        name: 1,
+        unit: 1,
+        article_code: 1,
+      })
+      .populate("unit", { _id: 1, name: 1 })
+    res.send(products);
+  })
+);
+
+//product details
+router.get(
+  "/details/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const products = await Product.findOne({ _id: id })
+      .select({
+        _id: 1,
+        name: 1,
+        unit: 1,
+        article_code: 1,
+        photo: 1,
+        tp: 1,
+        mrp: 1,
+        size: 1,
+        vat: 1,
+        pcsBox: 1,
+        discount: 1,
+        group: 1
+      })
+      .populate("group", { _id: 1, name: 1 })
+    res.send(products);
+  })
+);
 
 // GET PRODUCT PRICE
 router.get(
@@ -110,6 +151,8 @@ router.get(
           article_code: 1,
           photo: 1,
           tp: 1,
+          mrp: 1,
+          size: 1
         })
         .limit(100);
       res.status(200).json(product);
@@ -126,6 +169,9 @@ router.get(
           unit: 1,
           article_code: 1,
           photo: 1,
+          tp: 1,
+          mrp: 1,
+          size: 1
         })
         .limit(size)
         .skip(size * page);
@@ -146,6 +192,7 @@ router.get(
           ean: 1,
           article_code: 1,
           tp: 1,
+          mrp: 1
         })
         .populate("priceList");
 
@@ -202,6 +249,65 @@ router.get(
     }
   })
 );
+router.get(
+  "/search/nnew/test/:q",
+  expressAsyncHandler(async (req, res) => {
+    // let payload = req.query?.q?.trim().toString().toLocaleLowerCase();
+    const payload = req.params?.q?.trim().toString().toLocaleLowerCase();
+    console.log(payload);
+
+    const isNumber = /^\d/.test(payload);
+    let query = {};
+    if (!isNumber) {
+      query = { name: { $regex: new RegExp("\\b" + payload + ".*?", "i") } };
+    } else {
+      query = {
+        $or: [
+          { article_code: { $regex: new RegExp("^" + payload + ".*", "i") } },
+        ],
+      };
+    }
+
+    // const search = await Product.find(query)
+    //   // TODO:: UPDATE AGREEGET FOR GET STOCK VALUE
+    //   .select({
+    //     _id: 1,
+    //     name: 1,
+    //     unit: 1,
+    //     vat: 1,
+    //     article_code: 1,
+    //     tp: 1,
+    //     mrp: 1,
+    //     discount: 1,
+    //     group: 1,
+    //     brand: 1,
+    //     size: 1,
+    //     pcsBox: 1,
+    //   })
+    //   .populate("brand", "name")
+    //   .populate("unit", "symbol")
+    //   .populate("group", "name")
+    //   .limit(10);
+    // if (payload === "") {
+    //   res.send([]);
+    // } else {
+    //   res.send(search);
+    // }
+
+    const search = await Product.aggregate([
+      {
+        $match: query,
+      },
+    ])
+    if (payload === "") {
+      res.send([]);
+    } else {
+      res.send(search);
+    }
+  })
+);
+
+
 router.get(
   "/search/:q",
   expressAsyncHandler(async (req, res) => {
@@ -317,39 +423,64 @@ router.get(
 router.post(
   "/",
   expressAsyncHandler(async (req, res) => {
+    console.log("product", req.body)
     const newProduct = new Product(req.body);
-    await newProduct.save(async (err, product) => {
-      if (err) {
-        res
-          .status(500)
-          .json({ error: err, message: "There was a server side error" });
-      } else {
-        // let inventory = {
-        //   name: product.name,
-        //   article_code: product.article_code,
-        //   warehouse: "645c9297ed6d5d94af257be9",
-        //   currentQty: 0,
-        //   openingQty: 0,
-        //   totalQty: 0,
-        //   soldQty: 0,
-        //   damageQty: 0,
-        //   rtvQty: 0,
-        //   tpnQty: 0,
-        //   status: "active",
-        //   createdAt: new Date(Date.now()),
-        //   updatedAt: new Date(Date.now()),
+    console.log(newProduct)
+    try {
+      await newProduct.save()
+        .then(res => {
+          console.log(res)
+          res.status(200).json({
+            message: "Product is created Successfully",
+          });
+        })
+    } catch (err) {
+      res
+        .status(500)
+        .json({ message: "There was a server side error", error: err });
+    }
 
-        // };
-        // const newInventory = new Inventory(inventory);
-        // const update = await newInventory.save()
-        res.status(200).json({
-          data: product?._id,
-          message: "Product is created Successfully",
-        });
-      }
-    });
   })
 );
+// // CREATE ONE PRODUCT
+// router.post(
+//   "/",
+//   expressAsyncHandler(async (req, res) => {
+//     console.log("product", req.body)
+//     const newProduct = new Product(req.body.product);
+//     await newProduct.save(async (err, product) => {
+//       if (err) {
+//         res
+//           .status(500)
+//           .json({ error: err, message: "There was a server side error" });
+//       } else {
+//         console.log(product)
+//         // let inventory = {
+//         //   name: product.name,
+//         //   article_code: product.article_code,
+//         //   warehouse: "645c9297ed6d5d94af257be9",
+//         //   currentQty: 0,
+//         //   openingQty: 0,
+//         //   totalQty: 0,
+//         //   soldQty: 0,
+//         //   damageQty: 0,
+//         //   rtvQty: 0,
+//         //   tpnQty: 0,
+//         //   status: "active",
+//         //   createdAt: new Date(Date.now()),
+//         //   updatedAt: new Date(Date.now()),
+
+//         // };
+//         // const newInventory = new Inventory(inventory);
+//         // const update = await newInventory.save()
+//         res.status(200).json({
+//           data: product?._id,
+//           message: "Product is created Successfully",
+//         });
+//       }
+//     });
+//   })
+// );
 
 // CREATE MANY PRODUCTS
 router.post(

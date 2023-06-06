@@ -2,10 +2,10 @@ const mongoose = require("mongoose");
 
 const supplierSchema = mongoose.Schema(
   {
-    name: { type: String, require: true },
-    email: { type: String, require: true },
+    name: { type: String },
+    email: { type: String },
     code: { type: String, require: true, unique: true },
-    company: { type: String, require: true },
+    company: { type: String },
     products: [
       {
         type: Map,
@@ -21,7 +21,7 @@ const supplierSchema = mongoose.Schema(
     ],
     address: { type: String },
     type: { type: String },
-    phone: { type: String, require: true },
+    phone: { type: String },
     companyLayer: { type: mongoose.Schema.Types.ObjectId, ref: "Company", default: null },
     status: { type: String, enum: ["active", "inactive"] },
   },

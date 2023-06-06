@@ -17,12 +17,118 @@ const checklogin = require("../middlewares/checkLogin");
 
 const genericRouter = express.Router();
 
+
+// COUNT PRODUCT
+genericRouter.get(
+  "/count",
+  expressAsyncHandler(async (req, res) => {
+    const generic = await Generic.countDocuments({});
+    res.status(200).json(generic);
+  })
+);
 // GET ALL generics
 genericRouter.get(
   "/",
   expressAsyncHandler(async (req, res) => {
     const generics = await Generic.find({});
     res.send(generics);
+    // // res.send('removed');
+    console.log(generics);
+  })
+);
+genericRouter.get(
+  "/new",
+  expressAsyncHandler(async (req, res) => {
+    const generics = await Generic.find({}).limit(20);
+    res.send(generics);
+    // // res.send('removed');
+    console.log(generics);
+  })
+);
+// GET ALL generic WITH PAGENATION & SEARCH
+genericRouter.get(
+  "/all/:page/:size",
+  expressAsyncHandler(async (req, res) => {
+    const page = parseInt(req.params.page);
+    const size = parseInt(req.params.size);
+    const queryString = req.query?.q?.trim().toString().toLocaleLowerCase();
+    const currentPage = page + 0;
+
+    let query = {};
+    let generic = [];
+    // const size = parseInt(req.query.size);
+    console.log("page:", currentPage, "size:", size, "search:", queryString);
+
+    //check if search or the pagenation
+
+    if (queryString) {
+      console.log("search:", query);
+      // search check if num or string
+      const isNumber = /^\d/.test(queryString);
+      console.log(isNumber);
+      if (!isNumber) {
+        // if text then search name
+        query = {
+          $or: [
+            { name: { $regex: new RegExp(queryString + ".*?", "i") } },
+          ],
+        };
+        // query = { name:  queryString  };
+      } else {
+        // if number search in ean and article code
+        query = {
+          code: {
+            $regex: RegExp("^" + queryString + ".*", "i"),
+          },
+        };
+      }
+
+      generic = await Generic.find(query)
+        .limit(100);
+      res.status(200).json(generic);
+    } else {
+      // regular pagination
+      query = {};
+
+      generic = await Generic.find(query)
+        .limit(size)
+        .skip(size * page);
+      res.status(200).json(generic);
+      console.log("done:", query);
+    }
+  })
+);
+// GET ALL generics
+genericRouter.get(
+  "/search/:q",
+  expressAsyncHandler(async (req, res) => {
+
+    const payload = req.params?.q?.trim().toString().toLocaleLowerCase();
+    console.log("payload", payload);
+    if (payload) {
+      let query = {};
+      if (!isNumber) {
+        query = { name: { $regex: new RegExp("\\b" + payload + ".*?", "i") } };
+      } else {
+        query = {
+          $or: [
+            { code: { $regex: new RegExp("^" + payload + ".*", "i") } },
+          ],
+        };
+      }
+
+
+      const generics = await Generic.find(query).limit(20);
+      res.status(200).send(generics);
+    } else {
+      let query = {};
+      const generics = await Generic.find(query)
+        .limit(20);
+      res.send(generics);
+    }
+
+
+
     // // res.send('removed');
     console.log(generics);
   })

@@ -17,6 +17,15 @@ const checklogin = require("../middlewares/checkLogin");
 
 const groupRouter = express.Router();
 
+
+// COUNT PRODUCT
+groupRouter.get(
+  "/count",
+  expressAsyncHandler(async (req, res) => {
+    const group = await Group.countDocuments({});
+    res.status(200).json(group);
+  })
+);
 // GET ALL groups
 groupRouter.get(
   "/",
@@ -25,6 +34,60 @@ groupRouter.get(
     res.send(groups);
     // // res.send('removed');
     console.log(groups);
+  })
+);
+
+// GET ALL group WITH PAGENATION & SEARCH
+groupRouter.get(
+  "/all/:page/:size",
+  expressAsyncHandler(async (req, res) => {
+    const page = parseInt(req.params.page);
+    const size = parseInt(req.params.size);
+    const queryString = req.query?.q?.trim().toString().toLocaleLowerCase();
+    const currentPage = page + 0;
+
+    let query = {};
+    let group = [];
+    // const size = parseInt(req.query.size);
+    console.log("page:", currentPage, "size:", size, "search:", queryString);
+
+    //check if search or the pagenation
+
+    if (queryString) {
+      console.log("search:", query);
+      // search check if num or string
+      const isNumber = /^\d/.test(queryString);
+      console.log(isNumber);
+      if (!isNumber) {
+        // if text then search name
+        query = {
+          $or: [
+            { name: { $regex: new RegExp(queryString + ".*?", "i") } },
+          ],
+        };
+        // query = { name:  queryString  };
+      } else {
+        // if number search in ean and article code
+        query = {
+          code: {
+            $regex: RegExp("^" + queryString + ".*", "i"),
+          },
+        };
+      }
+
+      group = await Group.find(query)
+        .limit(100);
+      res.status(200).json(group);
+    } else {
+      // regular pagination
+      query = {};
+
+      group = await Group.find(query)
+        .limit(size)
+        .skip(size * page);
+      res.status(200).json(group);
+      console.log("done:", query);
+    }
   })
 );
 
