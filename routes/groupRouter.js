@@ -14,9 +14,7 @@ const jwt = require("jsonwebtoken");
 const Group = require("../models/groupModel");
 const checklogin = require("../middlewares/checkLogin");
 
-
 const groupRouter = express.Router();
-
 
 // COUNT PRODUCT
 groupRouter.get(
@@ -61,9 +59,7 @@ groupRouter.get(
       if (!isNumber) {
         // if text then search name
         query = {
-          $or: [
-            { name: { $regex: new RegExp(queryString + ".*?", "i") } },
-          ],
+          $or: [{ name: { $regex: new RegExp(queryString + ".*?", "i") } }],
         };
         // query = { name:  queryString  };
       } else {
@@ -75,8 +71,7 @@ groupRouter.get(
         };
       }
 
-      group = await Group.find(query)
-        .limit(100);
+      group = await Group.find(query).limit(100);
       res.status(200).json(group);
     } else {
       // regular pagination
@@ -97,9 +92,9 @@ groupRouter.get(
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     const group = await Group.findOne({ _id: id });
+    console.log(group);
     res.send(group);
     // // res.send('removed');
-    console.log(group);
   })
 );
 
@@ -119,6 +114,39 @@ groupRouter.post(
         .status(500)
         .json({ message: "There was a server side error", error: err });
     }
+  })
+);
+
+// GROUP DW SEARCH
+groupRouter.get(
+  "/search/:q",
+  expressAsyncHandler(async (req, res) => {
+    const payload = req.params?.q?.trim().toString().toLocaleLowerCase();
+
+    let query = {};
+
+    if (payload === "") {
+      query = {};
+    } else {
+      const isNumber = /^\d/.test(payload);
+      if (!isNumber) {
+        query = { name: { $regex: new RegExp("\\b" + payload + ".*?", "i") } };
+      } else {
+        query = {
+          $or: [{ code: { $regex: new RegExp("^" + payload + ".*", "i") } }],
+        };
+      }
+    }
+
+    const search = await Group.find(query)
+      // TODO:: UPDATE AGREEGET FOR GET STOCK VALUE
+      .select({
+        _id: 1,
+        name: 1,
+      })
+      .limit(10);
+
+    res.send(search);
   })
 );
 
@@ -144,7 +172,7 @@ groupRouter.put(
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     const update = req.body;
-    console.log('id', id, 'update', update)
+    console.log("id", id, "update", update);
     try {
       await Group.updateOne({ _id: id }, { $set: update })
         .then((response) => {
