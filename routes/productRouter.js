@@ -43,6 +43,18 @@ router.get(
     res.status(200).json(total);
   })
 );
+router.get(
+  "/export",
+  expressAsyncHandler(async (req, res) => {
+    const products = await Product.find().select({
+      _id: 1,
+      name: 1,
+      article_code: 1,
+      unit: 1,
+    })
+    res.status(200).json(products);
+  })
+);
 // GET PRODUCT DETAILS FOR PURCHASE PRODUCT IMPORT
 router.get(
   "/pro-details/:id",
@@ -318,35 +330,101 @@ router.get(
     const isNumber = /^\d/.test(payload);
     let query = {};
     if (!isNumber) {
-      query = { name: { $regex: new RegExp("\\b" + payload + ".*?", "i") } };
+      // query = { name: { $regex: new RegExp("\\b" + payload + ".*?", "i") } };
+      query = { name: { $regex: new RegExp(payload, "i") } };
     } else {
       query = {
         $or: [
-          { article_code: { $regex: new RegExp("^" + payload + ".*", "i") } },
+          { article_code: { $regex: new RegExp(payload, "i") } },
+          // { article_code: { $regex: new RegExp("^" + payload + ".*", "i") } },
         ],
       };
     }
 
-    const search = await Product.find(query)
-      // TODO:: UPDATE AGREEGET FOR GET STOCK VALUE
-      .select({
-        _id: 1,
-        name: 1,
-        unit: 1,
-        vat: 1,
-        article_code: 1,
-        tp: 1,
-        mrp: 1,
-        discount: 1,
-        group: 1,
-        brand: 1,
-        size: 1,
-        pcsBox: 1,
-      })
-      .populate("brand", "name")
-      .populate("unit", "symbol")
-      .populate("group", "name")
-      .limit(10);
+    // const search = await Product.find(query)
+    //   // TODO:: UPDATE AGREEGET FOR GET STOCK VALUE
+    //   .select({
+    //     _id: 1,
+    //     name: 1,
+    //     unit: 1,
+    //     vat: 1,
+    //     article_code: 1,
+    //     tp: 1,
+    //     mrp: 1,
+    //     discount: 1,
+    //     group: 1,
+    //     brand: 1,
+    //     size: 1,
+    //     pcsBox: 1,
+    //   })
+    //   .populate("brand", "name")
+    //   .populate("unit", "symbol")
+    //   .populate("group", "name")
+    //   .limit(10);
+
+    const search = await Product.aggregate([
+      {
+        $match: query,
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          unit: 1,
+          vat: 1,
+          article_code: 1,
+          tp: 1,
+          mrp: 1,
+          discount: 1,
+          group: 1,
+          brand: 1,
+          size: 1,
+          pcsBox: 1,
+        },
+      },
+      {
+        $lookup: {
+          from: "brands",
+          localField: "brand",
+          foreignField: "_id",
+          as: "brand",
+        },
+      },
+      {
+        $lookup: {
+          from: "units",
+          localField: "unit",
+          foreignField: "_id",
+          as: "unit",
+        },
+      },
+      {
+        $lookup: {
+          from: "groups",
+          localField: "group",
+          foreignField: "_id",
+          as: "group",
+        },
+      },
+      {
+        $addFields: {
+          nameLength: { $strLenCP: "$name" },
+        },
+      },
+      {
+        $sort: {
+          nameLength: 1, // -1 for descending, 1 for ascending
+        },
+      },
+      {
+        $limit: 10,
+      },
+    ]);
+
+    // Access the results
+    console.log(search);
+
+
     if (payload === "") {
       res.send([]);
     } else {

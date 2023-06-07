@@ -100,6 +100,67 @@ brandRouter.get(
     }
   })
 );
+brandRouter.get(
+  "/search/:q",
+  expressAsyncHandler(async (req, res) => {
+    // let payload = req.query?.q?.trim().toString().toLocaleLowerCase();
+    const payload = req.params?.q?.trim().toString().toLocaleLowerCase();
+    // console.log(payload);
+
+    const isNumber = /^\d/.test(payload);
+    let query = {};
+    if (!isNumber) {
+      // query = { name: { $regex: new RegExp("\\b" + payload + ".*?", "i") } };
+      query = { name: { $regex: new RegExp(payload, "i") } };
+    } else {
+      query = {
+        $or: [
+          { code: { $regex: new RegExp(payload, "i") } },
+          // { article_code: { $regex: new RegExp("^" + payload + ".*", "i") } },
+        ],
+      };
+    }
+
+    const search = await Brand.aggregate([
+      {
+        $match: query,
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          code: 1,
+        },
+      },
+      {
+        $addFields: {
+          nameLength: { $strLenCP: "$name" },
+        },
+      },
+      {
+        $sort: {
+          nameLength: 1, // -1 for descending, 1 for ascending
+        },
+      },
+      {
+        $limit: 10,
+      },
+    ]);
+
+    // Access the results
+    console.log(search);
+
+
+    if (payload === "") {
+      const brand = await Brand.find()
+        .limit(100)
+      res.send(brand);
+    } else {
+      res.send(search);
+    }
+  })
+);
+
 
 // GET ONE brands
 brandRouter.get(
