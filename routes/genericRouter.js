@@ -14,9 +14,7 @@ const jwt = require("jsonwebtoken");
 const Generic = require("../models/genericModel");
 const checklogin = require("../middlewares/checkLogin");
 
-
 const genericRouter = express.Router();
-
 
 // COUNT PRODUCT
 genericRouter.get(
@@ -69,9 +67,7 @@ genericRouter.get(
       if (!isNumber) {
         // if text then search name
         query = {
-          $or: [
-            { name: { $regex: new RegExp(queryString + ".*?", "i") } },
-          ],
+          $or: [{ name: { $regex: new RegExp(queryString + ".*?", "i") } }],
         };
         // query = { name:  queryString  };
       } else {
@@ -83,8 +79,7 @@ genericRouter.get(
         };
       }
 
-      generic = await Generic.find(query)
-        .limit(100);
+      generic = await Generic.find(query).limit(100);
       res.status(200).json(generic);
     } else {
       // regular pagination
@@ -98,39 +93,38 @@ genericRouter.get(
     }
   })
 );
-// GET ALL generics
+
+// Generic DW SEARCH
 genericRouter.get(
   "/search/:q",
   expressAsyncHandler(async (req, res) => {
-
     const payload = req.params?.q?.trim().toString().toLocaleLowerCase();
-    console.log("payload", payload);
-    if (payload) {
-      let query = {};
+
+    let query = {};
+
+    if (payload === "") {
+      query = {};
+    } else {
+      const isNumber = /^\d/.test(payload);
       if (!isNumber) {
         query = { name: { $regex: new RegExp("\\b" + payload + ".*?", "i") } };
       } else {
         query = {
-          $or: [
-            { code: { $regex: new RegExp("^" + payload + ".*", "i") } },
-          ],
+          $or: [{ code: { $regex: new RegExp("^" + payload + ".*", "i") } }],
         };
       }
-
-
-      const generics = await Generic.find(query).limit(20);
-      res.status(200).send(generics);
-    } else {
-      let query = {};
-      const generics = await Generic.find(query)
-        .limit(20);
-      res.send(generics);
     }
 
+    const search = await Generic.find(query)
+      // TODO:: UPDATE AGREEGET FOR GET STOCK VALUE
+      .select({
+        _id: 1,
+        name: 1,
+        code: 1,
+      })
+      .limit(10);
 
-
-    // // res.send('removed');
-    console.log(generics);
+    res.send(search);
   })
 );
 
@@ -142,7 +136,7 @@ genericRouter.get(
     const generic = await Generic.findOne({ _id: id });
     res.send(generic);
     // // res.send('removed');
-    console.log(generics);
+    // console.log(generics);
   })
 );
 

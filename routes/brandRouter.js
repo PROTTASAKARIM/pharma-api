@@ -46,7 +46,6 @@ brandRouter.get(
   })
 );
 
-
 brandRouter.get(
   "/all/:page/:size",
   expressAsyncHandler(async (req, res) => {
@@ -70,9 +69,7 @@ brandRouter.get(
       if (!isNumber) {
         // if text then search name
         query = {
-          $or: [
-            { name: { $regex: new RegExp(queryString + ".*?", "i") } },
-          ],
+          $or: [{ name: { $regex: new RegExp(queryString + ".*?", "i") } }],
         };
         // query = { name:  queryString  };
       } else {
@@ -85,8 +82,7 @@ brandRouter.get(
       }
       console.log("done:", query);
 
-      brand = await Brand.find(query)
-        .limit(100);
+      brand = await Brand.find(query).limit(100);
       res.status(200).json(brand);
     } else {
       // regular pagination
@@ -174,11 +170,45 @@ brandRouter.get(
   })
 );
 
+// BRAND DW SEARCH
+brandRouter.get(
+  "/search/:q",
+  expressAsyncHandler(async (req, res) => {
+    const payload = req.params?.q?.trim().toString().toLocaleLowerCase();
+
+    let query = {};
+
+    if (payload === "") {
+      query = {};
+    } else {
+      const isNumber = /^\d/.test(payload);
+      if (!isNumber) {
+        query = { name: { $regex: new RegExp("\\b" + payload + ".*?", "i") } };
+      } else {
+        query = {
+          $or: [{ code: { $regex: new RegExp("^" + payload + ".*", "i") } }],
+        };
+      }
+    }
+
+    const search = await Brand.find(query)
+      // TODO:: UPDATE AGREEGET FOR GET STOCK VALUE
+      .select({
+        _id: 1,
+        name: 1,
+        code: 1,
+      })
+      .limit(10);
+
+    res.send(search);
+  })
+);
+
 // CREATE ONE Brand
 brandRouter.post(
   "/",
   expressAsyncHandler(async (req, res) => {
-    console.log("Brand", req.body)
+    console.log("Brand", req.body);
     const newBrand = new Brand(req.body);
 
     try {
