@@ -47,6 +47,18 @@ saleRouter.get(
     // // res.send('removed');
   })
 );
+// GET ALL sales
+saleRouter.get(
+  "/lastsale",
+  expressAsyncHandler(async (req, res) => {
+    const sales = await Sale.aggregate([
+      { $sort: { createdAt: -1 } }, // Sort by createdAt in descending order
+      { $limit: 1 }
+    ])
+    res.send(sales);
+    // // res.send('removed');
+  })
+);
 // today point
 saleRouter.get(
   "/todayPoint",
@@ -174,72 +186,72 @@ saleRouter.get(
 );
 
 // weekly SALE Count
-saleRouter.get(
-  "/testing",
-  expressAsyncHandler(async (req, res) => {
-    // const today = new Date();
-    const currentDate = new Date();
-    console.log(currentDate)
-    const last7Days = [];
+// saleRouter.get(
+//   "/testing",
+//   expressAsyncHandler(async (req, res) => {
+//     // const today = new Date();
+//     const currentDate = new Date();
+//     console.log(currentDate)
+//     const last7Days = [];
 
-    for (let i = 0; i <= 10; i++) {
-      let day = new Date(currentDate.getTime());
-      day.setDate(currentDate.getDate() - i);
-      last7Days.push(day);
-    }
+//     for (let i = 0; i <= 10; i++) {
+//       let day = new Date(currentDate.getTime());
+//       day.setDate(currentDate.getDate() - i);
+//       last7Days.push(day);
+//     }
 
-    console.log(last7Days);
-    const to = endOfDay(currentDate)
-    // const end = startOfDay(new Date(last7Days[0]))
-    // const start = endOfDay(new Date(last7Days[8]))
-    // console.log("test1", start)
-    // console.log("test2", end)
-    // console.log("test2", to)
-    const start = startOfDay(last7Days[1]);
-    const end = endOfDay(last7Days[1]);
-    console.log("testing", start, end)
-    try {
-      const sales = await Sale.aggregate([
-        {
-          $match: {
-            createdAt: {
-              $gte: start,
-              $lt: end
-            }
-          }
-        },
-        {
-          $group: {
-            _id: {
-              $dateToString: {
-                format: "%Y-%m-%d",
-                date: "$createdAt"
-              }
-            },
-            grossTotalRound: {
-              $sum: "$grossTotalRound"
-            },
-            total: {
-              $sum: "$total"
-            },
-            vat: {
-              $sum: "$vat"
-            },
-          }
-        },
-        {
-          $sort: {
-            "_id": 1
-          }
-        }
-      ]);
-      console.log(sales);
-      res.send(sales);
-    } catch (err) {
-      console.log(err);
-    }
-  })
-);
+//     console.log(last7Days);
+//     const to = endOfDay(currentDate)
+//     // const end = startOfDay(new Date(last7Days[0]))
+//     // const start = endOfDay(new Date(last7Days[8]))
+//     // console.log("test1", start)
+//     // console.log("test2", end)
+//     // console.log("test2", to)
+//     const start = startOfDay(last7Days[1]);
+//     const end = endOfDay(last7Days[1]);
+//     console.log("testing", start, end)
+//     try {
+//       const sales = await Sale.aggregate([
+//         {
+//           $match: {
+//             createdAt: {
+//               $gte: start,
+//               $lt: end
+//             }
+//           }
+//         },
+//         {
+//           $group: {
+//             _id: {
+//               $dateToString: {
+//                 format: "%Y-%m-%d",
+//                 date: "$createdAt"
+//               }
+//             },
+//             grossTotalRound: {
+//               $sum: "$grossTotalRound"
+//             },
+//             total: {
+//               $sum: "$total"
+//             },
+//             vat: {
+//               $sum: "$vat"
+//             },
+//           }
+//         },
+//         {
+//           $sort: {
+//             "_id": 1
+//           }
+//         }
+//       ]);
+//       console.log(sales);
+//       res.send(sales);
+//     } catch (err) {
+//       console.log(err);
+//     }
+//   })
+// );
 saleRouter.get(
   "/testingi",
   expressAsyncHandler(async (req, res) => {
@@ -1137,12 +1149,12 @@ saleRouter.get(
   "/invoice/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
-    const sales = await Sale.find({ invoiceId: id, status: "complete" })
+    const sales = await Sale.findOne({ invoiceId: id, status: "complete" })
       .populate("billerId", "name")
       .populate("customerId", { phone: 1, name: 1, point: 1, address: 1 });
-    res.send(sales[0]);
+    console.log(sales);
+    res.send(sales);
     // // res.send('removed');
-    // console.log(sales);
   })
 );
 

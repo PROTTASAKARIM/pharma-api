@@ -7,9 +7,9 @@ const damageSchema = mongoose.Schema(
       {
         type: Map,
         of: new mongoose.Schema({
-          priceId: { type: mongoose.Types.ObjectId, ref: "Price" },
           qty: { type: Number, require: true },
           article_code: { type: String, require: true },
+          id: { type: mongoose.Types.ObjectId, ref: "Product", require: true },
           name: { type: String, require: true },
           tp: { type: String, require: true },
           reason: { type: String },
