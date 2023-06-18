@@ -408,6 +408,7 @@ grnRouter.post(
         });
       }
     } catch (err) {
+      console.log("grn error", err)
       res
         .status(500)
         .json({ message: "There was a server side error", error: err });

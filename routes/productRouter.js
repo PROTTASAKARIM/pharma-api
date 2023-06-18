@@ -469,10 +469,21 @@ router.get(
 
 // GET ONE PRODUCT
 router.get(
-  "/promo-update/:id",
+  "/details/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     const product = await Product.findOne({ _id: id });
+    res.send(product);
+  })
+);
+router.get(
+  "/all-details/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const product = await Product.findOne({ _id: id })
+      .populate("group", { name: 1 })
+      .populate("generic", { name: 1 })
+      .populate("brand", { name: 1 })
     res.send(product);
   })
 );
@@ -505,13 +516,14 @@ router.post(
     const newProduct = new Product(req.body);
     console.log(newProduct)
     try {
-      await newProduct.save()
-        .then(res => {
-          console.log(res)
-          res.status(200).json({
-            message: "Product is created Successfully",
-          });
-        })
+      const result = await newProduct.save();
+      // console.log(result);
+      if (result) {
+        res.status(200).json({
+          product: result,
+          message: "Purchase is created Successfully",
+        });
+      }
     } catch (err) {
       res
         .status(500)
@@ -609,6 +621,30 @@ router.put(
     const id = req.params.id;
     const update = { priceList: req.body };
     console.log(id, update);
+    try {
+      await Product.updateOne({ _id: id }, { $set: update })
+        .then((response) => {
+          console.log("update", response);
+          res.send(response);
+        })
+        .catch((err) => {
+          console.log("update", response);
+          res.send(err);
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  })
+);
+// UPDATE ONE PRODUCT pricelist
+router.put(
+  "/mrp/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const update = req.body.editedMrp;
+    console.log("id", id);
+    console.log("req.body", req.body);
+    console.log("update", update);
     try {
       await Product.updateOne({ _id: id }, { $set: update })
         .then((response) => {

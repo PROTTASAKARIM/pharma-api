@@ -41,15 +41,10 @@ supplierRouter.get(
       company: 1,
       phone: 1,
       products: 1,
+    }).populate({
+      path: "products.id",
+      model: "Product",
     });
-    // .populate("products")
-    // .populate({
-    //   path: "products.id",
-    //   populate: {
-    //     path: "priceList",
-    //     model: "Price",
-    //   },
-    // });
     // .exec();
     // .populate("Product.id");
     // .populate("Products.id", { name: 1, article_code: 1, priceList: 1 });
@@ -86,6 +81,68 @@ supplierRouter.get(
 );
 
 
+// GET ONE SUPPLIER FOR UPDATE
+supplierRouter.get(
+  "/grn/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    try {
+      let suppliers = await Supplier.find({
+        _id: id,
+        status: "active",
+      })
+        .select({
+          name: 1,
+          email: 1,
+          code: 1,
+          company: 1,
+          phone: 1,
+          products: 1,
+        })
+      // .populate("products")
+      // .populate({
+      //   path: "products.id",
+      //   model: "Product",
+      //   populate: {
+      //     path: "priceList",
+      //     model: "Price",
+      //   },
+      // });
+      const products = suppliers[0].products
+      // console.log("products", products)
+      let p_article = []
+      products.map(pro => {
+        p_article = [...p_article, pro.get("article_code")]
+      })
+      // console.log("p_article", p_article)
+      const findProducts = await Product.find({ article_code: p_article }).select({
+        article_code: 1
+      })
+      // console.log("final", findProducts.length)
+      let finalProduct = []
+      findProducts.map(pro => {
+        const pp = products.filter(p => p.get("article_code") === pro.article_code)
+        finalProduct = [...finalProduct, pp[0]]
+      })
+      // console.log("b", products)
+      // console.log("a", finalProduct)
+
+      // console.log("suppliers", suppliers[0]);
+      const newSupplier = { ...suppliers[0].toObject(), products: finalProduct }
+      console.log("newProduct", newSupplier)
+      const populatedSupplier = await Supplier.populate(newSupplier, {
+        path: "products.id",
+        model: "Product",
+      });
+      // console.log("populatedS", populatedSupplier)
+      // const n = populatedSupplier.find({ article_code: "6017023" })
+      res.send(populatedSupplier);
+      // console.log("removed");
+    } catch (err) {
+      res.send(err);
+    }
+  })
+);
 // GET ONE SUPPLIER FOR UPDATE
 supplierRouter.get(
   "/:id",

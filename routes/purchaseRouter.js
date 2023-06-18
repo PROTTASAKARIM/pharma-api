@@ -401,6 +401,7 @@ purchaseRouter.post(
       const result = await newPurchase.save();
       // console.log(result);
       res.status(200).json({
+        purchase: result,
         message: "Purchase is created Successfully",
       });
     } catch (err) {
