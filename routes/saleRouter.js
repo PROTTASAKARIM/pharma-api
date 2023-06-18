@@ -885,6 +885,64 @@ saleRouter.get(
 
 // articleSales
 
+// saleRouter.get(
+//   "/exportArticale/:start/:end",
+//   expressAsyncHandler(async (req, res) => {
+//     const q = req.query.q;
+//     const start = req.params.start
+//       ? startOfDay(new Date(req.params.start))
+//       : startOfDay(new Date.now());
+//     const end = req.params.end
+//       ? endOfDay(new Date(req.params.end))
+//       : endOfDay(new Date.now());
+//     console.log('q', q)
+//     try {
+//       const sales = await Sale.aggregate([
+//         {
+//           $match: {
+//             $and: [
+//               {
+//                 status: "complete",
+//               },
+//               {
+//                 createdAt: {
+//                   $gt: start,
+//                   $lt: end,
+//                 },
+//               },
+//             ],
+//           },
+//         },
+//         {
+//           $project: {
+//             "invoiceId": 1,
+//             "products.article_code": 1,
+//             "products.priceId": 1,
+//             "products.name": 1,
+//             "products.tp": 1,
+//             "products.mrp": 1,
+//             "products.qty": 1,
+//             "products.vat": 1,
+//             "createdAt": 1,
+//             "returnProducts.article_code": 1,
+//             "returnProducts.priceId": 1,
+//             "returnProducts.name": 1,
+//             "returnProducts.tp": 1,
+//             "returnProducts.mrp": 1,
+//             "returnProducts.qty": 1,
+//             "returnProducts.vat": 1,
+//             "returnInvoice": 1
+//           },
+//         },
+//       ]);
+//       console.log(sales);
+//       res.send(sales);
+//     } catch (err) {
+//       console.log(err);
+//     }
+//   })
+// );
+
 saleRouter.get(
   "/exportArticale/:start/:end",
   expressAsyncHandler(async (req, res) => {
@@ -895,42 +953,42 @@ saleRouter.get(
     const end = req.params.end
       ? endOfDay(new Date(req.params.end))
       : endOfDay(new Date.now());
+    console.log('q', q);
     try {
       const sales = await Sale.aggregate([
         {
           $match: {
             $and: [
+              { status: "complete" },
+              { createdAt: { $gt: start, $lt: end } },
               {
-                status: "complete",
-              },
-              {
-                createdAt: {
-                  $gt: start,
-                  $lt: end,
-                },
-              },
+                $or: [
+                  { "products.name": { $regex: q, $options: 'i' } },
+                  { "returnProducts.name": { $regex: q, $options: 'i' } },
+                  { "products.article_code": { $regex: q, $options: 'i' } },
+                  { "returnProducts.article_code": { $regex: q, $options: 'i' } }
+                ]
+              }
             ],
           },
         },
         {
           $project: {
-            "invoiceId": 1,
+            invoiceId: 1,
             "products.article_code": 1,
-            "products.priceId": 1,
             "products.name": 1,
             "products.tp": 1,
             "products.mrp": 1,
             "products.qty": 1,
             "products.vat": 1,
-            "createdAt": 1,
+            createdAt: 1,
             "returnProducts.article_code": 1,
-            "returnProducts.priceId": 1,
             "returnProducts.name": 1,
             "returnProducts.tp": 1,
             "returnProducts.mrp": 1,
             "returnProducts.qty": 1,
             "returnProducts.vat": 1,
-            "returnInvoice": 1
+            returnInvoice: 1,
           },
         },
       ]);
@@ -941,6 +999,7 @@ saleRouter.get(
     }
   })
 );
+
 
 // TODAYS SALE Total
 saleRouter.get(

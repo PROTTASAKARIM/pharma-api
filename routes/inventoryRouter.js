@@ -185,7 +185,7 @@ inventoryRouter.get(
   "/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
-    const inventories = await Inventory.find({
+    const inventories = await Inventory.findOne({
       _id: id,
       status: "active",
     })
@@ -203,26 +203,8 @@ inventoryRouter.get(
         rtvQty: 1,
         tpnQty: 1,
       })
-      // .populate("warehouse", "name")
-      .populate({
-        path: "priceTable",
-        populate: {
-          path: "id",
-          model: "Price",
-          populate: [
-            {
-              path: "supplier",
-              select: "company",
-            },
-            {
-              path: "warehouse",
-              select: "name",
-            },
-          ],
-        },
-      });
-    // console.log(inventories);
-    res.send(inventories[0]);
+
+    res.send(inventories);
   })
 );
 // GET ONE BY Article Code
