@@ -10,6 +10,11 @@ const inventorySchema = new mongoose.Schema(
       ref: "Warehouse",
       require: true,
     },
+    supplier: {
+      type: mongoose.Types.ObjectId,
+      ref: "Supplier"
+      , default: null
+    },
     name: { type: String, require: true },
     currentQty: { type: Number, require: true },
     openingQty: { type: Number, require: true },
