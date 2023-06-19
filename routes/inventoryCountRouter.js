@@ -34,28 +34,48 @@ inventoryCountRouter.get(
         userId: 1,
         createdAt: 1,
       })
-      .populate("article_code", { name: 1, article_code: 1 })
+      .populate("article_code", { name: 1, article_code: 1, mrp: 1, tp: 1 })
       .populate("userId", "name")
-      // .populate("priceTable");
-      .populate({
-        path: "priceTable",
-        model: "Price",
-        populate: [
-          {
-            path: "warehouse",
-            select: "name",
-          },
-          {
-            path: "supplier",
-            select: "company",
-          },
-        ],
-      });
-    // console.log(InventoryCounts);
+      .populate("warehouse", "name")
     res.send(InventoryCounts);
     // // res.send('removed');
   })
 );
+inventoryCountRouter.get(
+  "/new-count",
+  expressAsyncHandler(async (req, res) => {
+    const InventoryCounts = await InventoryCount.aggregate([
+      {
+        $match: { status: "active" },
+      },
+      {
+        $lookup: {
+          from: "products",
+          localField: "article_code",
+          foreignField: "_id",
+          as: "product",
+        },
+      },
+      {
+        $unwind: "$product",
+      },
+      {
+        $lookup: {
+          from: "suppliers",
+          localField: "article_code",
+          foreignField: "products.id",
+          as: "matchingSuppliers"
+        }
+      },
+
+    ]);
+
+    res.send(InventoryCounts);
+    // // res.send('removed');
+  })
+);
+
+
 // GET ALL InventoryCounts
 inventoryCountRouter.get(
   "/byUser/:userId",
@@ -70,7 +90,6 @@ inventoryCountRouter.get(
         _id: 1,
         qty: 1,
         article_code: 1,
-        priceList: 1,
         createdAt: 1,
       })
       .populate("article_code", {
@@ -79,7 +98,7 @@ inventoryCountRouter.get(
         Unit: 1,
         _id: 0,
       })
-      .populate("priceTable", { mrp: 1, tp: 1, supplier: 1, _id: 0 })
+      // .populate("priceTable", { mrp: 1, tp: 1, supplier: 1, _id: 0 })
       .sort({ createdAt: -1 })
       .limit(10);
 

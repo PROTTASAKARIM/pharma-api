@@ -217,6 +217,55 @@ router.get(
 
 // PRODUCTS SRARCH
 router.get(
+  "/search/inventory/:q",
+  expressAsyncHandler(async (req, res) => {
+    // let payload = req.query?.q?.trim().toString().toLocaleLowerCase();
+    const payload = req.params?.q?.trim().toString().toLocaleLowerCase();
+    // console.log(payload);
+
+    const isNumber = /^\d/.test(payload);
+    let query = {};
+    if (!isNumber) {
+      query = { name: { $regex: new RegExp("\\b" + payload + ".*?", "i") } };
+    } else {
+      query = {
+        $or: [
+          { article_code: { $regex: new RegExp("^" + payload + ".*", "i") } },
+        ],
+      };
+    }
+
+    const search = await Product.find(query)
+      // TODO:: UPDATE AGREEGET FOR GET STOCK VALUE
+      .select({
+        _id: 1,
+        name: 1,
+        unit: 1,
+        vat: 1,
+        article_code: 1,
+        tp: 1,
+        mrp: 1,
+        group: 1,
+        discount: 1,
+        generic: 1,
+        brand: 1,
+        size: 1,
+        pcsBox: 1,
+      })
+      .populate("unit", "name")
+      .populate("group", "name")
+      .populate("generic", "name")
+      .populate("brand", "name")
+      .limit(10);
+    if (payload === "") {
+      res.send([]);
+    } else {
+      res.send(search);
+    }
+  })
+);
+// PRODUCTS SRARCH
+router.get(
   "/search/new/:q",
   expressAsyncHandler(async (req, res) => {
     // let payload = req.query?.q?.trim().toString().toLocaleLowerCase();
@@ -441,6 +490,33 @@ router.get(
     const products = await Product.find({ _id: id });
     // .populate("priceList", "mrp")
     res.send(products[0]);
+  })
+);
+router.get(
+  "/select/inventory/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const product = await Product.findOne({ _id: id }).select({
+      _id: 1,
+      name: 1,
+      unit: 1,
+      vat: 1,
+      article_code: 1,
+      tp: 1,
+      mrp: 1,
+      discount: 1,
+      brand: 1,
+      group: 1,
+      generic: 1,
+      size: 1,
+      pcsBox: 1,
+    })
+      .populate("brand", "name")
+      .populate("group", "name")
+      .populate("generic", "name")
+
+    // .populate("priceList");
+    res.send(product);
   })
 );
 router.get(

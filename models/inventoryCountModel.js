@@ -12,11 +12,6 @@ const inventoryCountSchema = mongoose.Schema(
       ref: "Warehouse",
       require: true,
     },
-    priceTable: {
-      type: mongoose.Types.ObjectId,
-      ref: "Price",
-      require: true,
-    },
     qty: { type: Number, require: true },
     userId: { type: mongoose.Types.ObjectId, ref: "User" },
     company: { type: mongoose.Schema.Types.ObjectId, ref: "Company", default: null },

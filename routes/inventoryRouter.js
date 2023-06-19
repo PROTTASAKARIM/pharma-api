@@ -213,11 +213,11 @@ inventoryRouter.get(
   expressAsyncHandler(async (req, res) => {
     const id = req.params.article_code;
     try {
-      const inventory = await Inventory.find({
+      const inventory = await Inventory.findOne({
         article_code: id,
         status: "active",
       });
-      res.status(200).json(inventory[0]);
+      res.status(200).json(inventory);
     } catch (err) {
       res.status(500).json(err);
     }
