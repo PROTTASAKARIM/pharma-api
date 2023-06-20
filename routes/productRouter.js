@@ -57,6 +57,30 @@ router.get(
 );
 // GET PRODUCT DETAILS FOR PURCHASE PRODUCT IMPORT
 router.get(
+  "/article/:code",
+  expressAsyncHandler(async (req, res) => {
+    const code = req.params.code;
+    const products = await Product.findOne({ article_code: code })
+      .select({
+        _id: 1,
+        name: 1,
+        unit: 1,
+        article_code: 1,
+        generic: 1,
+        group: 1,
+        brand: 1,
+        tp: 1,
+        mrp: 1,
+      })
+      .populate("group", { _id: 1, name: 1 })
+      .populate("generic", { _id: 1, name: 1 })
+      .populate("brand", { _id: 1, name: 1 })
+      .populate("unit", { _id: 1, name: 1 })
+    res.send(products);
+  })
+);
+// GET PRODUCT DETAILS FOR PURCHASE PRODUCT IMPORT
+router.get(
   "/pro-details/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;

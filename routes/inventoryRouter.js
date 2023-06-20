@@ -14,6 +14,7 @@ const expressAsyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 const Inventory = require("../models/inventoryModel");
 const checklogin = require("../middlewares/checkLogin");
+const mongoose = require('mongoose');
 const { adjustInventoryOnSale } = require("../middlewares/useInventory");
 
 
@@ -34,42 +35,51 @@ inventoryRouter.get(
 inventoryRouter.get(
   "/export",
   expressAsyncHandler(async (req, res) => {
-    const inventories = await Inventory.find({ status: "active" })
-      .select({
-        _id: 1,
-        name: 1,
-        article_code: 1,
-        warehouse: 1,
-        priceTable: 1,
-        currentQty: 1,
-        openingQty: 1,
-        totalQty: 1,
-        soldQty: 1,
-        damageQty: 1,
-        rtvQty: 1,
-        tpnQty: 1,
-      })
-      .populate("priceTable", {
-        path: "priceTable",
-        populate: {
-          path: "id",
-          model: "Price",
-          populate: [
-            {
-              path: "supplier",
-              select: "company",
-            },
-            {
-              path: "warehouse",
-              select: "name",
-            },
-          ],
+    const inventories = await Inventory.aggregate([
+      {
+        $match: {
+          status: "active",
         },
-      });
+      },
+      {
+        $lookup: {
+          from: "products",
+          localField: "article_code",
+          foreignField: "article_code",
+          as: "product",
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "warehouse", // Replace "warehouseId" with the actual field name that holds the warehouse reference in the "inventories" collection
+          foreignField: "_id", // Replace "_id" with the actual field name that holds the reference to the warehouse in the "warehouses" collection
+          as: "warehouse",
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          article_code: 1,
+          warehouse: { $arrayElemAt: ["$warehouse.name", 0] }, // Assuming "name" is the field you want to populate in the "warehouse" field
+          currentQty: 1,
+          openingQty: 1,
+          totalQty: 1,
+          soldQty: 1,
+          damageQty: 1,
+          rtvQty: 1,
+          tpnQty: 1,
+          product: 1,
+        },
+      },
+    ]);
+
     console.log(inventories);
     res.send(inventories);
   })
 );
+
 
 // Adjust Inventory
 inventoryRouter.put(
@@ -180,11 +190,59 @@ inventoryRouter.get(
   })
 );
 
-// GET ONE inventories
 inventoryRouter.get(
   "/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
+    console.log("id", id);
+
+    const inventories = await Inventory.aggregate([
+      {
+        $match: {
+          _id: mongoose.Types.ObjectId(id),
+          status: "active",
+        },
+      },
+      {
+        $lookup: {
+          from: "products",
+          localField: "article_code",
+          foreignField: "article_code",
+          as: "product",
+        },
+      },
+
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          article_code: 1,
+          warehouse: 1,
+          currentQty: 1,
+          openingQty: 1,
+          totalQty: 1,
+          soldQty: 1,
+          damageQty: 1,
+          rtvQty: 1,
+          tpnQty: 1,
+          product: 1,
+        },
+      },
+    ]).exec();
+
+    res.send(inventories[0]);
+  })
+);
+
+
+
+
+// GET ONE inventories
+inventoryRouter.get(
+  "/new/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    console.log("id", id)
     const inventories = await Inventory.findOne({
       _id: id,
       status: "active",
@@ -194,7 +252,6 @@ inventoryRouter.get(
         name: 1,
         article_code: 1,
         warehouse: 1,
-        priceTable: 1,
         currentQty: 1,
         openingQty: 1,
         totalQty: 1,
