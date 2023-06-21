@@ -772,6 +772,91 @@ saleRouter.get(
 );
 // GET ALL sales
 saleRouter.get(
+  "/byDateInvoice/:start/:end",
+  expressAsyncHandler(async (req, res) => {
+    const q = req.query.q;
+    const start = req.params.start
+      ? startOfDay(new Date(req.params.start))
+      : startOfDay(new Date.now());
+    const end = req.params.end
+      ? endOfDay(new Date(req.params.end))
+      : endOfDay(new Date.now());
+
+    try {
+      const sales = await Sale.aggregate([
+        {
+          $match: {
+            $and: [
+              { status: "complete" },
+              { createdAt: { $gt: start, $lt: end } },
+              {
+                $or: [
+                  { invoiceId: { $regex: q, $options: 'i' } },
+                ]
+              }
+            ],
+          },
+        },
+        {
+          $project: {
+            invoiceId: 1,
+            totalItem: 1,
+            grossTotalRound: 1,
+            total: 1,
+            status: 1,
+            billerId: 1,
+            totalReceived: 1,
+            createdAt: 1,
+            changeAmount: 1,
+            customerId: 1,
+          },
+        },
+        {
+          $lookup: {
+            from: "customers",
+            localField: "customerId",
+            foreignField: "_id",
+            as: "customer",
+          },
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "billerId",
+            foreignField: "_id",
+            as: "biller",
+          },
+        },
+        {
+          $project: {
+            invoiceId: 1,
+            totalItem: 1,
+            grossTotalRound: 1,
+            total: 1,
+            status: 1,
+            billerId: 1,
+            totalReceived: 1,
+            createdAt: 1,
+            changeAmount: 1,
+            customerId: 1,
+            // customer: { $arrayElemAt: ["$customer", 0] },
+            // biller: { $arrayElemAt: ["$biller", 0] },
+            "biller.name": 1,
+            "customer.phone": 1,
+            "customer.name": 1,
+          },
+        },
+      ]);
+      console.log(sales);
+      res.send(sales);
+    } catch (err) {
+      console.log(err);
+    }
+  })
+);
+
+
+saleRouter.get(
   "/byDate/:start/:end",
   expressAsyncHandler(async (req, res) => {
     const start = req.params.start
