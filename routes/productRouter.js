@@ -51,7 +51,17 @@ router.get(
       name: 1,
       article_code: 1,
       unit: 1,
+      group: 1,
+      generic: 1,
+      brand: 1,
+      tp: 1,
+      mrp: 1,
+      pcsBox: 1
     })
+      .populate("group", { name: 1 })
+      .populate("generic", { name: 1 })
+      .populate("brand", { name: 1 })
+
     res.status(200).json(products);
   })
 );

@@ -35,6 +35,15 @@ genericRouter.get(
   })
 );
 genericRouter.get(
+  "/export",
+  expressAsyncHandler(async (req, res) => {
+    const generics = await Generic.find({});
+    res.send(generics);
+    // // res.send('removed');
+    console.log(generics);
+  })
+);
+genericRouter.get(
   "/new",
   expressAsyncHandler(async (req, res) => {
     const generics = await Generic.find({}).limit(20);

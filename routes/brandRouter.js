@@ -37,6 +37,16 @@ brandRouter.get(
 );
 // GET ALL brands
 brandRouter.get(
+  "/export",
+  expressAsyncHandler(async (req, res) => {
+    const brands = await Brand.find({});
+    res.send(brands);
+    // // res.send('removed');
+    console.log(brands);
+  })
+);
+// GET ALL brands
+brandRouter.get(
   "/new",
   expressAsyncHandler(async (req, res) => {
     const brands = await Brand.find({}).limit(20);

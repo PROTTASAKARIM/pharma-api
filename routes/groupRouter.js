@@ -34,6 +34,16 @@ groupRouter.get(
     console.log(groups);
   })
 );
+// GET ALL groups Exports
+groupRouter.get(
+  "/export",
+  expressAsyncHandler(async (req, res) => {
+    const groups = await Group.find({});
+    res.send(groups);
+    // // res.send('removed');
+    console.log(groups);
+  })
+);
 
 // GET ALL group WITH PAGENATION & SEARCH
 groupRouter.get(
