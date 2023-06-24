@@ -22,6 +22,7 @@ const path = require("path");
 const {
   updateSupplierProducts,
 } = require("../middlewares/supplierProductRemove");
+const Supplier = require("../models/supplierModel");
 
 // COUNT PRODUCT
 router.get(
@@ -393,7 +394,60 @@ router.get(
       {
         $match: query,
       },
-    ])
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          unit: 1,
+          vat: 1,
+          article_code: 1,
+          tp: 1,
+          mrp: 1,
+          discount: 1,
+          group: 1,
+          brand: 1,
+          size: 1,
+          pcsBox: 1,
+        },
+      },
+      {
+        $lookup: {
+          from: "brands",
+          localField: "brand",
+          foreignField: "_id",
+          as: "brand",
+        },
+      },
+      {
+        $lookup: {
+          from: "units",
+          localField: "unit",
+          foreignField: "_id",
+          as: "unit",
+        },
+      },
+      {
+        $lookup: {
+          from: "groups",
+          localField: "group",
+          foreignField: "_id",
+          as: "group",
+        },
+      },
+      {
+        $addFields: {
+          nameLength: { $strLenCP: "$name" },
+        },
+      },
+      {
+        $sort: {
+          nameLength: 1, // -1 for descending, 1 for ascending
+        },
+      },
+      {
+        $limit: 10,
+      },
+    ]);
     if (payload === "") {
       res.send([]);
     } else {
@@ -583,7 +637,49 @@ router.get(
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     const product = await Product.findOne({ _id: id });
+    console.log("product", product)
+
     res.send(product);
+  })
+);
+// GET ONE PRODUCT
+router.get(
+  "/details/new/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const product = await Product.findOne({ _id: id });
+    console.log("product", product)
+    const search = await Supplier.aggregate([
+      {
+        $unwind: "$products"
+      },
+      {
+        $match: { "products.article_code": product.article_code }
+      },
+      {
+        $lookup: {
+          from: "products",
+          localField: "products.id",
+          foreignField: "_id",
+          as: "productDetails",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          supplierId: "$_id",
+          supplierCode: "$code",
+          supplierName: "$company",
+          productId: "$products.id",
+          articleCode: "$products.article_code",
+          productName: "$products.name",
+          unit: "$products.unit",
+          product: "$productDetails"
+        }
+      }
+    ]);
+    console.log(search)
+    res.send(search);
   })
 );
 router.get(

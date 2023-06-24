@@ -589,45 +589,8 @@ saleRouter.get(
           name: { $first: '$products.name' },
           mrp: { $last: '$products.mrp' },
           tp: { $last: '$products.tp' },
-          priceId: { $first: '$products.priceId' },
           supplier: { $first: '$products.supplier' },
-          // discount: { $first:  '$products.promo.promo_type' }
-          // discount: {
-          //   $sum: {
-          //     $cond: {
-          //       if: { $eq: ['$products.promo.promo_type', false] },
-          //       then: { $multiply: [{ $last: '$products.mrp' }, '$products.promo.promo_price'] },
-          //       else: { $multiply: [{ $last: '$products.mrp' }, { $divide: ['$products.promo.promo_price', 100] }] },
-          //     }
-          //   }
 
-          // },
-          // discount: {
-          //   $sum: {
-          //     $cond: [
-          //       {
-          //         $and: [
-          //           { $ne: ['$products.promo', null] },
-          //           { $eq: ['$products.promo.promo_type', false] }
-          //         ]
-          //       },
-          //       { $multiply: [{ $last: '$products.mrp' }, '$products.promo.promo_price'] },
-          //       {
-          //         $cond: [
-          //           {
-          //             $and: [
-          //               { $ne: ['$products.promo', null] },
-          //               { $eq: ['$products.promo.promo_type', true] }
-          //             ]
-          //           },
-          //           { $multiply: [{ $last: '$products.mrp' }, { $divide: ['$products.promo.promo_price', 100] }] },
-          //           0
-          //         ]
-          //       }
-          //     ]
-          //   }
-
-          // },
 
         }
       },
@@ -770,6 +733,53 @@ saleRouter.get(
     // // res.send('removed');
   })
 );
+
+//popular products 
+saleRouter.get(
+  "/popular-product/:start/:end",
+  expressAsyncHandler(async (req, res) => {
+
+    const start = req.params.start
+      ? startOfDay(new Date(req.params.start))
+      : startOfDay(new Date.now());
+    const end = req.params.end
+      ? endOfDay(new Date(req.params.end))
+      : endOfDay(new Date.now());
+
+    try {
+      const product = await Sale.aggregate([
+        {
+          $match: {
+            status: "complete",
+            createdAt: { $gte: start, $lte: end },
+          }
+        },
+        {
+          $unwind: '$products'
+        },
+        {
+          $group: {
+            _id: '$products.id',
+            article_code: { $first: '$products.article_code' },
+            totalSoldQuantity: { $sum: '$products.qty' },
+            name: { $first: '$products.name' },
+            mrp: { $last: '$products.mrp' },
+            tp: { $last: '$products.tp' },
+
+          }
+        },
+        {
+          $sort: { totalSoldQuantity: -1 }
+        }
+      ])
+
+      res.send(product);
+    } catch (err) {
+      console.log(err);
+    }
+  })
+);
+
 // GET ALL sales
 saleRouter.get(
   "/byDateInvoice/:start/:end",
