@@ -19,6 +19,7 @@ const Sale = require("../models/saleModel");
 const Inventory = require("../models/inventoryModel");
 const { startOfDay, endOfDay } = require("date-fns");
 const path = require("path");
+const mongoose = require('mongoose');
 const {
   updateSupplierProducts,
 } = require("../middlewares/supplierProductRemove");
@@ -478,46 +479,9 @@ router.get(
       };
     }
 
-    // const search = await Product.find(query)
-    //   // TODO:: UPDATE AGREEGET FOR GET STOCK VALUE
-    //   .select({
-    //     _id: 1,
-    //     name: 1,
-    //     unit: 1,
-    //     vat: 1,
-    //     article_code: 1,
-    //     tp: 1,
-    //     mrp: 1,
-    //     discount: 1,
-    //     group: 1,
-    //     brand: 1,
-    //     size: 1,
-    //     pcsBox: 1,
-    //   })
-    //   .populate("brand", "name")
-    //   .populate("unit", "symbol")
-    //   .populate("group", "name")
-    //   .limit(10);
-
     const search = await Product.aggregate([
       {
         $match: query,
-      },
-      {
-        $project: {
-          _id: 1,
-          name: 1,
-          unit: 1,
-          vat: 1,
-          article_code: 1,
-          tp: 1,
-          mrp: 1,
-          discount: 1,
-          group: 1,
-          brand: 1,
-          size: 1,
-          pcsBox: 1,
-        },
       },
       {
         $lookup: {
@@ -541,6 +505,220 @@ router.get(
           localField: "group",
           foreignField: "_id",
           as: "group",
+        },
+      },
+      {
+        $lookup: {
+          from: "inventories",
+          localField: "article_code", // Convert to ObjectId
+          foreignField: "article_code",
+          as: "inventory",
+        },
+      },
+      // {
+      //   $unwind: '$products',
+      // },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          unit: 1,
+          vat: 1,
+          article_code: 1,
+          tp: 1,
+          mrp: 1,
+          discount: 1,
+          group: 1,
+          brand: 1,
+          size: 1,
+          pcsBox: 1,
+          inventory: 1,
+          stock: {
+            $cond: {
+              if: { $gt: [{ $size: "$inventory" }, 0] },
+              then: { $arrayElemAt: ["$inventory.currentQty", 0] },
+              else: 0
+            }
+          }
+
+        },
+      },
+      {
+        $addFields: {
+          nameLength: { $strLenCP: "$name" },
+        },
+      },
+      {
+        $sort: {
+          nameLength: 1, // -1 for descending, 1 for ascending
+        },
+      },
+      {
+        $limit: 10,
+      },
+    ]);
+
+    // Access the results
+    console.log(search);
+
+
+    if (payload === "") {
+      res.send([]);
+    } else {
+      res.send(search);
+    }
+  })
+);
+router.get(
+  "/search/supplier/:q",
+  expressAsyncHandler(async (req, res) => {
+    // let payload = req.query?.q?.trim().toString().toLocaleLowerCase();
+    const payload = req.params?.q?.trim().toString().toLocaleLowerCase();
+    // console.log(payload);
+
+    const isNumber = /^\d/.test(payload);
+    let query = {};
+    if (!isNumber) {
+      // query = { name: { $regex: new RegExp("\\b" + payload + ".*?", "i") } };
+      query = { name: { $regex: new RegExp(payload, "i") } };
+    } else {
+      query = {
+        $or: [
+          { article_code: { $regex: new RegExp(payload, "i") } },
+          // { article_code: { $regex: new RegExp("^" + payload + ".*", "i") } },
+        ],
+      };
+    }
+
+    const search = await Product.aggregate([
+      {
+        $match: query,
+      },
+      {
+        $lookup: {
+          from: "brands",
+          localField: "brand",
+          foreignField: "_id",
+          as: "brand",
+        },
+      },
+      {
+        $lookup: {
+          from: "units",
+          localField: "unit",
+          foreignField: "_id",
+          as: "unit",
+        },
+      },
+      {
+        $lookup: {
+          from: "groups",
+          localField: "group",
+          foreignField: "_id",
+          as: "group",
+        },
+      },
+      {
+        $lookup: {
+          from: "inventories",
+          localField: "article_code", // Convert to ObjectId
+          foreignField: "article_code",
+          as: "inventory",
+        },
+      },
+      {
+        $lookup: {
+          from: "suppliers",
+          localField: "article_code", // Convert to ObjectId
+          foreignField: "products.article_code",
+          as: "supplier",
+        },
+      },
+      // {
+      //   $unwind: '$products',
+      // },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          unit: 1,
+          vat: 1,
+          article_code: 1,
+          tp: 1,
+          mrp: 1,
+          discount: 1,
+          group: 1,
+          brand: 1,
+          size: 1,
+          pcsBox: 1,
+          inventory: 1,
+          // supplier: 1,
+          stock: {
+            $cond: {
+              if: { $gt: [{ $size: "$inventory" }, 0] },
+              then: { $arrayElemAt: ["$inventory.currentQty", 0] },
+              else: 0
+            }
+          },
+          supplierId: {
+            $cond: {
+              if: { $gt: [{ $size: "$supplier" }, 0] },
+              then: { $arrayElemAt: ["$supplier._id", 0] },
+              else: null
+            }
+          },
+          supplierCompany: {
+            $cond: {
+              if: { $gt: [{ $size: "$supplier" }, 0] },
+              then: { $arrayElemAt: ["$supplier.company", 0] },
+              else: ""
+            }
+          },
+          supplierName: {
+            $cond: {
+              if: { $gt: [{ $size: "$supplier" }, 0] },
+              then: { $arrayElemAt: ["$supplier.name", 0] },
+              else: ""
+            }
+          },
+          supplierCode: {
+            $cond: {
+              if: { $gt: [{ $size: "$supplier" }, 0] },
+              then: { $arrayElemAt: ["$supplier.code", 0] },
+              else: ""
+            }
+          },
+          supplierEmail: {
+            $cond: {
+              if: { $gt: [{ $size: "$supplier" }, 0] },
+              then: { $arrayElemAt: ["$supplier.email", 0] },
+              else: ""
+            }
+          },
+          supplierPhone: {
+            $cond: {
+              if: { $gt: [{ $size: "$supplier" }, 0] },
+              then: { $arrayElemAt: ["$supplier.phone", 0] },
+              else: ""
+            }
+          },
+          supplierAddress: {
+            $cond: {
+              if: { $gt: [{ $size: "$supplier" }, 0] },
+              then: { $arrayElemAt: ["$supplier.address", 0] },
+              else: ""
+            }
+          },
+          // supplierId: {
+          //   $arrayElemAt: ["$supplier._id", 0]
+          // },
+          // supplierCompany: {
+          //   $arrayElemAt: ["$supplier.company", 0]
+          // },
+          // supplierName: {
+          //   $arrayElemAt: ["$supplier.name", 0]
+          // },
+
         },
       },
       {
@@ -632,24 +810,25 @@ router.get(
 );
 
 // GET ONE PRODUCT
-router.get(
-  "/details/:id",
-  expressAsyncHandler(async (req, res) => {
-    const id = req.params.id;
-    const product = await Product.findOne({ _id: id });
-    console.log("product", product)
+// router.get(
+//   "/details/:id",
+//   expressAsyncHandler(async (req, res) => {
+//     const id = req.params.id;
+//     const product = await Product.findOne({ _id: id });
+//     console.log("product", product)
 
-    res.send(product);
-  })
-);
+//     res.send(product);
+//   })
+// );
 // GET ONE PRODUCT
 router.get(
   "/details/new/:id",
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
+    let search = []
     const product = await Product.findOne({ _id: id });
     console.log("product", product)
-    const search = await Supplier.aggregate([
+    const supplierP = await Supplier.aggregate([
       {
         $unwind: "$products"
       },
@@ -659,25 +838,209 @@ router.get(
       {
         $lookup: {
           from: "products",
-          localField: "products.id",
-          foreignField: "_id",
+          localField: "products.article_code", // Convert to ObjectId
+          foreignField: "article_code",
           as: "productDetails",
         },
       },
-      {
-        $project: {
-          _id: 0,
-          supplierId: "$_id",
-          supplierCode: "$code",
-          supplierName: "$company",
-          productId: "$products.id",
-          articleCode: "$products.article_code",
-          productName: "$products.name",
-          unit: "$products.unit",
-          product: "$productDetails"
+    ])
+    console.log("supplierP", supplierP)
+    console.log("supplierP.length", supplierP.length)
+
+    if (supplierP.length > 0) {
+      search = await Supplier.aggregate([
+        {
+          $unwind: "$products"
+        },
+        {
+          $match: { "products.article_code": product.article_code }
+        },
+        {
+          $lookup: {
+            from: "products",
+            localField: "products.article_code", // Convert to ObjectId
+            foreignField: "article_code",
+            as: "productDetails",
+          },
+        },
+        {
+          $lookup: {
+            from: "groups", // Assuming the collection name is "groups"
+            localField: "productDetails.group",
+            foreignField: "_id",
+            as: "group",
+          },
+        },
+        {
+          $lookup: {
+            from: "generics", // Assuming the collection name is "generics"
+            localField: "productDetails.generic",
+            foreignField: "_id",
+            as: "generic",
+          },
+        },
+        {
+          $lookup: {
+            from: "brands", // Assuming the collection name is "brands"
+            localField: "productDetails.brand",
+            foreignField: "_id",
+            as: "brand",
+          },
+        },
+        {
+          $lookup: {
+            from: "units", // Assuming the collection name is "brands"
+            localField: "productDetails.unit",
+            foreignField: "_id",
+            as: "unit",
+          },
+        },
+        {
+          $lookup: {
+            from: "inventories",
+            localField: "products.article_code", // Convert to ObjectId
+            foreignField: "article_code",
+            as: "inventory",
+          },
+        },
+        {
+          $project: {
+            _id: "$products.id",
+            supplierId: "$_id",
+            supplierCode: "$code",
+            supplierCompany: "$company",
+            supplierName: "$name",
+            supplierEmail: "$email",
+            supplierPhone: "$phone",
+            supplierAddress: "$address",
+            productId: "$products.id",
+            article_code: "$products.article_code",
+            name: "$products.name",
+
+            // unit: "$products.unit",
+            productDetails: 1,
+            group: 1,
+            generic: 1,
+            brand: 1,
+            unit: 1,
+            tp: {
+              $arrayElemAt: ["$productDetails.tp", 0]
+            },
+            mrp: {
+              $arrayElemAt: ["$productDetails.mrp", 0]
+            },
+            pcsBox: {
+              $arrayElemAt: ["$productDetails.pcsBox", 0]
+            },
+            size: {
+              $arrayElemAt: ["$productDetails.size", 0]
+            },
+            // pGenericName: {
+            //   $arrayElemAt: ["$productGeneric.name", 0]
+            // },
+            // pBrandName: {
+            //   $arrayElemAt: ["$productBrand.name", 0]
+            // },
+            // pUnitName: {
+            //   $arrayElemAt: ["$productUnit.name", 0]
+            // },
+            stock: {
+              $cond: {
+                if: { $gt: [{ $size: "$inventory" }, 0] },
+                then: { $arrayElemAt: ["$inventory.currentQty", 0] },
+                else: 0
+              }
+            }
+            ,
+            // "productGroup.name": 1,
+            // "productDetails.group": 1,
+            // "productDetails.generic": 1,
+            // "productDetails.brand": 1,
+            // "productDetails.brand.name": 1,
+            inventory: 1
+          }
         }
-      }
-    ]);
+
+      ]);
+    } else {
+      search = await Product.aggregate([
+        {
+          $match: { article_code: product.article_code },
+        },
+        {
+          $lookup: {
+            from: "brands",
+            localField: "brand",
+            foreignField: "_id",
+            as: "brand",
+          },
+        },
+        {
+          $lookup: {
+            from: "units",
+            localField: "unit",
+            foreignField: "_id",
+            as: "unit",
+          },
+        },
+        {
+          $lookup: {
+            from: "groups",
+            localField: "group",
+            foreignField: "_id",
+            as: "group",
+          },
+        },
+        {
+          $lookup: {
+            from: "inventories",
+            localField: "article_code",
+            foreignField: "article_code",
+            as: "inventory",
+          },
+        },
+        {
+          $addFields: {
+            nameLength: { $strLenCP: "$name" },
+          },
+        },
+        {
+          $sort: {
+            nameLength: 1, // -1 for descending, 1 for ascending
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            name: 1,
+            unit: 1,
+            vat: 1,
+            article_code: 1,
+            tp: 1,
+            mrp: 1,
+            discount: 1,
+            group: 1,
+            brand: 1,
+            size: 1,
+            pcsBox: 1,
+            inventory: 1,
+            stock: {
+              $cond: {
+                if: { $gt: [{ $size: "$inventory" }, 0] },
+                then: { $arrayElemAt: ["$inventory.currentQty", 0] },
+                else: 0
+              }
+            }
+            ,
+            supplierId: null
+          },
+        },
+        {
+          $limit: 10,
+        },
+      ]);
+    }
+
     console.log(search)
     res.send(search);
   })
