@@ -326,6 +326,7 @@ grnRouter.get(
         createdAt: 1,
         shipping_cost: 1,
         note: 1,
+        discount: 1
       })
       .populate("poNo", "poNo")
       // .populate("tpnNo", { tpnNo: 1, warehouseFrom: 1, warehouseTo: 1 })

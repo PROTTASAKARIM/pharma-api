@@ -134,6 +134,10 @@ supplierRouter.get(
       const populatedSupplier = await Supplier.populate(newSupplier, {
         path: "products.id",
         model: "Product",
+        populate: {
+          path: "group",
+          model: "Group",
+        },
       });
       // console.log("populatedS", populatedSupplier)
       // const n = populatedSupplier.find({ article_code: "6017023" })
@@ -196,6 +200,10 @@ supplierRouter.get(
       const populatedSupplier = await Supplier.populate(newSupplier, {
         path: "products.id",
         model: "Product",
+        populate: {
+          path: "group",
+          model: "Group",
+        },
       });
       // console.log("populatedS", populatedSupplier)
       // const n = populatedSupplier.find({ article_code: "6017023" })
