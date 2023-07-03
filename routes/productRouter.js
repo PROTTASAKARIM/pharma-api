@@ -102,8 +102,12 @@ router.get(
         name: 1,
         unit: 1,
         article_code: 1,
+        tp: 1,
+        mrp: 1,
+        group: 1
       })
       .populate("unit", { _id: 1, name: 1 })
+      .populate("group", { _id: 1, name: 1 })
     res.send(products);
   })
 );

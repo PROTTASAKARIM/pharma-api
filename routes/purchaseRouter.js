@@ -255,6 +255,10 @@ purchaseRouter.get(
         populate: {
           path: "products.id",
           model: "Product",
+          populate: {
+            path: "group",
+            model: "Group",
+          },
         },
       })
       .populate("warehouse", "name")
