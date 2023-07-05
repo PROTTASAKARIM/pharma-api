@@ -1097,6 +1097,51 @@ saleRouter.get(
 
 
 // TODAYS SALE Total
+// saleRouter.get(
+//   "/total/:start/:end",
+//   //
+//   expressAsyncHandler(async (req, res) => {
+//     const start = req.params.start
+//       ? startOfDay(new Date(req.params.start))
+//       : startOfDay(new Date.now());
+//     const end = req.params.end
+//       ? endOfDay(new Date(req.params.end))
+//       : endOfDay(new Date.now());
+//     console.log("date", start, end);
+//     // const day = parseInt(1);
+//     try {
+//       const sales = await Sale.aggregate([
+//         {
+//           $match: {
+//             $and: [
+//               {
+//                 status: "complete",
+//               },
+//               {
+//                 createdAt: {
+//                   $gt: start,
+//                   $lt: end,
+//                 },
+//               },
+//             ],
+//           },
+//         },
+//         {
+//           $group: {
+//             _id: null,
+//             grossTotalRound: { $sum: "$grossTotalRound" },
+//             total: { $sum: "$total" },
+//             vat: { $sum: "$vat" },
+//           },
+//         },
+//       ]);
+//       res.send(sales);
+//     } catch (err) {
+//       console.log(err);
+//     }
+//   })
+// );
+
 saleRouter.get(
   "/total/:start/:end",
   //
@@ -1107,35 +1152,255 @@ saleRouter.get(
     const end = req.params.end
       ? endOfDay(new Date(req.params.end))
       : endOfDay(new Date.now());
-    console.log("date", start, end);
-    // const day = parseInt(1);
+
+    // console.log("date", start, end);
+
     try {
-      const sales = await Sale.aggregate([
+      // const salesAggregate = await Sale.aggregate([
+      //   {
+      //     $match: {
+      //       status: "complete",
+      //       createdAt: {
+      //         $gt: start,
+      //         $lt: end,
+      //       },
+      //     },
+      //   },
+      //   {
+      //     $addFields: {
+      //       cogs: {
+      //         $sum: {
+      //           $map: {
+      //             input: "$products",
+      //             as: "product",
+      //             in: {
+      //               $multiply: ["$$product.tp", "$$product.qty"],
+      //             },
+      //           },
+      //         },
+      //       },
+      //       sale: {
+      //         $sum: {
+      //           $map: {
+      //             input: "$products",
+      //             as: "product",
+      //             in: {
+      //               $multiply: ["$$product.mrp", "$$product.qty"],
+      //             },
+      //           },
+      //         },
+      //       },
+      //       cash: "$paidAmount.cash",
+      //       point: "$paidAmount.point",
+      //       mfs: { $objectToArray: "$paidAmount.mfs" },
+      //       card: { $objectToArray: "$paidAmount.card" },
+      //     },
+      //   },
+      //   {
+      //     $group: {
+      //       _id: null,
+      //       count: { $sum: 1 },
+      //       total: { $sum: "$grossTotalRound" },
+      //       vat: { $sum: "$vat" },
+      //       cogs: { $sum: "$cogs" },
+      //       sale: { $sum: "$sale" },
+      //       cash: { $sum: "$cash" },
+      //       point: { $sum: "$point" },
+      //       mfs: {
+      //         $push: {
+      //           $arrayToObject: {
+      //             $map: {
+      //               input: "$mfs",
+      //               in: { k: "$$this.k", v: "$$this.v" },
+      //             },
+      //           },
+      //         },
+      //       },
+      //       card: {
+      //         $push: {
+      //           $arrayToObject: {
+      //             $map: {
+      //               input: "$card",
+      //               in: { k: "$$this.k", v: "$$this.v" },
+      //             },
+      //           },
+      //         },
+      //       },
+      //     },
+      //   },
+      //   {
+      //     $project: {
+      //       _id: 0,
+      //       count: 1,
+      //       total: 1,
+      //       vat: 1,
+      //       cogs: 1,
+      //       sale: 1,
+      //       paidAmount: {
+      //         cash: "$cash",
+      //         point: "$point",
+      //         mfs: {
+      //           $arrayToObject: {
+      //             $map: {
+      //               input: "$mfs",
+      //               in: { k: "$$this.name", v: "$$this.amount" },
+      //             },
+      //           },
+      //         },
+      //         card: {
+      //           $arrayToObject: {
+      //             $map: {
+      //               input: "$card",
+      //               in: { k: "$$this.name", v: "$$this.amount" },
+      //             },
+      //           },
+      //         },
+      //       },
+      //     },
+      //   },
+      // ]);
+
+      const salesAggregate = await Sale.aggregate([
         {
           $match: {
-            $and: [
-              {
-                status: "complete",
-              },
-              {
-                createdAt: {
-                  $gt: start,
-                  $lt: end,
+            status: "complete",
+            createdAt: {
+              $gt: start,
+              $lt: end,
+            },
+          },
+        },
+        {
+          $addFields: {
+            cogs: {
+              $sum: {
+                $map: {
+                  input: "$products",
+                  as: "product",
+                  in: {
+                    $multiply: [{ $toDouble: "$$product.tp" }, { $toDouble: "$$product.qty" }],
+                  },
                 },
               },
-            ],
+            },
+            sale: {
+              $sum: {
+                $map: {
+                  input: "$products",
+                  as: "product",
+                  in: {
+                    $multiply: [{ $toDouble: "$$product.mrp" }, { $toDouble: "$$product.qty" }],
+                  },
+                },
+              },
+            },
+
+            cash: "$paidAmount.cash",
+            point: "$paidAmount.point",
+            mfs: "$paidAmount.mfs",
+            card: "$paidAmount.card",
           },
         },
         {
           $group: {
             _id: null,
-            grossTotalRound: { $sum: "$grossTotalRound" },
-            total: { $sum: "$total" },
+            count: { $sum: 1 },
+            total: { $sum: "$grossTotalRound" },
             vat: { $sum: "$vat" },
+            cogs: { $sum: "$cogs" },
+            sale: { $sum: "$sale" },
+            cash: { $sum: "$cash" },
+            point: { $sum: "$point" },
+            discount: { $sum: { $toDouble: "$discount" } },
+            mfs_bkash: {
+              $sum: {
+                $cond: [{ $eq: ["$mfs.name", "bkash"] }, "$mfs.amount", 0],
+              },
+            },
+            mfs_nagad: {
+              $sum: {
+                $cond: [{ $eq: ["$mfs.name", "Nagad"] }, "$mfs.amount", 0],
+              },
+            },
+            mfs_upay: {
+              $sum: {
+                $cond: [{ $eq: ["$mfs.name", "Upay"] }, "$mfs.amount", 0],
+              },
+            },
+            mfs_roket: {
+              $sum: {
+                $cond: [{ $eq: ["$mfs.name", "Rocket"] }, "$mfs.amount", 0],
+              },
+            },
+            card_visa: {
+              $sum: {
+                $cond: [{ $eq: ["$card.name", "visa"] }, "$card.amount", 0],
+              },
+            },
+            card_master: {
+              $sum: {
+                $cond: [{ $eq: ["$card.name", "Master"] }, "$card.amount", 0],
+              },
+            },
+            oldCustomer: {
+              $addToSet: {
+                $cond: [
+                  { $eq: [{ $type: "$customerId" }, "objectId"] },
+                  "$customerId",
+                  null,
+                ],
+              },
+            },
+            newCustomer: {
+              $addToSet: {
+                $cond: [
+                  { $eq: [{ $type: "$customerId" }, "string"] },
+                  "$customerId",
+                  null,
+                ],
+              },
+            },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            count: 1,
+            total: 1,
+            vat: 1,
+            cogs: 1,
+            sale: 1,
+            oldCustomer: { $size: "$oldCustomer" },
+            newCustomer: { $size: "$newCustomer" },
+            discount: 1,
+            paidAmount: {
+              cash: "$cash",
+              point: "$point",
+              mfs: {
+                bkash: "$mfs_bkash",
+                nagad: "$mfs_nagad",
+                upay: "$mfs_upay",
+                roket: "$mfs_roket",
+              },
+              card: {
+                visa: "$card_visa",
+                master: "$card_master",
+              },
+            },
           },
         },
       ]);
-      res.send(sales);
+
+      const result = salesAggregate[0] || {
+        count: 0,
+        total: 0,
+        vat: 0,
+        cogs: 0,
+        sale: 0,
+        paidAmount: { cash: 0, point: 0, mfs: {}, card: {} },
+      };
+      console.log("result:", result);
+      res.send(result);
     } catch (err) {
       console.log(err);
     }

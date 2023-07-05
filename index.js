@@ -51,7 +51,12 @@ app.use(express.static(__dirname + "/template"));
 
 const dbUrl = `mongodb+srv://techsoulincbd:d3VklaC25bQS0tSs@cluster0.zgc27tw.mongodb.net/pharmacyDB?retryWrites=true&w=majority`;
 
-
+//test//
+// const dbUrl = `mongodb+srv://test:QFNOIr4QbpGGpA4D@cluster0.1hsyopn.mongodb.net/Pharmacy?retryWrites=true&w=majority`;
+//test
+//test//
+// const dbUrl = `mongodb+srv://test:QFNOIr4QbpGGpA4D@cluster0.1hsyopn.mongodb.net/pharmacyDb?retryWrites=true&w=majority`;
+//test
 console.log(dbUrl);
 // // mongodb+srv://techsoulincbd:d3VklaC25bQS0tSs@cluster0.zgc27tw.mongodb.net/pharmacyDB?retryWrites=true&w=majority
 // // database connection
