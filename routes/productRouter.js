@@ -173,24 +173,27 @@ router.get(
       console.log("search:", query);
       // search check if num or string
       const isNumber = /^\d/.test(queryString);
-      console.log(isNumber);
+      console.log("isNumber", isNumber);
       if (!isNumber) {
         // if text then search name
+        const escapeRegExp = (string) => {
+          return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        };
+        const escapedQueryString = escapeRegExp(queryString);
         query = {
-          name: { $regex: new RegExp(".*" + queryString + ".*?", "i") },
+          // name: { $regex: new RegExp(".*" + queryString + ".*?", "i") },
+          // name: { $regex: new RegExp(queryString, "i") },
+          // name: { $regex: new RegExp(`\\b${queryString}\\b`, "i") },
+          // name: { $regex: new RegExp(`.*${queryString}.*`, "i") },
+          name: { $regex: new RegExp(`.*${escapedQueryString}.*`, "i") },
         };
         // query = { name:  queryString  };
       } else {
         // if number search in ean and article code
         query = {
-          $or: [
-            { ean: { $regex: RegExp("^" + queryString + ".*", "i") } },
-            {
-              article_code: {
-                $regex: RegExp("^" + queryString + ".*", "i"),
-              },
-            },
-          ],
+          article_code: {
+            $regex: RegExp("^" + queryString + ".*", "i"),
+          },
         };
       }
       console.log(query);
@@ -584,13 +587,29 @@ router.get(
     let query = {};
     if (!isNumber) {
       // query = { name: { $regex: new RegExp("\\b" + payload + ".*?", "i") } };
-      query = { name: { $regex: new RegExp(payload, "i") } };
+      // query = { name: { $regex: new RegExp(payload, "i") } }; // previous search 
+      // query = {
+      //   name: { $regex: new RegExp(`\\b${queryString}\\b`, "i") },
+      // };
+
+      const escapeRegExp = (string) => {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      };
+      const escapedQueryString = escapeRegExp(payload);
+      query = {
+        // name: { $regex: new RegExp(".*" + queryString + ".*?", "i") },
+        // name: { $regex: new RegExp(queryString, "i") },
+        // name: { $regex: new RegExp(`\\b${queryString}\\b`, "i") },
+        // name: { $regex: new RegExp(`.*${queryString}.*`, "i") },
+        name: { $regex: new RegExp(`.*${escapedQueryString}.*`, "i") },
+        // name: { $regex: new RegExp(`^${escapedQueryString}$`, "i") },
+      };
+
+
     } else {
       query = {
-        $or: [
-          { article_code: { $regex: new RegExp(payload, "i") } },
-          // { article_code: { $regex: new RegExp("^" + payload + ".*", "i") } },
-        ],
+        article_code: { $regex: new RegExp(payload, "i") },
+        // { article_code: { $regex: new RegExp("^" + payload + ".*", "i") } },
       };
     }
 
