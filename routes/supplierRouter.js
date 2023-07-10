@@ -16,6 +16,8 @@ const Supplier = require("../models/supplierModel");
 const ProductTable = require("../models/productModel");
 const checklogin = require("../middlewares/checkLogin");
 const Product = require("../models/productModel");
+const mongoose = require('mongoose');
+
 
 const supplierRouter = express.Router();
 
@@ -78,6 +80,59 @@ supplierRouter.get(
     const total = await Supplier.countDocuments({});
     // console.log("id");
     res.status(200).json(total);
+  })
+);
+supplierRouter.get(
+  "/search/:q",
+  expressAsyncHandler(async (req, res) => {
+    const payload = req.params?.q?.trim().toString().toLocaleLowerCase();
+    console.log(payload);
+
+    const isNumber = /^\d/.test(payload);
+    let query = {};
+    if (!isNumber) {
+      // query = { name: { $regex: new RegExp("\\b" + payload + ".*?", "i") } };
+      query = { company: { $regex: new RegExp(payload, "i") } };
+    } else {
+      query = {
+        code: { $regex: new RegExp(payload, "i") },
+        // { article_code: { $regex: new RegExp("^" + payload + ".*", "i") } },
+
+      };
+    }
+
+    const search = await Supplier.aggregate([
+      {
+        $match: query,
+      },
+      {
+        $project: {
+          _id: 1,
+          company: 1,
+          code: 1,
+          name: 1,
+          address: 1,
+          type: 1,
+          phone: 1,
+          products: 1,
+          email: 1,
+          status: 1
+        },
+      },
+      {
+        $limit: 10,
+      },
+    ]);
+
+    console.log(search);
+    if (payload === "") {
+      const supplier = await Supplier.find()
+        .limit(10)
+      res.status(200).send(supplier);
+    } else {
+      res.status(200).json(search);
+    }
+    // res.status(200).json(search);
   })
 );
 
@@ -154,66 +209,184 @@ supplierRouter.get(
   expressAsyncHandler(async (req, res) => {
     const id = req.params.id;
     try {
-      let suppliers = await Supplier.find({
-        _id: id,
-        status: "active",
-      })
-        .select({
-          name: 1,
-          email: 1,
-          code: 1,
-          company: 1,
-          phone: 1,
-          products: 1,
-        })
-      // .populate("products")
-      // .populate({
-      //   path: "products.id",
-      //   model: "Product",
-      //   populate: {
-      //     path: "priceList",
-      //     model: "Price",
-      //   },
-      // });
-      const products = suppliers[0].products
-      // console.log("products", products)
-      let p_article = []
-      products.map(pro => {
-        p_article = [...p_article, pro.get("article_code")]
-      })
-      // console.log("p_article", p_article)
-      const findProducts = await Product.find({ article_code: p_article }).select({
-        article_code: 1
-      })
-      // console.log("final", findProducts.length)
-      let finalProduct = []
-      findProducts.map(pro => {
-        const pp = products.filter(p => p.get("article_code") === pro.article_code)
-        finalProduct = [...finalProduct, pp[0]]
-      })
-      // console.log("b", products)
-      // console.log("a", finalProduct)
-
-      // console.log("suppliers", suppliers[0]);
-      const newSupplier = { ...suppliers[0].toObject(), products: finalProduct }
-      console.log("newProduct", newSupplier)
-      const populatedSupplier = await Supplier.populate(newSupplier, {
-        path: "products.id",
-        model: "Product",
-        populate: {
-          path: "group",
-          model: "Group",
+      const supplier = await Supplier.aggregate([
+        {
+          $match: { _id: mongoose.Types.ObjectId(id) },
         },
-      });
-      // console.log("populatedS", populatedSupplier)
-      // const n = populatedSupplier.find({ article_code: "6017023" })
-      res.send(populatedSupplier);
-      // console.log("removed");
+        {
+          $lookup: {
+            from: "products",
+            let: { productIds: { $map: { input: "$products", as: "product", in: { $toObjectId: "$$product.id" } } } },
+            pipeline: [
+              {
+                $match: {
+                  $expr: { $in: ["$_id", "$$productIds"] }
+                }
+              },
+              {
+                $lookup: {
+                  from: "groups",
+                  localField: "group",
+                  foreignField: "_id",
+                  as: "groupDetails"
+                }
+              },
+              {
+                $project: {
+                  name: 1,
+                  article_code: 1,
+                  tp: 1,
+                  mrp: 1,
+                  group: {
+                    $cond: [
+                      { $gt: [{ $size: "$groupDetails" }, 0] },
+                      { $arrayElemAt: ["$groupDetails", 0] },
+                      null
+                    ]
+                  },
+                  _id: 1
+                }
+              },
+              {
+                $project: {
+                  name: 1,
+                  article_code: 1,
+                  tp: 1,
+                  mrp: 1,
+                  group: {
+                    _id: 1,
+                    name: 1,
+                    code: 1
+                  },
+                  _id: 0,
+                  id: "$_id"
+                }
+              }
+            ],
+            as: "productDetails",
+          },
+        },
+        {
+          $addFields: {
+            products: {
+              $map: {
+                input: "$products",
+                as: "product",
+                in: {
+                  $mergeObjects: [
+                    "$$product",
+                    {
+                      group: {
+                        $arrayElemAt: [
+                          "$productDetails.group",
+                          {
+                            $indexOfArray: [
+                              { $map: { input: "$productDetails", as: "pd", in: { $toObjectId: "$$pd._id" } } },
+                              { $toObjectId: "$$product.id" }
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    // {
+                    //   inventory: {
+                    //     $arrayElemAt: [
+                    //       "$inventory",
+                    //       {
+                    //         $indexOfArray: [
+                    //           { $map: { input: "$inventory", as: "inv", in: "$$inv.article_code" } },
+                    //           "$$product.article_code"
+                    //         ]
+                    //       }
+                    //     ]
+                    //   }
+                    // }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          $project: {
+            products: 0,
+          }
+        }
+      ]);
+
+      res.send(supplier[0]);
     } catch (err) {
       res.send(err);
     }
-  })
-);
+  }));
+
+// supplierRouter.get(
+//   "/:id",
+//   expressAsyncHandler(async (req, res) => {
+//     const id = req.params.id;
+//     try {
+//       let suppliers = await Supplier.find({
+//         _id: id,
+//         status: "active",
+//       })
+//         .select({
+//           name: 1,
+//           email: 1,
+//           code: 1,
+//           company: 1,
+//           phone: 1,
+//           products: 1,
+//         })
+//       // .populate("products")
+//       // .populate({
+//       //   path: "products.id",
+//       //   model: "Product",
+//       //   populate: {
+//       //     path: "priceList",
+//       //     model: "Price",
+//       //   },
+//       // });
+//       const products = suppliers[0].products
+//       // console.log("products", products)
+//       let p_article = []
+//       products.map(pro => {
+//         p_article = [...p_article, pro.get("article_code")]
+//       })
+//       // console.log("p_article", p_article)
+//       const findProducts = await Product.find({ article_code: p_article }).select({
+//         article_code: 1
+//       })
+//       // console.log("final", findProducts.length)
+//       let finalProduct = []
+//       findProducts.map(pro => {
+//         const pp = products.filter(p => p.get("article_code") === pro.article_code)
+//         finalProduct = [...finalProduct, pp[0]]
+//       })
+//       // console.log("b", products)
+//       // console.log("a", finalProduct)
+
+//       // console.log("suppliers", suppliers[0]);
+//       const newSupplier = { ...suppliers[0].toObject(), products: finalProduct }
+//       console.log("newProduct", newSupplier)
+//       const populatedSupplier = await Supplier.populate(newSupplier, {
+//         path: "products.id",
+//         model: "Product",
+//         populate: {
+//           path: "group",
+//           model: "Group",
+//           select: "name code",
+//         },
+//         select: "name article_code group",
+//       });
+//       // console.log("populatedS", populatedSupplier)
+//       // const n = populatedSupplier.find({ article_code: "6017023" })
+//       res.send(populatedSupplier);
+//       // console.log("removed");
+//     } catch (err) {
+//       res.send(err);
+//     }
+//   })
+// );
 // GET ONE SUPPLIER FOR UPDATE
 supplierRouter.get(
   "/pk/:id",
