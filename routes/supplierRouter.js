@@ -83,6 +83,58 @@ supplierRouter.get(
   })
 );
 supplierRouter.get(
+  "/search/po/:q",
+  expressAsyncHandler(async (req, res) => {
+    const payload = req.params?.q?.trim().toString().toLocaleLowerCase();
+    console.log("payload", payload);
+
+    const isNumber = /^\d/.test(payload);
+    let query = {};
+    if (!isNumber) {
+      // query = { name: { $regex: new RegExp("\\b" + payload + ".*?", "i") } };
+      query = { company: { $regex: new RegExp(payload, "i") } };
+    } else {
+      query = {
+        code: { $regex: new RegExp(payload, "i") },
+        // { article_code: { $regex: new RegExp("^" + payload + ".*", "i") } },
+
+      };
+    }
+
+    const search = await Supplier.aggregate([
+      {
+        $match: query,
+      },
+      {
+        $project: {
+          _id: 1,
+          company: 1,
+          code: 1,
+          name: 1,
+          address: 1,
+          type: 1,
+          phone: 1,
+          email: 1,
+          status: 1
+        },
+      },
+      {
+        $limit: 10,
+      },
+    ]);
+
+    console.log(search);
+    if (payload === "") {
+      const supplier = await Supplier.find()
+        .limit(10)
+      res.status(200).send(supplier);
+    } else {
+      res.status(200).json(search);
+    }
+    // res.status(200).json(search);
+  })
+);
+supplierRouter.get(
   "/search/:q",
   expressAsyncHandler(async (req, res) => {
     const payload = req.params?.q?.trim().toString().toLocaleLowerCase();
@@ -204,6 +256,121 @@ supplierRouter.get(
   })
 );
 // GET ONE SUPPLIER FOR UPDATE
+supplierRouter.get(
+  "/po/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    try {
+      const supplier = await Supplier.aggregate([
+        {
+          $match: { _id: mongoose.Types.ObjectId(id) },
+        },
+        // {
+        //   $lookup: {
+        //     from: "products",
+        //     let: { productIds: { $map: { input: "$products", as: "product", in: { $toObjectId: "$$product.id" } } } },
+        //     pipeline: [
+        //       {
+        //         $match: {
+        //           $expr: { $in: ["$_id", "$$productIds"] }
+        //         }
+        //       },
+        //       {
+        //         $lookup: {
+        //           from: "groups",
+        //           localField: "group",
+        //           foreignField: "_id",
+        //           as: "groupDetails"
+        //         }
+        //       },
+        //       {
+        //         $project: {
+        //           name: 1,
+        //           article_code: 1,
+        //           tp: 1,
+        //           mrp: 1,
+        //           group: {
+        //             $cond: [
+        //               { $gt: [{ $size: "$groupDetails" }, 0] },
+        //               { $arrayElemAt: ["$groupDetails", 0] },
+        //               null
+        //             ]
+        //           },
+        //           _id: 1
+        //         }
+        //       },
+        //       {
+        //         $project: {
+        //           name: 1,
+        //           article_code: 1,
+        //           tp: 1,
+        //           mrp: 1,
+        //           group: {
+        //             _id: 1,
+        //             name: 1,
+        //             code: 1
+        //           },
+        //           _id: 0,
+        //           id: "$_id"
+        //         }
+        //       }
+        //     ],
+        //     as: "productDetails",
+        //   },
+        // },
+        // {
+        //   $addFields: {
+        //     products: {
+        //       $map: {
+        //         input: "$products",
+        //         as: "product",
+        //         in: {
+        //           $mergeObjects: [
+        //             "$$product",
+        //             {
+        //               group: {
+        //                 $arrayElemAt: [
+        //                   "$productDetails.group",
+        //                   {
+        //                     $indexOfArray: [
+        //                       { $map: { input: "$productDetails", as: "pd", in: { $toObjectId: "$$pd._id" } } },
+        //                       { $toObjectId: "$$product.id" }
+        //                     ]
+        //                   }
+        //                 ]
+        //               }
+        //             },
+        //             // {
+        //             //   inventory: {
+        //             //     $arrayElemAt: [
+        //             //       "$inventory",
+        //             //       {
+        //             //         $indexOfArray: [
+        //             //           { $map: { input: "$inventory", as: "inv", in: "$$inv.article_code" } },
+        //             //           "$$product.article_code"
+        //             //         ]
+        //             //       }
+        //             //     ]
+        //             //   }
+        //             // }
+        //           ]
+        //         }
+        //       }
+        //     }
+        //   }
+        // },
+        // {
+        //   $project: {
+        //     products: 0,
+        //   }
+        // }
+      ]);
+
+      res.send(supplier[0]);
+    } catch (err) {
+      res.send(err);
+    }
+  }));
 supplierRouter.get(
   "/:id",
   expressAsyncHandler(async (req, res) => {
