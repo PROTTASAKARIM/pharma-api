@@ -207,8 +207,10 @@ router.get(
           photo: 1,
           tp: 1,
           mrp: 1,
-          size: 1
+          size: 1,
+          generic: 1
         })
+        .populate("generic", "name")
         .limit(100);
       res.status(200).json(product);
     } else {
@@ -226,8 +228,10 @@ router.get(
           photo: 1,
           tp: 1,
           mrp: 1,
-          size: 1
+          size: 1,
+          generic: 1
         })
+        .populate("generic", "name")
         .limit(size)
         .skip(size * page);
       res.status(200).json(product);
@@ -576,6 +580,8 @@ router.get(
     }
   })
 );
+
+//pos search query 
 router.get(
   "/search/supplier/:q",
   expressAsyncHandler(async (req, res) => {
@@ -672,6 +678,7 @@ router.get(
           discount: 1,
           group: 1,
           brand: 1,
+          brandNameLength: { $strLenCP: { $arrayElemAt: ["$brand.name", 0] } },
           size: 1,
           pcsBox: 1,
           inventory: 1,
@@ -749,6 +756,17 @@ router.get(
           nameLength: { $strLenCP: "$name" },
         },
       },
+      // {
+      //   $sort: {
+      //     brandNameLength: {
+      //       $cond: {
+      //         if: { $gt: ["$brandNameLength", 0] },
+      //         then: 1,
+      //         else: "$nameLength",
+      //       },
+      //     },
+      //   },
+      // },
       {
         $sort: {
           nameLength: 1, // -1 for descending, 1 for ascending
@@ -762,6 +780,144 @@ router.get(
     // Access the results
     console.log(search);
 
+
+    if (payload === "") {
+      res.send([]);
+    } else {
+      res.send(search);
+    }
+  })
+);
+
+router.get(
+  "/search/supplier/new/:q",
+  expressAsyncHandler(async (req, res) => {
+    const payload = req.params?.q?.trim().toString().toLocaleLowerCase();
+    const isNumber = /^\d/.test(payload);
+    let query = {};
+
+    if (!isNumber) {
+      const escapeRegExp = (string) => {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      };
+      const escapedQueryString = escapeRegExp(payload);
+      query = {
+        name: { $regex: new RegExp(`.*${escapedQueryString}.*`, "i") },
+      };
+    } else {
+      query = {
+        article_code: { $regex: new RegExp(payload, "i") },
+      };
+    }
+    console.log(query)
+    const search = await Product.aggregate([
+      {
+        $match: query
+      },
+      {
+        $lookup: {
+          from: "brands",
+          localField: "brand",
+          foreignField: "_id",
+          as: "brand",
+        },
+      },
+      {
+        $lookup: {
+          from: "units",
+          localField: "unit",
+          foreignField: "_id",
+          as: "unit",
+        },
+      },
+      {
+        $lookup: {
+          from: "groups",
+          localField: "group",
+          foreignField: "_id",
+          as: "group",
+        },
+      },
+      {
+        $lookup: {
+          from: "inventories",
+          localField: "article_code",
+          foreignField: "article_code",
+          as: "inventory",
+        },
+      },
+      {
+        $lookup: {
+          from: "suppliers",
+          localField: "article_code",
+          foreignField: "products.article_code",
+          as: "supplier",
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          unit: 1,
+          vat: 1,
+          article_code: 1,
+          tp: 1,
+          mrp: 1,
+          discount: 1,
+          group: 1,
+          brand: 1,
+          size: 1,
+          pcsBox: 1,
+          inventory: 1,
+          stock: {
+            $cond: {
+              if: { $gt: [{ $size: "$inventory" }, 0] },
+              then: { $arrayElemAt: ["$inventory.currentQty", 0] },
+              else: 0
+            }
+          },
+          supplier: 1,
+        },
+      },
+      {
+        $unwind: "$supplier"
+      },
+      {
+        $group: {
+          _id: "$supplier._id",
+          supplier: { $first: "$supplier" },
+          products: { $push: "$$ROOT" },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $match: { count: 1 }
+      },
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: [
+              { supplier: "$supplier" },
+              { product: { $arrayElemAt: ["$products", 0] } }
+            ]
+          }
+        }
+      },
+      {
+        $addFields: {
+          stock: "$product.stock",
+          nameLength: { $strLenCP: "$product.name" },
+        },
+      },
+      {
+        $sort: {
+          nameLength: 1,
+        },
+      },
+      {
+        $limit: 10,
+      },
+    ]);
 
     if (payload === "") {
       res.send([]);
