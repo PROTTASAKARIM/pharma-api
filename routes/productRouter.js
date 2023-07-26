@@ -162,6 +162,29 @@ router.get(
     res.send(products);
   })
 );
+router.get(
+  "/generic/inventory/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const products = await Product.aggregate([
+      {
+        $match: { generic: mongoose.Types.ObjectId(id) }
+      },
+      {
+        $lookup: {
+          from: "inventories",
+          localField: "article_code", // Convert to ObjectId
+          foreignField: "article_code",
+          as: "inventory",
+        },
+      },
+      {
+        $unwind: "$inventory"
+      },
+    ])
+    res.send(products);
+  })
+);
 
 // GET PRODUCT PRICE
 router.get(
