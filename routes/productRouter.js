@@ -225,24 +225,34 @@ router.get(
       console.log("isNumber", isNumber);
       if (!isNumber) {
         // if text then search name
+        // const escapeRegExp = (string) => {
+        //   return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        // };
+        // const escapedQueryString = escapeRegExp(queryString);
+        // query = {
+        //   // name: { $regex: new RegExp(".*" + queryString + ".*?", "i") },
+        //   // name: { $regex: new RegExp(queryString, "i") },
+        //   // name: { $regex: new RegExp(`\\b${queryString}\\b`, "i") },
+        //   // name: { $regex: new RegExp(`.*${queryString}.*`, "i") },
+        //   name: { $regex: new RegExp(`.*${escapedQueryString}.*`, "i") },
+        // };
+        // query = { name:  queryString  };
         const escapeRegExp = (string) => {
           return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
         };
         const escapedQueryString = escapeRegExp(queryString);
         query = {
-          // name: { $regex: new RegExp(".*" + queryString + ".*?", "i") },
-          // name: { $regex: new RegExp(queryString, "i") },
-          // name: { $regex: new RegExp(`\\b${queryString}\\b`, "i") },
-          // name: { $regex: new RegExp(`.*${queryString}.*`, "i") },
           name: { $regex: new RegExp(`.*${escapedQueryString}.*`, "i") },
         };
-        // query = { name:  queryString  };
       } else {
         // if number search in ean and article code
+        // query = {
+        //   article_code: {
+        //     $regex: RegExp("^" + queryString + ".*", "i"),
+        //   },
+        // };
         query = {
-          article_code: {
-            $regex: RegExp("^" + queryString + ".*", "i"),
-          },
+          article_code: { $regex: new RegExp(queryString, "i") },
         };
       }
       console.log(query);
@@ -268,13 +278,25 @@ router.get(
         {
           $lookup: {
             from: "inventories",
-            localField: "article_code", // Convert to ObjectId
-            foreignField: "article_code",
+            let: { articleCode: "$article_code" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: { $eq: ["$article_code", "$$articleCode"] },
+                },
+              },
+              {
+                $limit: 1, // Limit the inventory array to one element (or remove this stage if you want all matching inventories)
+              },
+            ],
             as: "inventory",
           },
         },
         {
-          $unwind: "$inventory"
+          $unwind: {
+            path: "$inventory",
+            preserveNullAndEmptyArrays: true, // Preserve products without matching inventories
+          },
         },
         {
           $lookup: {
@@ -286,6 +308,17 @@ router.get(
         },
         {
           $unwind: "$generic"
+        },
+        {
+          $lookup: {
+            from: "groups",
+            localField: "group", // Convert to ObjectId
+            foreignField: "_id",
+            as: "group",
+          },
+        },
+        {
+          $unwind: "$group"
         },
         {
           $limit: 100
@@ -318,13 +351,25 @@ router.get(
         {
           $lookup: {
             from: "inventories",
-            localField: "article_code", // Convert to ObjectId
-            foreignField: "article_code",
+            let: { articleCode: "$article_code" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: { $eq: ["$article_code", "$$articleCode"] },
+                },
+              },
+              {
+                $limit: 1, // Limit the inventory array to one element (or remove this stage if you want all matching inventories)
+              },
+            ],
             as: "inventory",
           },
         },
         {
-          $unwind: "$inventory"
+          $unwind: {
+            path: "$inventory",
+            preserveNullAndEmptyArrays: true, // Preserve products without matching inventories
+          },
         },
         {
           $lookup: {
@@ -336,6 +381,17 @@ router.get(
         },
         {
           $unwind: "$generic"
+        },
+        {
+          $lookup: {
+            from: "groups",
+            localField: "group", // Convert to ObjectId
+            foreignField: "_id",
+            as: "group",
+          },
+        },
+        {
+          $unwind: "$group"
         },
         {
           $limit: 100
@@ -350,6 +406,156 @@ router.get(
     }
   })
 );
+// router.get(
+//   "/all/:page/:size",
+//   expressAsyncHandler(async (req, res) => {
+//     const page = parseInt(req.params.page);
+//     const size = parseInt(req.params.size);
+//     const queryString = req.query?.q?.trim().toString().toLocaleLowerCase();
+//     const currentPage = parseInt(page) + 0;
+//     const skip = size * page
+//     let query = {};
+//     let product = [];
+//     // const size = parseInt(req.query.size);
+//     console.log("page:", currentPage, "size:", size, "search:", queryString);
+//     console.log(typeof queryString);
+
+//     //check if search or the pagenation
+
+//     if (queryString) {
+//       console.log("== query");
+
+//       console.log("search:", query);
+//       // search check if num or string
+//       const isNumber = /^\d/.test(queryString);
+//       console.log("isNumber", isNumber);
+//       if (!isNumber) {
+//         // if text then search name
+//         const escapeRegExp = (string) => {
+//           return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+//         };
+//         const escapedQueryString = escapeRegExp(queryString);
+//         query = {
+//           // name: { $regex: new RegExp(".*" + queryString + ".*?", "i") },
+//           // name: { $regex: new RegExp(queryString, "i") },
+//           // name: { $regex: new RegExp(`\\b${queryString}\\b`, "i") },
+//           // name: { $regex: new RegExp(`.*${queryString}.*`, "i") },
+//           name: { $regex: new RegExp(`.*${escapedQueryString}.*`, "i") },
+//         };
+//         // query = { name:  queryString  };
+//       } else {
+//         // if number search in ean and article code
+//         query = {
+//           article_code: {
+//             $regex: RegExp("^" + queryString + ".*", "i"),
+//           },
+//         };
+//       }
+//       console.log(query);
+
+//       // product = await Product.find(query)
+//       //   .select({
+//       //     _id: 1,
+//       //     name: 1,
+//       //     unit: 1,
+//       //     article_code: 1,
+//       //     photo: 1,
+//       //     tp: 1,
+//       //     mrp: 1,
+//       //     size: 1,
+//       //     generic: 1
+//       //   })
+//       //   .populate("generic", "name")
+//       //   .limit(100);
+//       product = await Product.aggregate([
+//         {
+//           $match: query,
+//         },
+//         {
+//           $lookup: {
+//             from: "inventories",
+//             localField: "article_code", // Convert to ObjectId
+//             foreignField: "article_code",
+//             as: "inventory",
+//           },
+//         },
+//         {
+//           $unwind: "$inventory"
+//         },
+//         {
+//           $lookup: {
+//             from: "generics",
+//             localField: "generic", // Convert to ObjectId
+//             foreignField: "_id",
+//             as: "generic",
+//           },
+//         },
+//         {
+//           $unwind: "$generic"
+//         },
+//         {
+//           $limit: 100
+//         },
+//       ])
+//       res.status(200).json(product);
+//     } else {
+//       console.log("no query");
+
+//       // regular pagination
+//       query = {};
+
+//       // product = await Product.find(query)
+//       //   .select({
+//       //     _id: 1,
+//       //     name: 1,
+//       //     unit: 1,
+//       //     article_code: 1,
+//       //     photo: 1,
+//       //     tp: 1,
+//       //     mrp: 1,
+//       //     size: 1,
+//       //     generic: 1
+//       //   })
+//       //   .populate("generic", "name")
+//       //   .limit(size)
+//       //   .skip(size * page);
+//       product = await Product.aggregate([
+
+//         {
+//           $lookup: {
+//             from: "inventories",
+//             localField: "article_code", // Convert to ObjectId
+//             foreignField: "article_code",
+//             as: "inventory",
+//           },
+//         },
+//         {
+//           $unwind: "$inventory"
+//         },
+//         {
+//           $lookup: {
+//             from: "generics",
+//             localField: "generic", // Convert to ObjectId
+//             foreignField: "_id",
+//             as: "generic",
+//           },
+//         },
+//         {
+//           $unwind: "$generic"
+//         },
+//         {
+//           $limit: 100
+//         },
+//         {
+//           $skip: skip
+//         }
+//       ])
+//       console.log("done:", query);
+//       console.log("product:", product);
+//       res.status(200).json(product);
+//     }
+//   })
+// );
 router.get(
   "/allnew/:page/:size",
   expressAsyncHandler(async (req, res) => {
