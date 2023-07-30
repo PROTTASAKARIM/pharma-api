@@ -929,6 +929,7 @@ saleRouter.get(
         changeAmount: 1,
         customerId: 1,
         tp: 1,
+        discount: 1
       })
       .populate("billerId", "name")
       .populate("customerId", "phone");
@@ -1084,6 +1085,7 @@ saleRouter.get(
             "returnProducts.qty": 1,
             "returnProducts.vat": 1,
             returnInvoice: 1,
+            discount: 1
           },
         },
       ]);
