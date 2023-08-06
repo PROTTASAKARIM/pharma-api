@@ -141,22 +141,44 @@ inventoryRouter.get(
       }
       console.log("qry", query);
 
-      product = await Inventory.find(query)
-        .select({
-          _id: 1,
-          name: 1,
-          article_code: 1,
-          currentQty: 1,
-          openingQty: 1,
-          totalQty: 1,
-          damageQty: 1,
-          rtvQty: 1,
-          soldQty: 1,
-          damageQty: 1,
-          rtvQty: 1,
-          tpnQty: 1,
-        })
-        .limit(100);
+      // product = await Inventory.find(query)
+      //   .select({
+      //     _id: 1,
+      //     name: 1,
+      //     article_code: 1,
+      //     currentQty: 1,
+      //     openingQty: 1,
+      //     totalQty: 1,
+      //     damageQty: 1,
+      //     rtvQty: 1,
+      //     soldQty: 1,
+      //     damageQty: 1,
+      //     rtvQty: 1,
+      //     tpnQty: 1,
+      //   })
+      //   .limit(100);
+
+
+
+      product = await Inventory.aggregate([
+        {
+          $match: query
+        },
+        {
+          $lookup: {
+            from: "products",
+            localField: "article_code",
+            foreignField: "article_code",
+            as: "product",
+          },
+        },
+        {
+          $unwind: '$product',
+        },
+        {
+          $limit: 100
+        }
+      ])
 
       console.log("res", product);
       res.status(200).json(product);
@@ -166,23 +188,46 @@ inventoryRouter.get(
       // regular pagination
       // query = {};
 
-      product = await Inventory.find(query)
-        .select({
-          _id: 1,
-          name: 1,
-          article_code: 1,
-          currentQty: 1,
-          openingQty: 1,
-          totalQty: 1,
-          damageQty: 1,
-          rtvQty: 1,
-          soldQty: 1,
-          damageQty: 1,
-          rtvQty: 1,
-          tpnQty: 1,
-        })
-        .limit(size)
-        .skip(size * page);
+
+      // product = await Inventory.find(query)
+      //   .select({
+      //     _id: 1,
+      //     name: 1,
+      //     article_code: 1,
+      //     currentQty: 1,
+      //     openingQty: 1,
+      //     totalQty: 1,
+      //     damageQty: 1,
+      //     rtvQty: 1,
+      //     soldQty: 1,
+      //     damageQty: 1,
+      //     rtvQty: 1,
+      //     tpnQty: 1,
+      //   })
+      //   .limit(size)
+      //   .skip(size * page);
+
+      console.log("size", size, "currentPage", currentPage);
+
+      product = await Inventory.aggregate([
+        {
+          $lookup: {
+            from: "products",
+            localField: "article_code",
+            foreignField: "article_code",
+            as: "product",
+          },
+        },
+        {
+          $unwind: '$product',
+        },
+        {
+          $skip: size * currentPage
+        },
+        {
+          $limit: size
+        },
+      ])
 
       res.status(200).json(product);
       console.log("done:", query);

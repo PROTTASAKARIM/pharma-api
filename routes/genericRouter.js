@@ -131,7 +131,7 @@ genericRouter.get(
         name: 1,
         code: 1,
       })
-      .limit(10);
+      .limit(20);
 
     res.send(search);
   })
