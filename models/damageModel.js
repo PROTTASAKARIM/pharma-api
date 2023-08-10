@@ -12,6 +12,7 @@ const damageSchema = mongoose.Schema(
           id: { type: mongoose.Types.ObjectId, ref: "Product", require: true },
           name: { type: String, require: true },
           tp: { type: String, require: true },
+          mrp: { type: String, require: true },
           reason: { type: String },
         }),
       },
