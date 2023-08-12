@@ -30,7 +30,14 @@ inventoryRouter.get(
     console.log(inventories);
   })
 );
-
+// count
+inventoryRouter.get(
+  "/count",
+  expressAsyncHandler(async (req, res) => {
+    const total = await Inventory.countDocuments({});
+    res.status(200).json(total);
+  })
+);
 // GET ALL inventories for export
 inventoryRouter.get(
   "/export",
