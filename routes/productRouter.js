@@ -1741,13 +1741,8 @@ router.get(
         console.log(query);
 
         product = await Product.aggregate([
-          // {
-          //   $match: {
-          //     article_code: id
-          //   }
-          // },
           {
-            $match: query,
+            $match: query
           },
           {
             $lookup: {
@@ -1759,6 +1754,49 @@ router.get(
           },
           {
             $unwind: '$products'
+          },
+          {
+            $lookup: {
+              from: "grns",
+              let: { article_code: "$products.article_code" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        // { $eq: ["$status", "Complete"] },
+                        //ji
+                        // {
+                        //   $gte: ["$createdAt", start]
+                        // },
+                        {
+                          $lt: ["$createdAt", start]
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  $addFields: {
+                    products: {
+                      $filter: {
+                        input: "$products",
+                        as: "product",
+                        cond: {
+                          $eq: ["$$product.article_code", "$$article_code"]
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  $match: {
+                    "products": { $gt: [] }
+                  }
+                }
+              ],
+              as: "grnsPrevious"
+            }
           },
           {
             $lookup: {
@@ -1805,32 +1843,68 @@ router.get(
           },
 
           //? grn qty sum 
-          // {
-          //   $addFields: {
-          //     grnQty: {
-          //       $reduce: {
-          //         input: "$grns",
-          //         initialValue: 0,
-          //         in: {
-          //           $sum: [
-          //             "$$value",
-          //             {
-          //               $sum: {
-          //                 $map: {
-          //                   input: "$$this.products",
-          //                   as: "product",
-          //                   in: { $toInt: "$$product.qty" }
-          //                 }
-          //               }
-          //             }
-          //           ]
-          //         }
-          //       }
-          //     }
-          //   }
-          // },
           //? grn Qty sum
           //?grn sum 
+          {
+            $addFields: {
+              grnPQty: {
+                $reduce: {
+                  input: "$grnsPrevious",
+                  initialValue: 0,
+                  in: {
+                    $sum: [
+                      "$$value",
+                      {
+                        $sum: {
+                          $map: {
+                            input: "$$this.products",
+                            as: "product",
+                            in: { $toInt: "$$product.qty" }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              grnPTPArray: {
+                $reduce: {
+                  input: "$grnsPrevious",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.tp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              grnPMRPArray: {
+                $reduce: {
+                  input: "$grnsPrevious",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.mrp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
           {
             $addFields: {
               grnQty: {
@@ -1890,6 +1964,29 @@ router.get(
                 }
               }
             }
+          },
+          {
+            $addFields: {
+              grnPTPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$grnPTPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+              grnPMRPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$grnPMRPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+            }
+
           },
           {
             $addFields: {
@@ -2007,975 +2104,6 @@ router.get(
               as: "rtvs"
             }
           },
-
-          {
-            $addFields: {
-              rtvQty: {
-                $reduce: {
-                  input: "$rtvs",
-                  initialValue: 0,
-                  in: {
-                    $sum: [
-                      "$$value",
-                      {
-                        $sum: {
-                          $map: {
-                            input: "$$this.products",
-                            as: "product",
-                            in: { $toInt: "$$product.qty" }
-                          }
-                        }
-                      }
-                    ]
-                  }
-                }
-              },
-              rtvTPArray: {
-                $reduce: {
-                  input: "$rtvs",
-                  initialValue: [],
-                  in: {
-                    $concatArrays: [
-                      "$$value",
-                      {
-                        $map: {
-                          input: "$$this.products",
-                          as: "product",
-                          in: { $toDouble: "$$product.tp" }
-                        }
-                      }
-                    ]
-                  }
-                }
-              },
-              rtvMRPArray: {
-                $reduce: {
-                  input: "$rtvs",
-                  initialValue: [],
-                  in: {
-                    $concatArrays: [
-                      "$$value",
-                      {
-                        $map: {
-                          input: "$$this.products",
-                          as: "product",
-                          in: { $toDouble: "$$product.mrp" }
-                        }
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          },
-          {
-            $addFields: {
-              rtvTPAvg: {
-                $avg: {
-                  $filter: {
-                    input: "$rtvTPArray",
-                    as: "value",
-                    cond: { $ne: ["$$value", null] }
-                  }
-                }
-              },
-              rtvMRPAvg: {
-                $avg: {
-                  $filter: {
-                    input: "$rtvMRPArray",
-                    as: "value",
-                    cond: { $ne: ["$$value", null] }
-                  }
-                }
-              },
-            }
-
-          },
-          {
-            $addFields: {
-              rtvDetails: {
-                $map: {
-                  input: "$rtvs",
-                  as: "rtv",
-                  in: {
-                    rtvNo: "$$rtv.rtvNo",
-                    qty: {
-                      $sum: {
-                        $map: {
-                          input: "$$rtv.products",
-                          as: "product",
-                          in: { $toInt: "$$product.qty" }
-                        }
-                      }
-                    },
-                    tp: {
-                      $toDouble: {
-                        $arrayElemAt: [
-                          "$$rtv.products.tp",
-                          {
-                            $indexOfArray: [
-                              "$$rtv.products.article_code",
-                              "$products.article_code"
-                            ]
-                          }
-                        ]
-                      }
-                    },
-                    mrp: {
-                      $toDouble: {
-                        $arrayElemAt: [
-                          "$$rtv.products.mrp",
-                          {
-                            $indexOfArray: [
-                              "$$rtv.products.article_code",
-                              "$products.article_code"
-                            ]
-                          }
-                        ]
-                      }
-                    },
-                    createdAt: "$$rtv.createdAt"
-                  }
-                }
-              }
-            }
-          },
-          //?rtv end 
-          //?damage start 
-          {
-            $lookup: {
-              from: "damages",
-              let: { article_code: "$products.article_code" },
-              pipeline: [
-                {
-                  $match: {
-                    $expr: {
-                      $and: [
-                        // { $eq: ["$status", "Complete"] },
-                        {
-                          $gte: ["$createdAt", start]
-                        },
-                        {
-                          $lt: ["$createdAt", end]
-                        }
-                      ]
-                    }
-                  }
-                },
-                {
-                  $addFields: {
-                    products: {
-                      $filter: {
-                        input: "$products",
-                        as: "product",
-                        cond: {
-                          $eq: ["$$product.article_code", "$$article_code"]
-                        }
-                      }
-                    }
-                  }
-                },
-                {
-                  $match: {
-                    "products": { $gt: [] }
-                  }
-                }
-              ],
-              as: "damages"
-            }
-          },
-
-          {
-            $addFields: {
-              damageQty: {
-                $reduce: {
-                  input: "$damages",
-                  initialValue: 0,
-                  in: {
-                    $sum: [
-                      "$$value",
-                      {
-                        $sum: {
-                          $map: {
-                            input: "$$this.products",
-                            as: "product",
-                            in: { $toInt: "$$product.qty" }
-                          }
-                        }
-                      }
-                    ]
-                  }
-                }
-              },
-              damageTPArray: {
-                $reduce: {
-                  input: "$damages",
-                  initialValue: [],
-                  in: {
-                    $concatArrays: [
-                      "$$value",
-                      {
-                        $map: {
-                          input: "$$this.products",
-                          as: "product",
-                          in: { $toDouble: "$$product.tp" }
-                        }
-                      }
-                    ]
-                  }
-                }
-              },
-              damageMRPArray: {
-                $reduce: {
-                  input: "$damages",
-                  initialValue: [],
-                  in: {
-                    $concatArrays: [
-                      "$$value",
-                      {
-                        $map: {
-                          input: "$$this.products",
-                          as: "product",
-                          in: { $toDouble: "$$product.mrp" }
-                        }
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          },
-          {
-            $addFields: {
-              damageTPAvg: {
-                $avg: {
-                  $filter: {
-                    input: "$damageTPArray",
-                    as: "value",
-                    cond: { $ne: ["$$value", null] }
-                  }
-                }
-              },
-              damageMRPAvg: {
-                $avg: {
-                  $filter: {
-                    input: "$damageMRPArray",
-                    as: "value",
-                    cond: { $ne: ["$$value", null] }
-                  }
-                }
-              },
-            }
-
-          },
-          {
-            $addFields: {
-              damageDetails: {
-                $map: {
-                  input: "$damages",
-                  as: "damage",
-                  in: {
-                    damageNo: "$$damage.damageNo",
-                    qty: {
-                      $sum: {
-                        $map: {
-                          input: "$$damage.products",
-                          as: "product",
-                          in: { $toInt: "$$product.qty" }
-                        }
-                      }
-                    },
-                    tp: {
-                      $toDouble: {
-                        $arrayElemAt: [
-                          "$$damage.products.tp",
-                          {
-                            $indexOfArray: [
-                              "$$damage.products.article_code",
-                              "$products.article_code"
-                            ]
-                          }
-                        ]
-                      }
-                    },
-                    mrp: {
-                      $toDouble: {
-                        $arrayElemAt: [
-                          "$$damage.products.mrp",
-                          {
-                            $indexOfArray: [
-                              "$$damage.products.article_code",
-                              "$products.article_code"
-                            ]
-                          }
-                        ]
-                      }
-                    },
-                    createdAt: "$$damage.createdAt"
-                  }
-                }
-              }
-            }
-          },
-          //?damage end
-          //?sale start 
-          {
-            $lookup: {
-              from: "sales",
-              let: { article_code: "$products.article_code" },
-              pipeline: [
-                {
-                  $match: {
-                    $expr: {
-                      $and: [
-                        // { $eq: ["$status", "Complete"] },
-                        {
-                          $gte: ["$createdAt", start]
-                        },
-                        {
-                          $lt: ["$createdAt", end]
-                        }
-                      ]
-                    }
-                  }
-                },
-                {
-                  $addFields: {
-                    products: {
-                      $filter: {
-                        input: "$products",
-                        as: "product",
-                        cond: {
-                          $eq: ["$$product.article_code", "$$article_code"]
-                        }
-                      }
-                    }
-                  }
-                },
-                {
-                  $match: {
-                    "products": { $gt: [] }
-                  }
-                }
-              ],
-              as: "sales"
-            }
-          },
-
-          {
-            $addFields: {
-              saleQty: {
-                $reduce: {
-                  input: "$sales",
-                  initialValue: 0,
-                  in: {
-                    $sum: [
-                      "$$value",
-                      {
-                        $sum: {
-                          $map: {
-                            input: "$$this.products",
-                            as: "product",
-                            in: { $toInt: "$$product.qty" }
-                          }
-                        }
-                      }
-                    ]
-                  }
-                }
-              },
-              saleTPArray: {
-                $reduce: {
-                  input: "$sales",
-                  initialValue: [],
-                  in: {
-                    $concatArrays: [
-                      "$$value",
-                      {
-                        $map: {
-                          input: "$$this.products",
-                          as: "product",
-                          in: { $toDouble: "$$product.tp" }
-                        }
-                      }
-                    ]
-                  }
-                }
-              },
-              saleMRPArray: {
-                $reduce: {
-                  input: "$sales",
-                  initialValue: [],
-                  in: {
-                    $concatArrays: [
-                      "$$value",
-                      {
-                        $map: {
-                          input: "$$this.products",
-                          as: "product",
-                          in: { $toDouble: "$$product.mrp" }
-                        }
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          },
-          {
-            $addFields: {
-              saleTPAvg: {
-                $avg: {
-                  $filter: {
-                    input: "$saleTPArray",
-                    as: "value",
-                    cond: { $ne: ["$$value", null] }
-                  }
-                }
-              },
-              saleMRPAvg: {
-                $avg: {
-                  $filter: {
-                    input: "$saleMRPArray",
-                    as: "value",
-                    cond: { $ne: ["$$value", null] }
-                  }
-                }
-              },
-            }
-
-          },
-          {
-            $addFields: {
-              saleDetails: {
-                $map: {
-                  input: "$sales",
-                  as: "sale",
-                  in: {
-                    invoiceId: "$$sale.invoiceId",
-                    qty: {
-                      $sum: {
-                        $map: {
-                          input: "$$sale.products",
-                          as: "product",
-                          in: { $toInt: "$$product.qty" }
-                        }
-                      }
-                    },
-                    tp: {
-                      $toDouble: {
-                        $arrayElemAt: [
-                          "$$sale.products.tp",
-                          {
-                            $indexOfArray: [
-                              "$$sale.products.article_code",
-                              "$products.article_code"
-                            ]
-                          }
-                        ]
-                      }
-                    },
-                    mrp: {
-                      $toDouble: {
-                        $arrayElemAt: [
-                          "$$sale.products.mrp",
-                          {
-                            $indexOfArray: [
-                              "$$sale.products.article_code",
-                              "$products.article_code"
-                            ]
-                          }
-                        ]
-                      }
-                    },
-                    createdAt: "$$sale.createdAt",
-                    // discount: "$$sale.discount"
-                  }
-                }
-              }
-            }
-          },
-          //?sale end
-          //?tpn start
-          {
-            $lookup: {
-              from: "tpns",
-              let: { article_code: "$products.article_code" },
-              pipeline: [
-                {
-                  $match: {
-                    $expr: {
-                      $and: [
-                        // { $eq: ["$status", "Complete"] },
-                        {
-                          $gte: ["$createdAt", start]
-                        },
-                        {
-                          $lt: ["$createdAt", end]
-                        }
-                      ]
-                    }
-                  }
-                },
-                {
-                  $addFields: {
-                    products: {
-                      $filter: {
-                        input: "$products",
-                        as: "product",
-                        cond: {
-                          $eq: ["$$product.article_code", "$$article_code"]
-                        }
-                      }
-                    }
-                  }
-                },
-                {
-                  $match: {
-                    "products": { $gt: [] }
-                  }
-                }
-              ],
-              as: "tpns"
-            }
-          },
-
-          {
-            $addFields: {
-              tpnQty: {
-                $reduce: {
-                  input: "$tpns",
-                  initialValue: 0,
-                  in: {
-                    $sum: [
-                      "$$value",
-                      {
-                        $sum: {
-                          $map: {
-                            input: "$$this.products",
-                            as: "product",
-                            in: { $toInt: "$$product.qty" }
-                          }
-                        }
-                      }
-                    ]
-                  }
-                }
-              },
-              tpnTPArray: {
-                $reduce: {
-                  input: "$tpns",
-                  initialValue: [],
-                  in: {
-                    $concatArrays: [
-                      "$$value",
-                      {
-                        $map: {
-                          input: "$$this.products",
-                          as: "product",
-                          in: { $toDouble: "$$product.tp" }
-                        }
-                      }
-                    ]
-                  }
-                }
-              },
-              tpnMRPArray: {
-                $reduce: {
-                  input: "$tpns",
-                  initialValue: [],
-                  in: {
-                    $concatArrays: [
-                      "$$value",
-                      {
-                        $map: {
-                          input: "$$this.products",
-                          as: "product",
-                          in: { $toDouble: "$$product.mrp" }
-                        }
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          },
-          {
-            $addFields: {
-              tpnTPAvg: {
-                $avg: {
-                  $filter: {
-                    input: "$tpnTPArray",
-                    as: "value",
-                    cond: { $ne: ["$$value", null] }
-                  }
-                }
-              },
-              tpnMRPAvg: {
-                $avg: {
-                  $filter: {
-                    input: "$tpnMRPArray",
-                    as: "value",
-                    cond: { $ne: ["$$value", null] }
-                  }
-                }
-              },
-            }
-
-          },
-          {
-            $addFields: {
-              tpnDetails: {
-                $map: {
-                  input: "$tpns",
-                  as: "tpn",
-                  in: {
-                    invoiceId: "$$tpn.invoiceId",
-                    qty: {
-                      $sum: {
-                        $map: {
-                          input: "$$tpn.products",
-                          as: "product",
-                          in: { $toInt: "$$product.qty" }
-                        }
-                      }
-                    },
-                    tp: {
-                      $toDouble: {
-                        $arrayElemAt: [
-                          "$$tpn.products.tp",
-                          {
-                            $indexOfArray: [
-                              "$$tpn.products.article_code",
-                              "$products.article_code"
-                            ]
-                          }
-                        ]
-                      }
-                    },
-                    mrp: {
-                      $toDouble: {
-                        $arrayElemAt: [
-                          "$$tpn.products.mrp",
-                          {
-                            $indexOfArray: [
-                              "$$tpn.products.article_code",
-                              "$products.article_code"
-                            ]
-                          }
-                        ]
-                      }
-                    },
-                    createdAt: "$$tpn.createdAt"
-                  }
-                }
-              }
-            }
-          },
-          {
-            $lookup: {
-              from: "generics",
-              localField: "generic", // Convert to ObjectId
-              foreignField: "_id",
-              as: "generic",
-            },
-          },
-          {
-            $unwind: "$generic"
-          },
-          {
-            $lookup: {
-              from: "groups",
-              localField: "group", // Convert to ObjectId
-              foreignField: "_id",
-              as: "group",
-            },
-          },
-          {
-            $unwind: "$group"
-          },
-          {
-            $lookup: {
-              from: "brands",
-              localField: "brand", // Convert to ObjectId
-              foreignField: "_id",
-              as: "brand",
-            },
-          },
-          {
-            $unwind: "$brand"
-          },
-          // {
-          //   $skip: skip
-          // },
-          {
-            $limit: 100
-          },
-
-          {
-            $project: {
-              _id: 1,
-              name: 1,
-              article_code: 1,
-              group: 1,
-              generic: 1,
-              brand: 1,
-              unit: 1,
-              tp: 1,
-              mrp: 1,
-
-              grnQty: 1,
-              grnTPAvg: 1,
-              grnMRPAvg: 1,
-              grnDetails: 1,
-
-              rtvQty: 1,
-              rtvTPAvg: 1,
-              rtvMRPAvg: 1,
-              rtvDetails: 1,
-
-              saleQty: 1,
-              saleTPAvg: 1,
-              saleMRPAvg: 1,
-              saleDetails: 1,
-
-              tpnQty: 1,
-              tpnTPAvg: 1,
-              tpnMRPAvg: 1,
-              tpnDetails: 1,
-
-              damageQty: 1,
-              damageTPAvg: 1,
-              damageMRPAvg: 1,
-              damageDetails: 1,
-
-              // ... (repeat for damage, sale, tpn)
-            },
-          },
-
-
-          // {
-          //   $limit: 10
-          // }
-        ]);
-      } else {
-        product = await Product.aggregate([
-          {
-            $lookup: {
-              from: "inventories",
-              localField: "article_code",
-              foreignField: "article_code",
-              as: "products"
-            }
-          },
-          {
-            $unwind: '$products'
-          },
-          {
-            $lookup: {
-              from: "grns",
-              let: { article_code: "$products.article_code" },
-              pipeline: [
-                {
-                  $match: {
-                    $expr: {
-                      $and: [
-                        // { $eq: ["$status", "Complete"] },
-                        //ji
-                        {
-                          $gte: ["$createdAt", start]
-                        },
-                        {
-                          $lt: ["$createdAt", end]
-                        }
-                      ]
-                    }
-                  }
-                },
-                {
-                  $addFields: {
-                    products: {
-                      $filter: {
-                        input: "$products",
-                        as: "product",
-                        cond: {
-                          $eq: ["$$product.article_code", "$$article_code"]
-                        }
-                      }
-                    }
-                  }
-                },
-                {
-                  $match: {
-                    "products": { $gt: [] }
-                  }
-                }
-              ],
-              as: "grns"
-            }
-          },
-
-          //? grn qty sum 
-          // {
-          //   $addFields: {
-          //     grnQty: {
-          //       $reduce: {
-          //         input: "$grns",
-          //         initialValue: 0,
-          //         in: {
-          //           $sum: [
-          //             "$$value",
-          //             {
-          //               $sum: {
-          //                 $map: {
-          //                   input: "$$this.products",
-          //                   as: "product",
-          //                   in: { $toInt: "$$product.qty" }
-          //                 }
-          //               }
-          //             }
-          //           ]
-          //         }
-          //       }
-          //     }
-          //   }
-          // },
-          //? grn Qty sum
-          //?grn sum 
-          {
-            $addFields: {
-              grnQty: {
-                $reduce: {
-                  input: "$grns",
-                  initialValue: 0,
-                  in: {
-                    $sum: [
-                      "$$value",
-                      {
-                        $sum: {
-                          $map: {
-                            input: "$$this.products",
-                            as: "product",
-                            in: { $toInt: "$$product.qty" }
-                          }
-                        }
-                      }
-                    ]
-                  }
-                }
-              },
-              grnTPArray: {
-                $reduce: {
-                  input: "$grns",
-                  initialValue: [],
-                  in: {
-                    $concatArrays: [
-                      "$$value",
-                      {
-                        $map: {
-                          input: "$$this.products",
-                          as: "product",
-                          in: { $toDouble: "$$product.tp" }
-                        }
-                      }
-                    ]
-                  }
-                }
-              },
-              grnMRPArray: {
-                $reduce: {
-                  input: "$grns",
-                  initialValue: [],
-                  in: {
-                    $concatArrays: [
-                      "$$value",
-                      {
-                        $map: {
-                          input: "$$this.products",
-                          as: "product",
-                          in: { $toDouble: "$$product.mrp" }
-                        }
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          },
-          {
-            $addFields: {
-              grnTPAvg: {
-                $avg: {
-                  $filter: {
-                    input: "$grnTPArray",
-                    as: "value",
-                    cond: { $ne: ["$$value", null] }
-                  }
-                }
-              },
-              grnMRPAvg: {
-                $avg: {
-                  $filter: {
-                    input: "$grnMRPArray",
-                    as: "value",
-                    cond: { $ne: ["$$value", null] }
-                  }
-                }
-              },
-            }
-
-          },
-          {
-            $addFields: {
-              grnDetails: {
-                $map: {
-                  input: "$grns",
-                  as: "grn",
-                  in: {
-                    grnNo: "$$grn.grnNo",
-                    qty: {
-                      $sum: {
-                        $map: {
-                          input: "$$grn.products",
-                          as: "product",
-                          in: { $toInt: "$$product.qty" }
-                        }
-                      }
-                    },
-                    tp: {
-                      $toDouble: {
-                        $arrayElemAt: [
-                          "$$grn.products.tp",
-                          {
-                            $indexOfArray: [
-                              "$$grn.products.article_code",
-                              "$products.article_code"
-                            ]
-                          }
-                        ]
-                      }
-                    },
-                    mrp: {
-                      $toDouble: {
-                        $arrayElemAt: [
-                          "$$grn.products.mrp",
-                          {
-                            $indexOfArray: [
-                              "$$grn.products.article_code",
-                              "$products.article_code"
-                            ]
-                          }
-                        ]
-                      }
-                    },
-                    createdAt: "$$grn.createdAt"
-                  }
-                }
-              }
-            }
-          },
-          //?grn end
-          //? rtv start
           {
             $lookup: {
               from: "rtvs",
@@ -2986,11 +2114,11 @@ router.get(
                     $expr: {
                       $and: [
                         // { $eq: ["$status", "Complete"] },
+                        // {
+                        //   $gte: ["$createdAt", start]
+                        // },
                         {
-                          $gte: ["$createdAt", start]
-                        },
-                        {
-                          $lt: ["$createdAt", end]
+                          $lt: ["$createdAt", start]
                         }
                       ]
                     }
@@ -3015,10 +2143,70 @@ router.get(
                   }
                 }
               ],
-              as: "rtvs"
+              as: "rtvsPrevious"
             }
           },
 
+          {
+            $addFields: {
+              rtvPQty: {
+                $reduce: {
+                  input: "$rtvsPrevious",
+                  initialValue: 0,
+                  in: {
+                    $sum: [
+                      "$$value",
+                      {
+                        $sum: {
+                          $map: {
+                            input: "$$this.products",
+                            as: "product",
+                            in: { $toInt: "$$product.qty" }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              rtvPTPArray: {
+                $reduce: {
+                  input: "$rtvsPrevious",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.tp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              rtvPMRPArray: {
+                $reduce: {
+                  input: "$rtvsPrevious",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.mrp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
           {
             $addFields: {
               rtvQty: {
@@ -3079,6 +2267,31 @@ router.get(
               }
             }
           },
+
+
+          {
+            $addFields: {
+              rtvPTPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$rtvPTPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+              rtvPMRPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$rtvPMRPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+            }
+
+          },
           {
             $addFields: {
               rtvTPAvg: {
@@ -3102,6 +2315,7 @@ router.get(
             }
 
           },
+
           {
             $addFields: {
               rtvDetails: {
@@ -3163,6 +2377,48 @@ router.get(
                     $expr: {
                       $and: [
                         // { $eq: ["$status", "Complete"] },
+                        // {
+                        //   $gte: ["$createdAt", start]
+                        // },
+                        {
+                          $lt: ["$createdAt", start]
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  $addFields: {
+                    products: {
+                      $filter: {
+                        input: "$products",
+                        as: "product",
+                        cond: {
+                          $eq: ["$$product.article_code", "$$article_code"]
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  $match: {
+                    "products": { $gt: [] }
+                  }
+                }
+              ],
+              as: "damagesPrevious"
+            }
+          },
+          {
+            $lookup: {
+              from: "damages",
+              let: { article_code: "$products.article_code" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        // { $eq: ["$status", "Complete"] },
                         {
                           $gte: ["$createdAt", start]
                         },
@@ -3196,6 +2452,66 @@ router.get(
             }
           },
 
+          {
+            $addFields: {
+              damagePQty: {
+                $reduce: {
+                  input: "$damagesPrevious",
+                  initialValue: 0,
+                  in: {
+                    $sum: [
+                      "$$value",
+                      {
+                        $sum: {
+                          $map: {
+                            input: "$$this.products",
+                            as: "product",
+                            in: { $toInt: "$$product.qty" }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              damagePTPArray: {
+                $reduce: {
+                  input: "$damagesPrevious",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.tp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              damagePMRPArray: {
+                $reduce: {
+                  input: "$damagesPrevious",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.mrp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
           {
             $addFields: {
               damageQty: {
@@ -3255,6 +2571,30 @@ router.get(
                 }
               }
             }
+          },
+
+          {
+            $addFields: {
+              damagePTPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$damagePTPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+              damagePMRPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$damagePMRPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+            }
+
           },
           {
             $addFields: {
@@ -3340,6 +2680,48 @@ router.get(
                     $expr: {
                       $and: [
                         // { $eq: ["$status", "Complete"] },
+                        // {
+                        // $gte: ["$createdAt", start]
+                        // },
+                        {
+                          $lt: ["$createdAt", start]
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  $addFields: {
+                    products: {
+                      $filter: {
+                        input: "$products",
+                        as: "product",
+                        cond: {
+                          $eq: ["$$product.article_code", "$$article_code"]
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  $match: {
+                    "products": { $gt: [] }
+                  }
+                }
+              ],
+              as: "salesPrevious"
+            }
+          },
+          {
+            $lookup: {
+              from: "sales",
+              let: { article_code: "$products.article_code" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        // { $eq: ["$status", "Complete"] },
                         {
                           $gte: ["$createdAt", start]
                         },
@@ -3373,6 +2755,66 @@ router.get(
             }
           },
 
+          {
+            $addFields: {
+              salePQty: {
+                $reduce: {
+                  input: "$salesPrevious",
+                  initialValue: 0,
+                  in: {
+                    $sum: [
+                      "$$value",
+                      {
+                        $sum: {
+                          $map: {
+                            input: "$$this.products",
+                            as: "product",
+                            in: { $toInt: "$$product.qty" }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              salePTPArray: {
+                $reduce: {
+                  input: "$salesPrevious",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.tp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              salePMRPArray: {
+                $reduce: {
+                  input: "$salesPrevious",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.mrp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
           {
             $addFields: {
               saleQty: {
@@ -3432,6 +2874,30 @@ router.get(
                 }
               }
             }
+          },
+
+          {
+            $addFields: {
+              salePTPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$salePTPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+              salePMRPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$salePMRPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+            }
+
           },
           {
             $addFields: {
@@ -3518,6 +2984,48 @@ router.get(
                     $expr: {
                       $and: [
                         // { $eq: ["$status", "Complete"] },
+                        // {
+                        //   $gte: ["$createdAt", start]
+                        // },
+                        {
+                          $lt: ["$createdAt", start]
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  $addFields: {
+                    products: {
+                      $filter: {
+                        input: "$products",
+                        as: "product",
+                        cond: {
+                          $eq: ["$$product.article_code", "$$article_code"]
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  $match: {
+                    "products": { $gt: [] }
+                  }
+                }
+              ],
+              as: "tpnsPrevious"
+            }
+          },
+          {
+            $lookup: {
+              from: "tpns",
+              let: { article_code: "$products.article_code" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        // { $eq: ["$status", "Complete"] },
                         {
                           $gte: ["$createdAt", start]
                         },
@@ -3551,6 +3059,66 @@ router.get(
             }
           },
 
+          {
+            $addFields: {
+              tpnPQty: {
+                $reduce: {
+                  input: "$tpnsPrevious",
+                  initialValue: 0,
+                  in: {
+                    $sum: [
+                      "$$value",
+                      {
+                        $sum: {
+                          $map: {
+                            input: "$$this.products",
+                            as: "product",
+                            in: { $toInt: "$$product.qty" }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              tpnPTPArray: {
+                $reduce: {
+                  input: "$tpnsPrevious",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.tp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              tpnPMRPArray: {
+                $reduce: {
+                  input: "$tpnsPrevious",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.mrp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
           {
             $addFields: {
               tpnQty: {
@@ -3610,6 +3178,30 @@ router.get(
                 }
               }
             }
+          },
+
+          {
+            $addFields: {
+              tpnPTPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$tpnTPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+              tpnPMRPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$tpnMRPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+            }
+
           },
           {
             $addFields: {
@@ -3683,6 +3275,7 @@ router.get(
               }
             }
           },
+          //?tpn end
           {
             $lookup: {
               from: "generics",
@@ -3735,6 +3328,10 @@ router.get(
               tp: 1,
               mrp: 1,
 
+              grnPQty: 1,
+              grnPTPAvg: 1,
+              grnPMRPAvg: 1,
+
               grnQty: 1,
               grnTPAvg: 1,
               grnMRPAvg: 1,
@@ -3745,20 +3342,1680 @@ router.get(
               rtvMRPAvg: 1,
               rtvDetails: 1,
 
+              rtvPQty: 1,
+              rtvPTPAvg: 1,
+              rtvPMRPAvg: 1,
+
               saleQty: 1,
               saleTPAvg: 1,
               saleMRPAvg: 1,
               saleDetails: 1,
+
+              salePQty: 1,
+              salePTPAvg: 1,
+              salePMRPAvg: 1,
+
 
               tpnQty: 1,
               tpnTPAvg: 1,
               tpnMRPAvg: 1,
               tpnDetails: 1,
 
+              tpnPQty: 1,
+              tpnPTPAvg: 1,
+              tpnPMRPAvg: 1,
+
               damageQty: 1,
               damageTPAvg: 1,
               damageMRPAvg: 1,
               damageDetails: 1,
+
+              damagePQty: 1,
+              damagePTPAvg: 1,
+              damagePMRPAvg: 1,
+
+
+              // ... (repeat for damage, sale, tpn)
+            },
+          },
+
+
+          // {
+          //   $limit: 10
+          // }
+        ]);
+      } else {
+        product = await Product.aggregate([
+          {
+            $lookup: {
+              from: "inventories",
+              localField: "article_code",
+              foreignField: "article_code",
+              as: "products"
+            }
+          },
+          {
+            $unwind: '$products'
+          },
+          {
+            $lookup: {
+              from: "grns",
+              let: { article_code: "$products.article_code" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        // { $eq: ["$status", "Complete"] },
+                        //ji
+                        // {
+                        //   $gte: ["$createdAt", start]
+                        // },
+                        {
+                          $lt: ["$createdAt", start]
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  $addFields: {
+                    products: {
+                      $filter: {
+                        input: "$products",
+                        as: "product",
+                        cond: {
+                          $eq: ["$$product.article_code", "$$article_code"]
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  $match: {
+                    "products": { $gt: [] }
+                  }
+                }
+              ],
+              as: "grnsPrevious"
+            }
+          },
+          {
+            $lookup: {
+              from: "grns",
+              let: { article_code: "$products.article_code" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        // { $eq: ["$status", "Complete"] },
+                        //ji
+                        {
+                          $gte: ["$createdAt", start]
+                        },
+                        {
+                          $lt: ["$createdAt", end]
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  $addFields: {
+                    products: {
+                      $filter: {
+                        input: "$products",
+                        as: "product",
+                        cond: {
+                          $eq: ["$$product.article_code", "$$article_code"]
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  $match: {
+                    "products": { $gt: [] }
+                  }
+                }
+              ],
+              as: "grns"
+            }
+          },
+
+          //? grn qty sum 
+          //? grn Qty sum
+          //?grn sum 
+          {
+            $addFields: {
+              grnPQty: {
+                $reduce: {
+                  input: "$grnsPrevious",
+                  initialValue: 0,
+                  in: {
+                    $sum: [
+                      "$$value",
+                      {
+                        $sum: {
+                          $map: {
+                            input: "$$this.products",
+                            as: "product",
+                            in: { $toInt: "$$product.qty" }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              grnPTPArray: {
+                $reduce: {
+                  input: "$grnsPrevious",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.tp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              grnPMRPArray: {
+                $reduce: {
+                  input: "$grnsPrevious",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.mrp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            $addFields: {
+              grnQty: {
+                $reduce: {
+                  input: "$grns",
+                  initialValue: 0,
+                  in: {
+                    $sum: [
+                      "$$value",
+                      {
+                        $sum: {
+                          $map: {
+                            input: "$$this.products",
+                            as: "product",
+                            in: { $toInt: "$$product.qty" }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              grnTPArray: {
+                $reduce: {
+                  input: "$grns",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.tp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              grnMRPArray: {
+                $reduce: {
+                  input: "$grns",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.mrp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            $addFields: {
+              grnPTPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$grnPTPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+              grnPMRPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$grnPMRPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+            }
+
+          },
+          {
+            $addFields: {
+              grnTPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$grnTPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+              grnMRPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$grnMRPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+            }
+
+          },
+          {
+            $addFields: {
+              grnDetails: {
+                $map: {
+                  input: "$grns",
+                  as: "grn",
+                  in: {
+                    grnNo: "$$grn.grnNo",
+                    qty: {
+                      $sum: {
+                        $map: {
+                          input: "$$grn.products",
+                          as: "product",
+                          in: { $toInt: "$$product.qty" }
+                        }
+                      }
+                    },
+                    tp: {
+                      $toDouble: {
+                        $arrayElemAt: [
+                          "$$grn.products.tp",
+                          {
+                            $indexOfArray: [
+                              "$$grn.products.article_code",
+                              "$products.article_code"
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    mrp: {
+                      $toDouble: {
+                        $arrayElemAt: [
+                          "$$grn.products.mrp",
+                          {
+                            $indexOfArray: [
+                              "$$grn.products.article_code",
+                              "$products.article_code"
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    createdAt: "$$grn.createdAt"
+                  }
+                }
+              }
+            }
+          },
+          //?grn end
+          //? rtv start
+          {
+            $lookup: {
+              from: "rtvs",
+              let: { article_code: "$products.article_code" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        // { $eq: ["$status", "Complete"] },
+                        {
+                          $gte: ["$createdAt", start]
+                        },
+                        {
+                          $lt: ["$createdAt", end]
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  $addFields: {
+                    products: {
+                      $filter: {
+                        input: "$products",
+                        as: "product",
+                        cond: {
+                          $eq: ["$$product.article_code", "$$article_code"]
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  $match: {
+                    "products": { $gt: [] }
+                  }
+                }
+              ],
+              as: "rtvs"
+            }
+          },
+          {
+            $lookup: {
+              from: "rtvs",
+              let: { article_code: "$products.article_code" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        // { $eq: ["$status", "Complete"] },
+                        // {
+                        //   $gte: ["$createdAt", start]
+                        // },
+                        {
+                          $lt: ["$createdAt", start]
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  $addFields: {
+                    products: {
+                      $filter: {
+                        input: "$products",
+                        as: "product",
+                        cond: {
+                          $eq: ["$$product.article_code", "$$article_code"]
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  $match: {
+                    "products": { $gt: [] }
+                  }
+                }
+              ],
+              as: "rtvsPrevious"
+            }
+          },
+
+          {
+            $addFields: {
+              rtvPQty: {
+                $reduce: {
+                  input: "$rtvsPrevious",
+                  initialValue: 0,
+                  in: {
+                    $sum: [
+                      "$$value",
+                      {
+                        $sum: {
+                          $map: {
+                            input: "$$this.products",
+                            as: "product",
+                            in: { $toInt: "$$product.qty" }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              rtvPTPArray: {
+                $reduce: {
+                  input: "$rtvsPrevious",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.tp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              rtvPMRPArray: {
+                $reduce: {
+                  input: "$rtvsPrevious",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.mrp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            $addFields: {
+              rtvQty: {
+                $reduce: {
+                  input: "$rtvs",
+                  initialValue: 0,
+                  in: {
+                    $sum: [
+                      "$$value",
+                      {
+                        $sum: {
+                          $map: {
+                            input: "$$this.products",
+                            as: "product",
+                            in: { $toInt: "$$product.qty" }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              rtvTPArray: {
+                $reduce: {
+                  input: "$rtvs",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.tp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              rtvMRPArray: {
+                $reduce: {
+                  input: "$rtvs",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.mrp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+
+
+          {
+            $addFields: {
+              rtvPTPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$rtvPTPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+              rtvPMRPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$rtvPMRPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+            }
+
+          },
+          {
+            $addFields: {
+              rtvTPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$rtvTPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+              rtvMRPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$rtvMRPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+            }
+
+          },
+
+          {
+            $addFields: {
+              rtvDetails: {
+                $map: {
+                  input: "$rtvs",
+                  as: "rtv",
+                  in: {
+                    rtvNo: "$$rtv.rtvNo",
+                    qty: {
+                      $sum: {
+                        $map: {
+                          input: "$$rtv.products",
+                          as: "product",
+                          in: { $toInt: "$$product.qty" }
+                        }
+                      }
+                    },
+                    tp: {
+                      $toDouble: {
+                        $arrayElemAt: [
+                          "$$rtv.products.tp",
+                          {
+                            $indexOfArray: [
+                              "$$rtv.products.article_code",
+                              "$products.article_code"
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    mrp: {
+                      $toDouble: {
+                        $arrayElemAt: [
+                          "$$rtv.products.mrp",
+                          {
+                            $indexOfArray: [
+                              "$$rtv.products.article_code",
+                              "$products.article_code"
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    createdAt: "$$rtv.createdAt"
+                  }
+                }
+              }
+            }
+          },
+          //?rtv end 
+          //?damage start 
+          {
+            $lookup: {
+              from: "damages",
+              let: { article_code: "$products.article_code" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        // { $eq: ["$status", "Complete"] },
+                        // {
+                        //   $gte: ["$createdAt", start]
+                        // },
+                        {
+                          $lt: ["$createdAt", start]
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  $addFields: {
+                    products: {
+                      $filter: {
+                        input: "$products",
+                        as: "product",
+                        cond: {
+                          $eq: ["$$product.article_code", "$$article_code"]
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  $match: {
+                    "products": { $gt: [] }
+                  }
+                }
+              ],
+              as: "damagesPrevious"
+            }
+          },
+          {
+            $lookup: {
+              from: "damages",
+              let: { article_code: "$products.article_code" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        // { $eq: ["$status", "Complete"] },
+                        {
+                          $gte: ["$createdAt", start]
+                        },
+                        {
+                          $lt: ["$createdAt", end]
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  $addFields: {
+                    products: {
+                      $filter: {
+                        input: "$products",
+                        as: "product",
+                        cond: {
+                          $eq: ["$$product.article_code", "$$article_code"]
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  $match: {
+                    "products": { $gt: [] }
+                  }
+                }
+              ],
+              as: "damages"
+            }
+          },
+
+          {
+            $addFields: {
+              damagePQty: {
+                $reduce: {
+                  input: "$damagesPrevious",
+                  initialValue: 0,
+                  in: {
+                    $sum: [
+                      "$$value",
+                      {
+                        $sum: {
+                          $map: {
+                            input: "$$this.products",
+                            as: "product",
+                            in: { $toInt: "$$product.qty" }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              damagePTPArray: {
+                $reduce: {
+                  input: "$damagesPrevious",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.tp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              damagePMRPArray: {
+                $reduce: {
+                  input: "$damagesPrevious",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.mrp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            $addFields: {
+              damageQty: {
+                $reduce: {
+                  input: "$damages",
+                  initialValue: 0,
+                  in: {
+                    $sum: [
+                      "$$value",
+                      {
+                        $sum: {
+                          $map: {
+                            input: "$$this.products",
+                            as: "product",
+                            in: { $toInt: "$$product.qty" }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              damageTPArray: {
+                $reduce: {
+                  input: "$damages",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.tp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              damageMRPArray: {
+                $reduce: {
+                  input: "$damages",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.mrp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+
+          {
+            $addFields: {
+              damagePTPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$damagePTPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+              damagePMRPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$damagePMRPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+            }
+
+          },
+          {
+            $addFields: {
+              damageTPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$damageTPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+              damageMRPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$damageMRPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+            }
+
+          },
+          {
+            $addFields: {
+              damageDetails: {
+                $map: {
+                  input: "$damages",
+                  as: "damage",
+                  in: {
+                    damageNo: "$$damage.damageNo",
+                    qty: {
+                      $sum: {
+                        $map: {
+                          input: "$$damage.products",
+                          as: "product",
+                          in: { $toInt: "$$product.qty" }
+                        }
+                      }
+                    },
+                    tp: {
+                      $toDouble: {
+                        $arrayElemAt: [
+                          "$$damage.products.tp",
+                          {
+                            $indexOfArray: [
+                              "$$damage.products.article_code",
+                              "$products.article_code"
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    mrp: {
+                      $toDouble: {
+                        $arrayElemAt: [
+                          "$$damage.products.mrp",
+                          {
+                            $indexOfArray: [
+                              "$$damage.products.article_code",
+                              "$products.article_code"
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    createdAt: "$$damage.createdAt"
+                  }
+                }
+              }
+            }
+          },
+          //?damage end
+          //?sale start 
+          {
+            $lookup: {
+              from: "sales",
+              let: { article_code: "$products.article_code" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        // { $eq: ["$status", "Complete"] },
+                        // {
+                        // $gte: ["$createdAt", start]
+                        // },
+                        {
+                          $lt: ["$createdAt", start]
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  $addFields: {
+                    products: {
+                      $filter: {
+                        input: "$products",
+                        as: "product",
+                        cond: {
+                          $eq: ["$$product.article_code", "$$article_code"]
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  $match: {
+                    "products": { $gt: [] }
+                  }
+                }
+              ],
+              as: "salesPrevious"
+            }
+          },
+          {
+            $lookup: {
+              from: "sales",
+              let: { article_code: "$products.article_code" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        // { $eq: ["$status", "Complete"] },
+                        {
+                          $gte: ["$createdAt", start]
+                        },
+                        {
+                          $lt: ["$createdAt", end]
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  $addFields: {
+                    products: {
+                      $filter: {
+                        input: "$products",
+                        as: "product",
+                        cond: {
+                          $eq: ["$$product.article_code", "$$article_code"]
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  $match: {
+                    "products": { $gt: [] }
+                  }
+                }
+              ],
+              as: "sales"
+            }
+          },
+
+          {
+            $addFields: {
+              salePQty: {
+                $reduce: {
+                  input: "$salesPrevious",
+                  initialValue: 0,
+                  in: {
+                    $sum: [
+                      "$$value",
+                      {
+                        $sum: {
+                          $map: {
+                            input: "$$this.products",
+                            as: "product",
+                            in: { $toInt: "$$product.qty" }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              salePTPArray: {
+                $reduce: {
+                  input: "$salesPrevious",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.tp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              salePMRPArray: {
+                $reduce: {
+                  input: "$salesPrevious",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.mrp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            $addFields: {
+              saleQty: {
+                $reduce: {
+                  input: "$sales",
+                  initialValue: 0,
+                  in: {
+                    $sum: [
+                      "$$value",
+                      {
+                        $sum: {
+                          $map: {
+                            input: "$$this.products",
+                            as: "product",
+                            in: { $toInt: "$$product.qty" }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              saleTPArray: {
+                $reduce: {
+                  input: "$sales",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.tp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              saleMRPArray: {
+                $reduce: {
+                  input: "$sales",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.mrp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+
+          {
+            $addFields: {
+              salePTPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$salePTPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+              salePMRPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$salePMRPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+            }
+
+          },
+          {
+            $addFields: {
+              saleTPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$saleTPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+              saleMRPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$saleMRPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+            }
+
+          },
+          {
+            $addFields: {
+              saleDetails: {
+                $map: {
+                  input: "$sales",
+                  as: "sale",
+                  in: {
+                    invoiceId: "$$sale.invoiceId",
+                    qty: {
+                      $sum: {
+                        $map: {
+                          input: "$$sale.products",
+                          as: "product",
+                          in: { $toInt: "$$product.qty" }
+                        }
+                      }
+                    },
+                    tp: {
+                      $toDouble: {
+                        $arrayElemAt: [
+                          "$$sale.products.tp",
+                          {
+                            $indexOfArray: [
+                              "$$sale.products.article_code",
+                              "$products.article_code"
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    mrp: {
+                      $toDouble: {
+                        $arrayElemAt: [
+                          "$$sale.products.mrp",
+                          {
+                            $indexOfArray: [
+                              "$$sale.products.article_code",
+                              "$products.article_code"
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    createdAt: "$$sale.createdAt",
+                    // discount: "$$sale.discount"
+                  }
+                }
+              }
+            }
+          },
+          //?sale end
+          //?tpn start
+          {
+            $lookup: {
+              from: "tpns",
+              let: { article_code: "$products.article_code" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        // { $eq: ["$status", "Complete"] },
+                        // {
+                        //   $gte: ["$createdAt", start]
+                        // },
+                        {
+                          $lt: ["$createdAt", start]
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  $addFields: {
+                    products: {
+                      $filter: {
+                        input: "$products",
+                        as: "product",
+                        cond: {
+                          $eq: ["$$product.article_code", "$$article_code"]
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  $match: {
+                    "products": { $gt: [] }
+                  }
+                }
+              ],
+              as: "tpnsPrevious"
+            }
+          },
+          {
+            $lookup: {
+              from: "tpns",
+              let: { article_code: "$products.article_code" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        // { $eq: ["$status", "Complete"] },
+                        {
+                          $gte: ["$createdAt", start]
+                        },
+                        {
+                          $lt: ["$createdAt", end]
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  $addFields: {
+                    products: {
+                      $filter: {
+                        input: "$products",
+                        as: "product",
+                        cond: {
+                          $eq: ["$$product.article_code", "$$article_code"]
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  $match: {
+                    "products": { $gt: [] }
+                  }
+                }
+              ],
+              as: "tpns"
+            }
+          },
+
+          {
+            $addFields: {
+              tpnPQty: {
+                $reduce: {
+                  input: "$tpnsPrevious",
+                  initialValue: 0,
+                  in: {
+                    $sum: [
+                      "$$value",
+                      {
+                        $sum: {
+                          $map: {
+                            input: "$$this.products",
+                            as: "product",
+                            in: { $toInt: "$$product.qty" }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              tpnPTPArray: {
+                $reduce: {
+                  input: "$tpnsPrevious",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.tp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              tpnPMRPArray: {
+                $reduce: {
+                  input: "$tpnsPrevious",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.mrp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            $addFields: {
+              tpnQty: {
+                $reduce: {
+                  input: "$tpns",
+                  initialValue: 0,
+                  in: {
+                    $sum: [
+                      "$$value",
+                      {
+                        $sum: {
+                          $map: {
+                            input: "$$this.products",
+                            as: "product",
+                            in: { $toInt: "$$product.qty" }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              tpnTPArray: {
+                $reduce: {
+                  input: "$tpns",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.tp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              tpnMRPArray: {
+                $reduce: {
+                  input: "$tpns",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      {
+                        $map: {
+                          input: "$$this.products",
+                          as: "product",
+                          in: { $toDouble: "$$product.mrp" }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+
+          {
+            $addFields: {
+              tpnPTPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$tpnTPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+              tpnPMRPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$tpnMRPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+            }
+
+          },
+          {
+            $addFields: {
+              tpnTPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$tpnTPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+              tpnMRPAvg: {
+                $avg: {
+                  $filter: {
+                    input: "$tpnMRPArray",
+                    as: "value",
+                    cond: { $ne: ["$$value", null] }
+                  }
+                }
+              },
+            }
+
+          },
+          {
+            $addFields: {
+              tpnDetails: {
+                $map: {
+                  input: "$tpns",
+                  as: "tpn",
+                  in: {
+                    invoiceId: "$$tpn.invoiceId",
+                    qty: {
+                      $sum: {
+                        $map: {
+                          input: "$$tpn.products",
+                          as: "product",
+                          in: { $toInt: "$$product.qty" }
+                        }
+                      }
+                    },
+                    tp: {
+                      $toDouble: {
+                        $arrayElemAt: [
+                          "$$tpn.products.tp",
+                          {
+                            $indexOfArray: [
+                              "$$tpn.products.article_code",
+                              "$products.article_code"
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    mrp: {
+                      $toDouble: {
+                        $arrayElemAt: [
+                          "$$tpn.products.mrp",
+                          {
+                            $indexOfArray: [
+                              "$$tpn.products.article_code",
+                              "$products.article_code"
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    createdAt: "$$tpn.createdAt"
+                  }
+                }
+              }
+            }
+          },
+          //?tpn end
+          {
+            $lookup: {
+              from: "generics",
+              localField: "generic", // Convert to ObjectId
+              foreignField: "_id",
+              as: "generic",
+            },
+          },
+          {
+            $unwind: "$generic"
+          },
+          {
+            $lookup: {
+              from: "groups",
+              localField: "group", // Convert to ObjectId
+              foreignField: "_id",
+              as: "group",
+            },
+          },
+          {
+            $unwind: "$group"
+          },
+          {
+            $lookup: {
+              from: "brands",
+              localField: "brand", // Convert to ObjectId
+              foreignField: "_id",
+              as: "brand",
+            },
+          },
+          {
+            $unwind: "$brand"
+          },
+          {
+            $skip: skip
+          },
+          {
+            $limit: 100
+          },
+
+          {
+            $project: {
+              _id: 1,
+              name: 1,
+              article_code: 1,
+              group: 1,
+              generic: 1,
+              brand: 1,
+              unit: 1,
+              tp: 1,
+              mrp: 1,
+
+              grnPQty: 1,
+              grnPTPAvg: 1,
+              grnPMRPAvg: 1,
+
+              grnQty: 1,
+              grnTPAvg: 1,
+              grnMRPAvg: 1,
+              grnDetails: 1,
+
+              rtvQty: 1,
+              rtvTPAvg: 1,
+              rtvMRPAvg: 1,
+              rtvDetails: 1,
+
+              rtvPQty: 1,
+              rtvPTPAvg: 1,
+              rtvPMRPAvg: 1,
+
+              saleQty: 1,
+              saleTPAvg: 1,
+              saleMRPAvg: 1,
+              saleDetails: 1,
+
+              salePQty: 1,
+              salePTPAvg: 1,
+              salePMRPAvg: 1,
+
+
+              tpnQty: 1,
+              tpnTPAvg: 1,
+              tpnMRPAvg: 1,
+              tpnDetails: 1,
+
+              tpnPQty: 1,
+              tpnPTPAvg: 1,
+              tpnPMRPAvg: 1,
+
+              damageQty: 1,
+              damageTPAvg: 1,
+              damageMRPAvg: 1,
+              damageDetails: 1,
+
+              damagePQty: 1,
+              damagePTPAvg: 1,
+              damagePMRPAvg: 1,
+
 
               // ... (repeat for damage, sale, tpn)
             },
