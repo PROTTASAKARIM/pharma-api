@@ -15,7 +15,7 @@ const jwt = require("jsonwebtoken");
 const Inventory = require("../models/inventoryModel");
 const checklogin = require("../middlewares/checkLogin");
 const mongoose = require('mongoose');
-const { adjustInventoryOnSale } = require("../middlewares/useInventory");
+// const { adjustInventoryOnSale } = require("../middlewares/useInventory");
 
 
 const inventoryRouter = express.Router();
@@ -91,7 +91,7 @@ inventoryRouter.get(
 // Adjust Inventory
 inventoryRouter.put(
   "/adjust",
-  adjustInventoryOnSale,
+  // adjustInventoryOnSale,
   expressAsyncHandler(async (req, res) => {
     console.log("update", req.body.update)
     // const total = await Inventory.countDocuments({});

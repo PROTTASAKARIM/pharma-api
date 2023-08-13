@@ -18,7 +18,7 @@ const updateInventoryOutOnDamageIn = async (req, res, next) => {
     if (products.length > 0) {
       products.map(async (product) => {
         // console.log("single product", product);
-        const { id, article_code, qty, priceId, name } = product;
+        const { id, article_code, qty, name } = product;
         // console.log(article_code);
         let inventory = {};
         const success = await Inventory.findOne({ article_code: article_code });
@@ -40,6 +40,7 @@ const updateInventoryOutOnDamageIn = async (req, res, next) => {
             updatedAt: new Date(Date.parse(success.updatedAt)),
 
           }
+          const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
         } else {
           inventory = {
             name: name,
@@ -58,12 +59,12 @@ const updateInventoryOutOnDamageIn = async (req, res, next) => {
 
 
           };
+          const newInventory = new Inventory(inventory)
+          const update = await newInventory.save();
+          console.log("CREATE");
         }
 
-        const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
-        if (update) {
-          // console.log("update", update)
-        }
+
       });
     } else {
       return;
@@ -113,33 +114,9 @@ const updateInventoryInOnDamageOut = async (req, res, next) => {
             updatedAt: new Date(Date.parse(success.updatedAt)),
 
           }
-
-        } else {
-          inventory = {
-            name: name,
-            article_code: article_code,
-            warehouse: "645c9297ed6d5d94af257be9",
-            currentQty: Number(qty),
-            openingQty: Number(qty),
-            totalQty: Number(qty),
-            soldQty: 0,
-            damageQty: -Number(qty),
-            rtvQty: 0,
-            tpnQty: 0,
-            status: "active",
-            createdAt: new Date(Date.now()),
-            updatedAt: new Date(Date.now()),
-
-
-          };
+          const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
         }
-        // res.send(inventory)
-        // console.log("id", id)
-        // console.log("inventory final", inventory);
-        const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
-        if (update) {
-          // console.log("update", update)
-        }
+
       });
     } else {
       return;
@@ -188,6 +165,7 @@ const updateInventoryOutOnRTVIn = async (req, res, next) => {
             createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
             updatedAt: new Date(Date.parse(success.updatedAt)),
           }
+          const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
         } else {
           inventory = {
             name: name,
@@ -203,15 +181,14 @@ const updateInventoryOutOnRTVIn = async (req, res, next) => {
             status: "active",
             createdAt: new Date(Date.now()),
             updatedAt: new Date(Date.now()),
-
-
           };
+          const newInventory = new Inventory(inventory)
+          const update = await newInventory.save();
+          console.log("CREATE");
         }
         // res.send(inventory)
-        const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
-        if (update) {
-          console.log("update", update)
-        }
+
+
       });
     } else {
       return;
@@ -239,8 +216,6 @@ const updateInventoryINOnRTVOut = async (req, res, next) => {
         const article_code = product.get("article_code");
         const qty = product.get("qty")
 
-
-
         let inventory = {};
         const success = await Inventory.findOne({ article_code: article_code });
 
@@ -262,31 +237,11 @@ const updateInventoryINOnRTVOut = async (req, res, next) => {
             updatedAt: new Date(Date.parse(success.updatedAt)),
 
           }
+          const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
 
-        } else {
-          inventory = {
-            name: name,
-            article_code: article_code,
-            warehouse: "645c9297ed6d5d94af257be9",
-            currentQty: Number(qty),
-            openingQty: Number(qty),
-            totalQty: Number(qty),
-            soldQty: 0,
-            damageQty: 0,
-            rtvQty: -Number(qty),
-            tpnQty: 0,
-            status: "active",
-            createdAt: new Date(Date.now()),
-            updatedAt: new Date(Date.now()),
-
-
-          };
         }
         // res.send(inventory)
-        const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
-        if (update) {
-          // console.log("update", update)
-        }
+
       });
     } else {
       return;
@@ -337,30 +292,8 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
 
           }
           // con
+          const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
 
-        } else {
-          inventory = {
-            name: name,
-            article_code: article_code,
-            warehouse: "645c9297ed6d5d94af257be9",
-            currentQty: Number(qty),
-            openingQty: Number(qty),
-            totalQty: Number(qty),
-            soldQty: - Number(qty),
-            damageQty: 0,
-            rtvQty: 0,
-            tpnQty: 0,
-            status: "active",
-            createdAt: new Date(Date.now()),
-            updatedAt: new Date(Date.now()),
-
-
-          };
-        }
-
-        const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
-        if (update) {
-          // console.log("update", update)
         }
       });
     }
@@ -399,29 +332,7 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
 
 
           }
-        } else {
-          inventory = {
-            name: name,
-            article_code: article_code,
-            warehouse: "645c9297ed6d5d94af257be9",
-            currentQty: - Number(qty),
-            openingQty: Number(qty),
-            totalQty: Number(qty),
-            soldQty: Number(qty),
-            damageQty: 0,
-            rtvQty: 0,
-            tpnQty: 0,
-            status: "active",
-            createdAt: new Date(Date.now()),
-            updatedAt: new Date(Date.now()),
-
-          };
-        }
-        // res.send(inventory)
-        // console.log(" return inventory final", inventory);
-        const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
-        if (update) {
-          // console.log("return update", update)
+          const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
         }
       });
     }
@@ -433,78 +344,78 @@ const updateInventoryInOnSaleDel = async (req, res, next) => {
   }
 };
 // Generate Sale in -> inventory Out
-const adjustInventoryOnSale = async (req, res, next) => {
-  // TODO:: todays total
+// const adjustInventoryOnSale = async (req, res, next) => {
+//   // TODO:: todays total
 
 
-  try {
-    const products = await req.body;
-    console.log("pp", products)
-    if (products.length > 0) {
-      products.map(async (product) => {
-        // console.log("single product", product);
-        const { code: article_code, qty, priceId, name } = product;
-        console.log("article_code", article_code?.length);
-        if (article_code?.length > 0) {
-          let inventory = {};
-          const success = await Inventory.findOne({ article_code: article_code });
+//   try {
+//     const products = await req.body;
+//     console.log("pp", products)
+//     if (products.length > 0) {
+//       products.map(async (product) => {
+//         // console.log("single product", product);
+//         const { code: article_code, qty, priceId, name } = product;
+//         console.log("article_code", article_code?.length);
+//         if (article_code?.length > 0) {
+//           let inventory = {};
+//           const success = await Inventory.findOne({ article_code: article_code });
 
-          if (success) {
-            inventory = {
-              name: success.name,
-              article_code: success.article_code,
-              warehouse: "645c9297ed6d5d94af257be9",
-              currentQty: Number(success.currentQty)
-                - Number(qty),
-              openingQty: success.openingQty,
-              totalQty: Number(success.totalQty),
-              soldQty: Number(success.soldQty) + Number(qty),
-              damageQty: Number(success.damageQty),
-              rtvQty: success.rtvQty,
-              tpnQty: success?.tpnQty ? success?.tpnQty : 0,
-              status: success.status,
-              createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
-              updatedAt: new Date(Date.parse(success.updatedAt)),
-
-
-            }
-
-          } else {
-            inventory = {
-              name: name,
-              article_code: article_code,
-              warehouse: "645c9297ed6d5d94af257be9",
-              currentQty: 0 - Number(qty),
-              openingQty: Number(qty),
-              totalQty: Number(qty),
-              soldQty: Number(qty),
-              damageQty: 0,
-              rtvQty: 0,
-              tpnQty: 0,
-              status: "active",
-              createdAt: new Date(Date.now()),
-              updatedAt: new Date(Date.now()),
-
-            };
-          }
-          const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
-          if (update) {
-            req.body.update = update
-          }
-        } else {
-          console.log("no update")
-        }
-      });
-    }
-  } catch (err) {
-    console.log(err)
-  } finally {
-    next()
-  }
+//           if (success) {
+//             inventory = {
+//               name: success.name,
+//               article_code: success.article_code,
+//               warehouse: "645c9297ed6d5d94af257be9",
+//               currentQty: Number(success.currentQty)
+//                 - Number(qty),
+//               openingQty: success.openingQty,
+//               totalQty: Number(success.totalQty),
+//               soldQty: Number(success.soldQty) + Number(qty),
+//               damageQty: Number(success.damageQty),
+//               rtvQty: success.rtvQty,
+//               tpnQty: success?.tpnQty ? success?.tpnQty : 0,
+//               status: success.status,
+//               createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
+//               updatedAt: new Date(Date.parse(success.updatedAt)),
 
 
+//             }
 
-};
+//           } else {
+//             inventory = {
+//               name: name,
+//               article_code: article_code,
+//               warehouse: "645c9297ed6d5d94af257be9",
+//               currentQty: 0 - Number(qty),
+//               openingQty: Number(qty),
+//               totalQty: Number(qty),
+//               soldQty: Number(qty),
+//               damageQty: 0,
+//               rtvQty: 0,
+//               tpnQty: 0,
+//               status: "active",
+//               createdAt: new Date(Date.now()),
+//               updatedAt: new Date(Date.now()),
+
+//             };
+//           }
+//           const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
+//           if (update) {
+//             req.body.update = update
+//           }
+//         } else {
+//           console.log("no update")
+//         }
+//       });
+//     }
+//   } catch (err) {
+//     console.log(err)
+//   } finally {
+//     next()
+//   }
+
+
+
+// };
 
 const updateInventoryOutOnSaleIn = async (req, res, next) => {
   // TODO:: todays total
@@ -598,6 +509,7 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
             updatedAt: new Date(Date.parse(success.updatedAt)),
 
           }
+          const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
         } else {
           inventory = {
             name: name,
@@ -615,14 +527,15 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
             updatedAt: new Date(Date.now()),
 
           };
+          const newInventory = new Inventory(inventory)
+          const update = await newInventory.save();
+          console.log("CREATE");
         }
         // res.send(inventory)
         // res.send(inventory)
         // console.log("inventory final", inventory);
-        const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
-        if (update) {
-          // console.log("update", update)
-        }
+
+
       });
     }
   } catch (err) {
@@ -753,30 +666,12 @@ const updateInventoryOutOnGRNDel = async (req, res, next) => {
             updatedAt: new Date(Date.parse(success.updatedAt)),
 
           }
-        } else {
-          inventory = {
-            name: name,
-            article_code: article_code,
-            warehouse: "645c9297ed6d5d94af257be9",
-            currentQty: - Number(qty),
-            openingQty: Number(qty),
-            totalQty: -Number(qty),
-            soldQty: 0,
-            damageQty: 0,
-            rtvQty: 0,
-            tpnQty: 0,
-            status: "active",
-            createdAt: new Date(Date.now()),
-            updatedAt: new Date(Date.now()),
-
-          };
+          const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
         }
         // res.send(inventory)
         // console.log("inventory final", inventory);
-        const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
-        if (update) {
-          // console.log("update", update)
-        }
+
+
       });
     } else {
       return;
@@ -826,6 +721,10 @@ const updateInventoryOutOnTPNIn = async (req, res, next) => {
             updatedAt: new Date(Date.parse(success.updatedAt)),
 
           }
+          const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
+          if (update) {
+            // console.log("update", update)
+          }
         } else {
           inventory = {
             name: name,
@@ -843,13 +742,13 @@ const updateInventoryOutOnTPNIn = async (req, res, next) => {
             updatedAt: new Date(Date.now()),
 
           };
+          const newInventory = new Inventory(inventory)
+          const update = await newInventory.save();
+          console.log("CREATE");
         }
         // res.send(inventory)
         // console.log("inventory final", inventory);
-        const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
-        if (update) {
-          // console.log("update", update)
-        }
+
       });
     } else {
       return;
@@ -901,30 +800,9 @@ const updateInventoryInOnTpnDel = async (req, res, next) => {
             createdAt: success.createdAt !== undefined ? new Date(Date.parse(success.createdAt)) : new Date(Date.now()),
             updatedAt: new Date(Date.parse(success.updatedAt)),
           }
-        } else {
-          inventory = {
-            name: name,
-            article_code: article_code,
-            warehouse: "645c9297ed6d5d94af257be9",
-            currentQty: Number(qty),
-            openingQty: Number(qty),
-            totalQty: Number(qty),
-            soldQty: 0,
-            damageQty: 0,
-            rtvQty: 0,
-            tpnQty: 0 - Number(qty),
-            status: "active",
-            createdAt: new Date(Date.now()),
-            updatedAt: new Date(Date.now()),
+          const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
+        }
 
-          };
-        }
-        // res.send(inventory)
-        // console.log("inventory final", inventory);
-        const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
-        if (update) {
-          // console.log("update", update)
-        }
       });
     } else {
       return;
@@ -947,7 +825,7 @@ module.exports = {
   updateInventoryINOnRTVOut,
   updateInventoryInOnSaleDel,
   updateInventoryOutOnSaleIn,
-  adjustInventoryOnSale,
+  // adjustInventoryOnSale,
   updateInventoryInOnGRNIn,
   updateInventoryOutOnGRNDel,
   updateInventoryOutOnTPNIn,
