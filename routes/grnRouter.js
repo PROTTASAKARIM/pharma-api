@@ -390,11 +390,11 @@ grnRouter.get(
 grnRouter.post(
   "/",
   generateGrnId,
-  updateInventoryInOnGRNIn,
   handleNewPrice,
+  updateInventoryInOnGRNIn,
   expressAsyncHandler(async (req, res) => {
-    console.log("New:", req.body.products);
-    console.log("New:All", req.body);
+    // console.log("New:", req.body.products);
+    // console.log("New:All", req.body);
 
     const newGrn = new Grn(req.body);
     console.log(newGrn);
@@ -410,7 +410,7 @@ grnRouter.post(
         });
       }
     } catch (err) {
-      console.log("grn error", err)
+      // console.log("grn error", err)
       res
         .status(500)
         .json({ message: "There was a server side error", error: err });

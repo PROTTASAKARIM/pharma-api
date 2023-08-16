@@ -7,11 +7,12 @@ const handleNewPrice = async (req, res, next) => {
     // let updatedProducts = []
     let upProducts = []
     let temp = false;
-    // console.log("grn products", grnData.products)
+    console.log("grn products", grnData.products)
 
     // LOOP
     try {
         const updatedProducts = products?.map(async product => {
+            console.log("product", product)
             // CHECK PRODUCT PRICE
             if (product.newPrice === true) {
                 const update = await Product.updateOne({ _id: product.id }, { $set: { tp: product.tp, mrp: product.mrp } })

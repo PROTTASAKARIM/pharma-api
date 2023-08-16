@@ -42,6 +42,7 @@ const updateInventoryOutOnDamageIn = async (req, res, next) => {
           }
           const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
         } else {
+
           inventory = {
             name: name,
             article_code: article_code,
@@ -56,9 +57,7 @@ const updateInventoryOutOnDamageIn = async (req, res, next) => {
             status: "active",
             createdAt: new Date(Date.now()),
             updatedAt: new Date(Date.now()),
-
-
-          };
+          }
           const newInventory = new Inventory(inventory)
           const update = await newInventory.save();
           console.log("CREATE");
@@ -472,8 +471,6 @@ const updateInventoryOutOnSaleIn = async (req, res, next) => {
             status: "active",
             createdAt: new Date(Date.now()),
             updatedAt: new Date(Date.now()),
-
-
           };
           const newInventory = new Inventory(inventory);
           const update = await newInventory.save()
@@ -722,9 +719,7 @@ const updateInventoryOutOnTPNIn = async (req, res, next) => {
 
           }
           const update = await Inventory.updateOne({ article_code: article_code }, { $set: inventory })
-          if (update) {
-            // console.log("update", update)
-          }
+
         } else {
           inventory = {
             name: name,
