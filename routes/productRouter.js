@@ -1741,9 +1741,11 @@ router.get(
         console.log(query);
 
         product = await Product.aggregate([
+          //!search product by name or article code
           {
             $match: query
           },
+          //! search product in inventory so that if the product is not present in inventory it will not come
           {
             $lookup: {
               from: "inventories",
@@ -1756,6 +1758,7 @@ router.get(
             $unwind: '$products'
           },
           {
+            //? catch all the product in grn before start date
             $lookup: {
               from: "grns",
               let: { article_code: "$products.article_code" },
@@ -1776,6 +1779,7 @@ router.get(
                     }
                   }
                 },
+                //? apply filter to get only those grn that has those that product
                 {
                   $addFields: {
                     products: {
@@ -1789,6 +1793,7 @@ router.get(
                     }
                   }
                 },
+                //? if the filtered product is found then bering only those grn
                 {
                   $match: {
                     "products": { $gt: [] }
@@ -1804,6 +1809,7 @@ router.get(
               let: { article_code: "$products.article_code" },
               pipeline: [
                 {
+                  //? fetch those grns that will match between those dates
                   $match: {
                     $expr: {
                       $and: [
@@ -1820,6 +1826,7 @@ router.get(
                   }
                 },
                 {
+                  //?filter those grns that has that product
                   $addFields: {
                     products: {
                       $filter: {
@@ -1832,6 +1839,7 @@ router.get(
                     }
                   }
                 },
+                //? bring only the filtered grns that matched with product
                 {
                   $match: {
                     "products": { $gt: [] }
@@ -1841,12 +1849,9 @@ router.get(
               as: "grns"
             }
           },
-
-          //? grn qty sum 
-          //? grn Qty sum
-          //?grn sum 
           {
             $addFields: {
+              //? sum of grns product qty before start date
               grnPQty: {
                 $reduce: {
                   input: "$grnsPrevious",
@@ -1867,6 +1872,7 @@ router.get(
                   }
                 }
               },
+              //? bring all the tp value in array of grns product tp before start date
               grnPTPArray: {
                 $reduce: {
                   input: "$grnsPrevious",
@@ -1885,6 +1891,7 @@ router.get(
                   }
                 }
               },
+              //? bring all the mrp value in array of grns product tp before start date
               grnPMRPArray: {
                 $reduce: {
                   input: "$grnsPrevious",
@@ -1907,6 +1914,7 @@ router.get(
           },
           {
             $addFields: {
+              //? sum of grns product qty between start date and end date
               grnQty: {
                 $reduce: {
                   input: "$grns",
@@ -1926,8 +1934,10 @@ router.get(
                     ]
                   }
                 }
+
               },
               grnTPArray: {
+                //? bring all the tp value in array of grns product tp between start date and end date
                 $reduce: {
                   input: "$grns",
                   initialValue: [],
@@ -1946,6 +1956,7 @@ router.get(
                 }
               },
               grnMRPArray: {
+                //? bring all the mrp value in array of grns product mrp between start date and end date
                 $reduce: {
                   input: "$grns",
                   initialValue: [],
@@ -1967,6 +1978,7 @@ router.get(
           },
           {
             $addFields: {
+              //?avg of previous grns tp array
               grnPTPAvg: {
                 $avg: {
                   $filter: {
@@ -1977,6 +1989,7 @@ router.get(
                 }
               },
               grnPMRPAvg: {
+                //?avg of previous grns mrp array
                 $avg: {
                   $filter: {
                     input: "$grnPMRPArray",
@@ -1990,6 +2003,7 @@ router.get(
           },
           {
             $addFields: {
+              //?avg of  grns tp array
               grnTPAvg: {
                 $avg: {
                   $filter: {
@@ -1999,6 +2013,7 @@ router.get(
                   }
                 }
               },
+              //?avg of previous grns tp array
               grnMRPAvg: {
                 $avg: {
                   $filter: {
@@ -2012,6 +2027,7 @@ router.get(
 
           },
           {
+            //?all the grns that has one product
             $addFields: {
               grnDetails: {
                 $map: {
@@ -2063,6 +2079,7 @@ router.get(
           //?grn end
           //? rtv start
           {
+            //? catch all the product in rtv before start date
             $lookup: {
               from: "rtvs",
               let: { article_code: "$products.article_code" },
@@ -2083,6 +2100,7 @@ router.get(
                   }
                 },
                 {
+                  //? apply filter to get only those rtv that has those that product
                   $addFields: {
                     products: {
                       $filter: {
@@ -2096,6 +2114,7 @@ router.get(
                   }
                 },
                 {
+                  //? if the filtered product is found then bering only those rtv
                   $match: {
                     "products": { $gt: [] }
                   }
@@ -2110,6 +2129,7 @@ router.get(
               let: { article_code: "$products.article_code" },
               pipeline: [
                 {
+                  //? fetch those rtv that will match between those dates
                   $match: {
                     $expr: {
                       $and: [
@@ -2125,6 +2145,7 @@ router.get(
                   }
                 },
                 {
+                  //?filter those rtv that has that product
                   $addFields: {
                     products: {
                       $filter: {
@@ -2138,6 +2159,7 @@ router.get(
                   }
                 },
                 {
+                  //? bring only the filtered rtv that matched with product
                   $match: {
                     "products": { $gt: [] }
                   }
@@ -2149,6 +2171,7 @@ router.get(
 
           {
             $addFields: {
+              //? sum of rtv product qty before start date
               rtvPQty: {
                 $reduce: {
                   input: "$rtvsPrevious",
@@ -2169,6 +2192,7 @@ router.get(
                   }
                 }
               },
+              //? bring all the tp value in array of rtv product tp before start date
               rtvPTPArray: {
                 $reduce: {
                   input: "$rtvsPrevious",
@@ -2187,6 +2211,7 @@ router.get(
                   }
                 }
               },
+              //? bring all the mrp value in array of rtv product tp before start date
               rtvPMRPArray: {
                 $reduce: {
                   input: "$rtvsPrevious",
@@ -2209,6 +2234,7 @@ router.get(
           },
           {
             $addFields: {
+              //? sum of rtv product qty between start date and end date
               rtvQty: {
                 $reduce: {
                   input: "$rtvs",
@@ -2230,6 +2256,7 @@ router.get(
                 }
               },
               rtvTPArray: {
+                //? bring all the tp value in array of rtv product tp between start date and end date
                 $reduce: {
                   input: "$rtvs",
                   initialValue: [],
@@ -2248,6 +2275,7 @@ router.get(
                 }
               },
               rtvMRPArray: {
+                //? bring all the mrp value in array of rtv product mrp between start date and end date
                 $reduce: {
                   input: "$rtvs",
                   initialValue: [],
@@ -2272,6 +2300,7 @@ router.get(
           // {
           //   $addFields: {
           //     rtvPTPAvg: {
+          // // ?avg of previous rtv tp array
           //       $avg: {
           //         $filter: {
           //           input: "$rtvPTPArray",
@@ -2281,6 +2310,7 @@ router.get(
           //       }
           //     },
           //     rtvPMRPAvg: {
+          // // ?avg of previous rtv mrp array
           //       $avg: {
           //         $filter: {
           //           input: "$rtvPMRPArray",
@@ -2295,6 +2325,7 @@ router.get(
           // {
           //   $addFields: {
           //     rtvTPAvg: {
+          // // ?avg of  rtv tp array
           //       $avg: {
           //         $filter: {
           //           input: "$rtvTPArray",
@@ -2304,6 +2335,7 @@ router.get(
           //       }
           //     },
           //     rtvMRPAvg: {
+          // // ?avg of previous grns mrp array
           //       $avg: {
           //         $filter: {
           //           input: "$rtvMRPArray",
@@ -2319,6 +2351,7 @@ router.get(
           {
             $addFields: {
               rtvDetails: {
+                //?all the rtv that has one product
                 $map: {
                   input: "$rtvs",
                   as: "rtv",
@@ -2369,6 +2402,7 @@ router.get(
           //?damage start 
           {
             $lookup: {
+              //? all the damagers before start date 
               from: "damages",
               let: { article_code: "$products.article_code" },
               pipeline: [
@@ -2388,6 +2422,7 @@ router.get(
                   }
                 },
                 {
+                  //? filter those damages with products before start date 
                   $addFields: {
                     products: {
                       $filter: {
@@ -2400,6 +2435,7 @@ router.get(
                     }
                   }
                 },
+                //? if products are matched only those damage before start date 
                 {
                   $match: {
                     "products": { $gt: [] }
