@@ -2747,7 +2747,7 @@ router.get(
                 },
                 {
                   $match: {
-                    "returnProducts": { $gt: [] }
+                    "products": { $gt: [] }
                   }
                 }
               ],
@@ -2789,7 +2789,7 @@ router.get(
                 },
                 {
                   $match: {
-                    "returnProducts": { $gt: [] }
+                    "products": { $gt: [] }
                   }
                 }
               ],
@@ -4642,7 +4642,7 @@ router.get(
                 },
                 {
                   $match: {
-                    "returnProducts": { $gt: [] }
+                    "products": { $gt: [] }
                   }
                 }
               ],
@@ -4684,7 +4684,7 @@ router.get(
                 },
                 {
                   $match: {
-                    "returnProducts": { $gt: [] }
+                    "products": { $gt: [] }
                   }
                 }
               ],
@@ -6235,7 +6235,7 @@ router.get(
               },
               {
                 $match: {
-                  "returnProducts": { $gt: [] }
+                  "products": { $gt: [] }
                 }
               }
             ],
@@ -6277,7 +6277,7 @@ router.get(
               },
               {
                 $match: {
-                  "returnProducts": { $gt: [] }
+                  "products": { $gt: [] }
                 }
               }
             ],
@@ -7439,7 +7439,7 @@ router.get(
               },
               {
                 $match: {
-                  "returnProducts": { $gt: [] }
+                  "products": { $gt: [] }
                 }
               }
             ],
@@ -7481,7 +7481,7 @@ router.get(
               },
               {
                 $match: {
-                  "returnProducts": { $gt: [] }
+                  "products": { $gt: [] }
                 }
               }
             ],
@@ -7631,56 +7631,56 @@ router.get(
 
           }
         },
-        // {
-        //   $addFields: {
-        //     saleReturnDetails: {
-        //       $map: {
-        //         input: "$salesReturn",
-        //         as: "sale",
-        //         in: {
-        //           invoiceId: "$$sale.invoiceId",
-        //           qty: {
-        //             $sum: {
-        //               $map: {
-        //                 input: "$$sale.products",
-        //                 as: "product",
-        //                 in: { $toInt: "$$product.qty" }
-        //               }
-        //             }
-        //           },
-        //           tp: {
-        //             $toDouble: {
-        //               $arrayElemAt: [
-        //                 "$$sale.products.tp",
-        //                 {
-        //                   $indexOfArray: [
-        //                     "$$sale.products.article_code",
-        //                     "$products.article_code"
-        //                   ]
-        //                 }
-        //               ]
-        //             }
-        //           },
-        //           mrp: {
-        //             $toDouble: {
-        //               $arrayElemAt: [
-        //                 "$$sale.products.mrp",
-        //                 {
-        //                   $indexOfArray: [
-        //                     "$$sale.products.article_code",
-        //                     "$products.article_code"
-        //                   ]
-        //                 }
-        //               ]
-        //             }
-        //           },
-        //           createdAt: "$$sale.createdAt",
-        //           // discount: "$$sale.discount"
-        //         }
-        //       }
-        //     }
-        //   }
-        // },
+        {
+          $addFields: {
+            saleReturnDetails: {
+              $map: {
+                input: "$salesReturn",
+                as: "sale",
+                in: {
+                  invoiceId: "$$sale.invoiceId",
+                  qty: {
+                    $sum: {
+                      $map: {
+                        input: "$$sale.products",
+                        as: "product",
+                        in: { $toInt: "$$product.qty" }
+                      }
+                    }
+                  },
+                  tp: {
+                    $toDouble: {
+                      $arrayElemAt: [
+                        "$$sale.products.tp",
+                        {
+                          $indexOfArray: [
+                            "$$sale.products.article_code",
+                            "$products.article_code"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  mrp: {
+                    $toDouble: {
+                      $arrayElemAt: [
+                        "$$sale.products.mrp",
+                        {
+                          $indexOfArray: [
+                            "$$sale.products.article_code",
+                            "$products.article_code"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  createdAt: "$$sale.createdAt",
+                  // discount: "$$sale.discount"
+                }
+              }
+            }
+          }
+        },
         {
           $addFields: {
             saleDetails: {
@@ -7973,8 +7973,8 @@ router.get(
 
             saleQty: 1,
             saleDetails: 1,
-            salesReturn: 1,
-            // saleReturnDetails: 1,
+            // salesReturn: 1,
+            saleReturnDetails: 1,
             salePQty: 1,
             saleRPQty: 1,
             saleRQty: 1,
