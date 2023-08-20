@@ -5595,6 +5595,7 @@ router.get(
     console.log("line5559", "start", start, "end", end)
     try {
 
+
       const product = await Product.aggregate([
         {
           $lookup: {
@@ -5761,64 +5762,7 @@ router.get(
             },
           }
         },
-        {
-          $addFields: {
-            grnDetails: {
-              $map: {
-                input: "$grns",
-                as: "grn",
-                in: {
-                  grnNo: "$$grn.grnNo",
-                  qty: {
-                    $sum: {
-                      $map: {
-                        input: "$$grn.products",
-                        as: "product",
-                        // in: { $toInt: "$$product.qty" }
-                        in: {
-                          $toInt: {
-                            $ifNull: [ // Handle null or invalid values
-                              { $toDouble: "$$product.qty" }, // Convert to double without trimming
-                              0 // Default value if conversion fails
-                            ]
-                          }
-                        }
 
-                      }
-                    }
-                  },
-                  tp: {
-                    $toDouble: {
-                      $arrayElemAt: [
-                        "$$grn.products.tp",
-                        {
-                          $indexOfArray: [
-                            "$$grn.products.article_code",
-                            "$products.article_code"
-                          ]
-                        }
-                      ]
-                    }
-                  },
-                  mrp: {
-                    $toDouble: {
-                      $arrayElemAt: [
-                        "$$grn.products.mrp",
-                        {
-                          $indexOfArray: [
-                            "$$grn.products.article_code",
-                            "$products.article_code"
-                          ]
-                        }
-                      ]
-                    }
-                  },
-                  createdAt: "$$grn.createdAt"
-                }
-              }
-            }
-          }
-        },
         //?grn end
         //? rtv start
         {
@@ -5920,7 +5864,14 @@ router.get(
                         $map: {
                           input: "$$this.products",
                           as: "product",
-                          in: { $toInt: "$$product.qty" }
+                          in: {
+                            $toInt: {
+                              $ifNull: [ // Handle null or invalid values
+                                { $toDouble: "$$product.qty" }, // Convert to double without trimming
+                                0 // Default value if conversion fails
+                              ]
+                            }
+                          }
                         }
                       }
                     }
@@ -5945,7 +5896,14 @@ router.get(
                         $map: {
                           input: "$$this.products",
                           as: "product",
-                          in: { $toInt: "$$product.qty" }
+                          in: {
+                            $toInt: {
+                              $ifNull: [ // Handle null or invalid values
+                                { $toDouble: "$$product.qty" }, // Convert to double without trimming
+                                0 // Default value if conversion fails
+                              ]
+                            }
+                          }
                         }
                       }
                     }
@@ -5954,55 +5912,6 @@ router.get(
               }
             },
 
-          }
-        },
-        {
-          $addFields: {
-            rtvDetails: {
-              $map: {
-                input: "$rtvs",
-                as: "rtv",
-                in: {
-                  rtvNo: "$$rtv.rtvNo",
-                  qty: {
-                    $sum: {
-                      $map: {
-                        input: "$$rtv.products",
-                        as: "product",
-                        in: { $toInt: "$$product.qty" }
-                      }
-                    }
-                  },
-                  tp: {
-                    $toDouble: {
-                      $arrayElemAt: [
-                        "$$rtv.products.tp",
-                        {
-                          $indexOfArray: [
-                            "$$rtv.products.article_code",
-                            "$products.article_code"
-                          ]
-                        }
-                      ]
-                    }
-                  },
-                  mrp: {
-                    $toDouble: {
-                      $arrayElemAt: [
-                        "$$rtv.products.mrp",
-                        {
-                          $indexOfArray: [
-                            "$$rtv.products.article_code",
-                            "$products.article_code"
-                          ]
-                        }
-                      ]
-                    }
-                  },
-                  createdAt: "$$rtv.createdAt"
-                }
-              }
-            }
           }
         },
         //?rtv end 
@@ -6106,7 +6015,14 @@ router.get(
                         $map: {
                           input: "$$this.products",
                           as: "product",
-                          in: { $toInt: "$$product.qty" }
+                          in: {
+                            $toInt: {
+                              $ifNull: [ // Handle null or invalid values
+                                { $toDouble: "$$product.qty" }, // Convert to double without trimming
+                                0 // Default value if conversion fails
+                              ]
+                            }
+                          }
                         }
                       }
                     }
@@ -6131,7 +6047,14 @@ router.get(
                         $map: {
                           input: "$$this.products",
                           as: "product",
-                          in: { $toInt: "$$product.qty" }
+                          in: {
+                            $toInt: {
+                              $ifNull: [ // Handle null or invalid values
+                                { $toDouble: "$$product.qty" }, // Convert to double without trimming
+                                0 // Default value if conversion fails
+                              ]
+                            }
+                          }
                         }
                       }
                     }
@@ -6140,56 +6063,6 @@ router.get(
               }
             },
 
-          }
-        },
-
-        {
-          $addFields: {
-            damageDetails: {
-              $map: {
-                input: "$damages",
-                as: "damage",
-                in: {
-                  damageNo: "$$damage.damageNo",
-                  qty: {
-                    $sum: {
-                      $map: {
-                        input: "$$damage.products",
-                        as: "product",
-                        in: { $toInt: "$$product.qty" }
-                      }
-                    }
-                  },
-                  tp: {
-                    $toDouble: {
-                      $arrayElemAt: [
-                        "$$damage.products.tp",
-                        {
-                          $indexOfArray: [
-                            "$$damage.products.article_code",
-                            "$products.article_code"
-                          ]
-                        }
-                      ]
-                    }
-                  },
-                  mrp: {
-                    $toDouble: {
-                      $arrayElemAt: [
-                        "$$damage.products.mrp",
-                        {
-                          $indexOfArray: [
-                            "$$damage.products.article_code",
-                            "$products.article_code"
-                          ]
-                        }
-                      ]
-                    }
-                  },
-                  createdAt: "$$damage.createdAt"
-                }
-              }
-            }
           }
         },
         //?damage end
@@ -6377,7 +6250,14 @@ router.get(
                         $map: {
                           input: "$$this.products",
                           as: "product",
-                          in: { $toInt: "$$product.qty" }
+                          in: {
+                            $toInt: {
+                              $ifNull: [ // Handle null or invalid values
+                                { $toDouble: "$$product.qty" }, // Convert to double without trimming
+                                0 // Default value if conversion fails
+                              ]
+                            }
+                          }
                         }
                       }
                     }
@@ -6402,7 +6282,14 @@ router.get(
                         $map: {
                           input: "$$this.products",
                           as: "product",
-                          in: { $toInt: "$$product.qty" }
+                          in: {
+                            $toInt: {
+                              $ifNull: [ // Handle null or invalid values
+                                { $toDouble: "$$product.qty" }, // Convert to double without trimming
+                                0 // Default value if conversion fails
+                              ]
+                            }
+                          }
                         }
                       }
                     }
@@ -6427,7 +6314,14 @@ router.get(
                         $map: {
                           input: "$$this.products",
                           as: "product",
-                          in: { $toInt: "$$product.qty" }
+                          in: {
+                            $toInt: {
+                              $ifNull: [ // Handle null or invalid values
+                                { $toDouble: "$$product.qty" }, // Convert to double without trimming
+                                0 // Default value if conversion fails
+                              ]
+                            }
+                          }
                         }
                       }
                     }
@@ -6452,7 +6346,14 @@ router.get(
                         $map: {
                           input: "$$this.products",
                           as: "product",
-                          in: { $toInt: "$$product.qty" }
+                          in: {
+                            $toInt: {
+                              $ifNull: [ // Handle null or invalid values
+                                { $toDouble: "$$product.qty" }, // Convert to double without trimming
+                                0 // Default value if conversion fails
+                              ]
+                            }
+                          }
                         }
                       }
                     }
@@ -6464,56 +6365,6 @@ router.get(
           }
         },
 
-        {
-          $addFields: {
-            saleDetails: {
-              $map: {
-                input: "$sales",
-                as: "sale",
-                in: {
-                  invoiceId: "$$sale.invoiceId",
-                  qty: {
-                    $sum: {
-                      $map: {
-                        input: "$$sale.products",
-                        as: "product",
-                        in: { $toInt: "$$product.qty" }
-                      }
-                    }
-                  },
-                  tp: {
-                    $toDouble: {
-                      $arrayElemAt: [
-                        "$$sale.products.tp",
-                        {
-                          $indexOfArray: [
-                            "$$sale.products.article_code",
-                            "$products.article_code"
-                          ]
-                        }
-                      ]
-                    }
-                  },
-                  mrp: {
-                    $toDouble: {
-                      $arrayElemAt: [
-                        "$$sale.products.mrp",
-                        {
-                          $indexOfArray: [
-                            "$$sale.products.article_code",
-                            "$products.article_code"
-                          ]
-                        }
-                      ]
-                    }
-                  },
-                  createdAt: "$$sale.createdAt",
-                  // discount: "$$sale.discount"
-                }
-              }
-            }
-          }
-        },
         //?sale end
         //?tpn start
         {
@@ -6615,7 +6466,14 @@ router.get(
                         $map: {
                           input: "$$this.products",
                           as: "product",
-                          in: { $toInt: "$$product.qty" }
+                          in: {
+                            $toInt: {
+                              $ifNull: [ // Handle null or invalid values
+                                { $toDouble: "$$product.qty" }, // Convert to double without trimming
+                                0 // Default value if conversion fails
+                              ]
+                            }
+                          }
                         }
                       }
                     }
@@ -6640,7 +6498,14 @@ router.get(
                         $map: {
                           input: "$$this.products",
                           as: "product",
-                          in: { $toInt: "$$product.qty" }
+                          in: {
+                            $toInt: {
+                              $ifNull: [ // Handle null or invalid values
+                                { $toDouble: "$$product.qty" }, // Convert to double without trimming
+                                0 // Default value if conversion fails
+                              ]
+                            }
+                          }
                         }
                       }
                     }
@@ -6651,67 +6516,19 @@ router.get(
 
           }
         },
-        {
-          $addFields: {
-            tpnDetails: {
-              $map: {
-                input: "$tpns",
-                as: "tpn",
-                in: {
-                  invoiceId: "$$tpn.invoiceId",
-                  qty: {
-                    $sum: {
-                      $map: {
-                        input: "$$tpn.products",
-                        as: "product",
-                        in: { $toInt: "$$product.qty" }
-                      }
-                    }
-                  },
-                  tp: {
-                    $toDouble: {
-                      $arrayElemAt: [
-                        "$$tpn.products.tp",
-                        {
-                          $indexOfArray: [
-                            "$$tpn.products.article_code",
-                            "$products.article_code"
-                          ]
-                        }
-                      ]
-                    }
-                  },
-                  mrp: {
-                    $toDouble: {
-                      $arrayElemAt: [
-                        "$$tpn.products.mrp",
-                        {
-                          $indexOfArray: [
-                            "$$tpn.products.article_code",
-                            "$products.article_code"
-                          ]
-                        }
-                      ]
-                    }
-                  },
-                  createdAt: "$$tpn.createdAt"
-                }
-              }
-            }
-          }
-        },
+
         //?tpn end
-        {
-          $lookup: {
-            from: "generics",
-            localField: "generic", // Convert to ObjectId
-            foreignField: "_id",
-            as: "generic",
-          },
-        },
-        {
-          $unwind: "$generic"
-        },
+        // {
+        //   $lookup: {
+        //     from: "generics",
+        //     localField: "generic", // Convert to ObjectId
+        //     foreignField: "_id",
+        //     as: "generic",
+        //   },
+        // },
+        // {
+        //   $unwind: "$generic"
+        // },
         {
           $lookup: {
             from: "groups",
@@ -6723,49 +6540,49 @@ router.get(
         {
           $unwind: "$group"
         },
-        {
-          $lookup: {
-            from: "brands",
-            localField: "brand", // Convert to ObjectId
-            foreignField: "_id",
-            as: "brand",
-          },
-        },
-        {
-          $unwind: "$brand"
-        },
+        // {
+        //   $lookup: {
+        //     from: "brands",
+        //     localField: "brand", // Convert to ObjectId
+        //     foreignField: "_id",
+        //     as: "brand",
+        //   },
+        // },
+        // {
+        //   $unwind: "$brand"
+        // },
         {
           $project: {
-            _id: 1,
+            _id: 0,
             name: 1,
             article_code: 1,
             group: 1,
-            generic: 1,
-            brand: 1,
-            unit: 1,
+            // generic: 1,
+            // brand: 1,
+            // unit: 1,
             tp: 1,
             mrp: 1,
 
             grnPQty: 1,
             grnQty: 1,
-            grnDetails: 1,
+            // grnDetails: 1,
 
             rtvQty: 1,
-            rtvDetails: 1,
+            // rtvDetails: 1,
             rtvPQty: 1,
 
             saleQty: 1,
-            saleDetails: 1,
+            // saleDetails: 1,
             salePQty: 1,
             saleRPQty: 1,
             saleRQty: 1,
 
             tpnQty: 1,
-            tpnDetails: 1,
+            // tpnDetails: 1,
             tpnPQty: 1,
 
             damageQty: 1,
-            damageDetails: 1,
+            // damageDetails: 1,
             damagePQty: 1,
           },
         },
