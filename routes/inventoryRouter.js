@@ -15,6 +15,7 @@ const jwt = require("jsonwebtoken");
 const Inventory = require("../models/inventoryModel");
 const checklogin = require("../middlewares/checkLogin");
 const mongoose = require('mongoose');
+const { MongoClient } = require('mongodb');
 // const { adjustInventoryOnSale } = require("../middlewares/useInventory");
 
 
@@ -334,6 +335,49 @@ inventoryRouter.get(
     console.log(id);
   })
 );
+
+
+inventoryRouter.get(
+  "/snapshot",
+  expressAsyncHandler(async (req, res) => {
+    console.log("snap")
+    try {
+      // Read data from secondary nodes with a preferred read preference
+      const snapshotData = await Inventory.find().readPreference('secondaryPreferred').toArray();
+
+      console.log("snapshotData", snapshotData);
+      res.send(snapshotData);
+    } catch (error) {
+      console.error("Error:", error);
+      res.status(500).send("Internal Server Error");
+    }
+  }));
+inventoryRouter.get(
+  "/snapshot/ss",
+  expressAsyncHandler(async (req, res) => {
+    try {
+      const dbUrl = `mongodb+srv://test:QFNOIr4QbpGGpA4D@cluster0.1hsyopn.mongodb.net/pharmacyDb?retryWrites=true&w=majority`;
+      const client = new MongoClient(dbUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+      const session = client.startSession();
+      session.startTransaction();
+      // Read data from secondary nodes with a preferred read preference
+      const snapshotData = await Inventory.find().readPreference('secondaryPreferred').toArray();
+
+      await session.commitTransaction();
+
+      console.log("snapshotData", snapshotData);
+      res.send(snapshotData);
+    } catch (error) {
+      console.error("Error:", error);
+      await session.abortTransaction();
+      res.status(500).send("Internal Server Error");
+    } finally {
+      session.endSession();
+    }
+  })
+);
+
+
 
 // CREATE ONE Inventory
 inventoryRouter.post(
