@@ -15,7 +15,6 @@ const unitRouter = require("./routes/unitRouter");
 const priceRouter = require("./routes/priceRouter");
 const warehouseRouter = require("./routes/warehouseRouter");
 const inventoryRouter = require("./routes/inventoryRouter");
-const snapRouter = require("./routes/snapRouter");
 const inventoryCountRouter = require("./routes/inventoryCountRouter");
 const purchaseRouter = require("./routes/purchaseRouter");
 const grnRouter = require("./routes/grnRouter");
@@ -32,7 +31,7 @@ const fileUpload = require("express-fileupload");
 require("dotenv").config();
 const PORT = process.env.PORT || 5001;
 
-// app init
+// app init`mongoose.set('strictQuery', 
 const app = express();
 
 // MiddleWare
@@ -55,13 +54,20 @@ app.use(express.static(__dirname + "/template"));
 
 const dbUrl = `mongodb+srv://techsoulincbd:d3VklaC25bQS0tSs@cluster0.zgc27tw.mongodb.net/pharmacyDB?retryWrites=true&w=majority`;
 
+
+// const dbUrl = `mongodb+srv://pharmatest:J7VS1GnDa5ZtL7mq@cluster0.ycvlm8h.mongodb.net/pharmatest?retryWrites=true&w=majority`;
+
 //new
 //test//
-// // const dbUrl = `mongodb+srv://test:QFNOIr4QbpGGpA4D@cluster0.1hsyopn.mongodb.net/Pharmacy?retryWrites=true&w=majority`;
+//  const dbUrl = `mongodb+srv://test:QFNOIr4QbpGGpA4D@cluster0.1hsyopn.mongodb.net/Pharmacy?retryWrites=true&w=majority`;
 //test
 //test//
 // const dbUrl = `mongodb+srv://test:QFNOIr4QbpGGpA4D@cluster0.1hsyopn.mongodb.net/pharmacyDb?retryWrites=true&w=majority`;
 //test
+
+//pharmatest
+//J7VS1GnDa5ZtL7mq
+// mongodb+srv://pharmatest:J7VS1GnDa5ZtL7mq@cluster0.ycvlm8h.mongodb.net/
 
 console.log(dbUrl);
 // // mongodb+srv://techsoulincbd:d3VklaC25bQS0tSs@cluster0.zgc27tw.mongodb.net/pharmacyDB?retryWrites=true&w=majority
@@ -87,7 +93,6 @@ app.use("/api/unit", unitRouter);
 app.use("/api/price", priceRouter);
 app.use("/api/warehouse", warehouseRouter);
 app.use("/api/inventory", inventoryRouter);
-app.use("/api/snap", snapRouter);
 app.use("/api/inventoryCount", inventoryCountRouter);
 app.use("/api/purchase", purchaseRouter);
 app.use("/api/grn", grnRouter);
