@@ -391,7 +391,96 @@ purchaseRouter.get(
 );
 
 
+// GET ALL GRN WITH PAGENATION & SEARCH
+purchaseRouter.get(
+  "/:page/:size",
+  expressAsyncHandler(async (req, res) => {
+    const page = parseInt(req.params.page);
+    const size = parseInt(req.params.size);
+    const queryString = req.query?.q?.trim().toString().toLocaleLowerCase();
+    const currentPage = page + 0;
 
+    let query = {};
+    let purchase = [];
+    // const size = parseInt(req.query.size);
+    console.log("page:", currentPage, "size:", size, "search:", queryString);
+    console.log(typeof queryString);
+
+    //check if search or the pagenation
+
+    if (queryString) {
+      console.log("== query");
+
+      console.log("search:", query);
+      query = { poNo: { $regex: new RegExp(queryString + ".*?", "i") } };
+      // search check if num or string
+      // const isNumber = /^\d/.test(queryString);
+      // console.log(isNumber);
+      // if (!isNumber) {
+      //   // if text then search name
+      //   // query = { name:  queryString  };
+      // } else {
+      //   // if number search in ean and article code
+      //   query = {
+      //     $or: [
+      //       { ean: { $regex: RegExp("^" + queryString + ".*", "i") } },
+      //       {
+      //         article_code: {
+      //           $regex: RegExp("^" + queryString + ".*", "i"),
+      //         },
+      //       },
+      //     ],
+      //   };
+      // }
+      console.log(query);
+
+      purchase = await Purchase.find(query)
+        .select({
+          poNo: 1,
+          supplier: 1,
+          warehouse: 1,
+          type: 1,
+          totalItem: 1,
+          total: 1,
+          status: 1,
+          createdAt: 1,
+          shipping_cost: 1,
+          note: 1,
+        })
+        .limit(50)
+        .populate("supplier", "name")
+        .populate("warehouse", "name")
+        .populate("userId", "name");
+      res.status(200).json(Purchase);
+    } else {
+      console.log("no query");
+
+      // regular pagination
+      query = {};
+
+      purchase = await Purchase.find(query)
+        .select({
+          poNo: 1,
+          supplier: 1,
+          warehouse: 1,
+          type: 1,
+          totalItem: 1,
+          total: 1,
+          status: 1,
+          createdAt: 1,
+          shipping_cost: 1,
+          note: 1,
+        })
+        .limit(size)
+        .skip(size * page)
+        .populate("supplier", "name")
+        .populate("warehouse", "name")
+        .populate("userId", "name");
+      res.status(200).json(purchase);
+      console.log("done:", query);
+    }
+  })
+);
 
 
 // CREATE ONE Purchase
@@ -493,6 +582,26 @@ purchaseRouter.put(
   })
 );
 
+// UPDATE ONE Purchase Status
+purchaseRouter.put(
+  "/delete/:id",
+  expressAsyncHandler(async (req, res) => {
+    const id = req.params.id;
+    console.log("PO", id)
+    try {
+      await Purchase.updateOne({ _id: id }, { $set: { status: "Canceled" } })
+        .then((response) => {
+          res.send(response);
+        })
+        .catch((err) => {
+          res.send(err);
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  })
+);
+
 // DELETE ONE Purchase
 purchaseRouter.delete(
   "/:id",
@@ -512,95 +621,6 @@ purchaseRouter.delete(
   })
 );
 
-// GET ALL GRN WITH PAGENATION & SEARCH
-purchaseRouter.get(
-  "/:page/:size",
-  expressAsyncHandler(async (req, res) => {
-    const page = parseInt(req.params.page);
-    const size = parseInt(req.params.size);
-    const queryString = req.query?.q?.trim().toString().toLocaleLowerCase();
-    const currentPage = page + 0;
 
-    let query = {};
-    let purchase = [];
-    // const size = parseInt(req.query.size);
-    console.log("page:", currentPage, "size:", size, "search:", queryString);
-    console.log(typeof queryString);
-
-    //check if search or the pagenation
-
-    if (queryString) {
-      console.log("== query");
-
-      console.log("search:", query);
-      query = { poNo: { $regex: new RegExp(queryString + ".*?", "i") } };
-      // search check if num or string
-      // const isNumber = /^\d/.test(queryString);
-      // console.log(isNumber);
-      // if (!isNumber) {
-      //   // if text then search name
-      //   // query = { name:  queryString  };
-      // } else {
-      //   // if number search in ean and article code
-      //   query = {
-      //     $or: [
-      //       { ean: { $regex: RegExp("^" + queryString + ".*", "i") } },
-      //       {
-      //         article_code: {
-      //           $regex: RegExp("^" + queryString + ".*", "i"),
-      //         },
-      //       },
-      //     ],
-      //   };
-      // }
-      console.log(query);
-
-      purchase = await Purchase.find(query)
-        .select({
-          poNo: 1,
-          supplier: 1,
-          warehouse: 1,
-          type: 1,
-          totalItem: 1,
-          total: 1,
-          status: 1,
-          createdAt: 1,
-          shipping_cost: 1,
-          note: 1,
-        })
-        .limit(50)
-        .populate("supplier", "name")
-        .populate("warehouse", "name")
-        .populate("userId", "name");
-      res.status(200).json(Purchase);
-    } else {
-      console.log("no query");
-
-      // regular pagination
-      query = {};
-
-      purchase = await Purchase.find(query)
-        .select({
-          poNo: 1,
-          supplier: 1,
-          warehouse: 1,
-          type: 1,
-          totalItem: 1,
-          total: 1,
-          status: 1,
-          createdAt: 1,
-          shipping_cost: 1,
-          note: 1,
-        })
-        .limit(size)
-        .skip(size * page)
-        .populate("supplier", "name")
-        .populate("warehouse", "name")
-        .populate("userId", "name");
-      res.status(200).json(purchase);
-      console.log("done:", query);
-    }
-  })
-);
 
 module.exports = purchaseRouter;
