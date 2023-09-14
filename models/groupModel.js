@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const groupSchema = mongoose.Schema(
     {
         name: { type: String, require: true },
-        code: { type: String },
+        code: { type: String, require: true, unique: true },
         symbol: { type: String },
         photo: { type: String },
         details: { type: String },

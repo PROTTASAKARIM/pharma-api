@@ -47,6 +47,33 @@ purchaseRouter.get(
     // console.log(Purchases);
   })
 );
+// GET active Purchases
+purchaseRouter.get(
+  "/active",
+  expressAsyncHandler(async (req, res) => {
+    const purchases = await Purchase.find({ status: { $ne: "Canceled" } })
+      .select({
+        poNo: 1,
+        supplier: 1,
+        warehouse: 1,
+        type: 1,
+        totalItem: 1,
+        total: 1,
+        status: 1,
+        createdAt: 1,
+        shipping_cost: 1,
+        note: 1,
+      })
+      .populate("supplier", "name")
+      .populate("warehouse", "name")
+      .populate("userId", "name");
+    //   .exec(callback);
+    const sorted = purchases.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    res.send(sorted);
+    // // res.send('removed');
+    // console.log(Purchases);
+  })
+);
 
 purchaseRouter.get(
   "/supplier/account/:id",
@@ -322,6 +349,7 @@ purchaseRouter.get(
     try {
       const purchase = await Purchase.find({
         createdAt: { $gte: start, $lte: end },
+        status: { $ne: "Canceled" }
       })
         .select({
           poNo: 1,
@@ -582,25 +610,7 @@ purchaseRouter.put(
   })
 );
 
-// UPDATE ONE Purchase Status
-purchaseRouter.put(
-  "/delete/:id",
-  expressAsyncHandler(async (req, res) => {
-    const id = req.params.id;
-    console.log("PO", id)
-    try {
-      await Purchase.updateOne({ _id: id }, { $set: { status: "Canceled" } })
-        .then((response) => {
-          res.send(response);
-        })
-        .catch((err) => {
-          res.send(err);
-        });
-    } catch (error) {
-      console.error(error);
-    }
-  })
-);
+
 
 // DELETE ONE Purchase
 purchaseRouter.delete(

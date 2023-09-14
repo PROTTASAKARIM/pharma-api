@@ -900,7 +900,44 @@ saleRouter.get(
   })
 );
 
-// GET export sales
+// // GET export sales
+// saleRouter.get(
+//   "/export/:start/:end",
+//   expressAsyncHandler(async (req, res) => {
+//     const start = req.params.start
+//       ? startOfDay(new Date(req.params.start))
+//       : startOfDay(new Date.now());
+//     const end = req.params.end
+//       ? endOfDay(new Date(req.params.end))
+//       : endOfDay(new Date.now());
+//     // console.log(start, end, new Date());
+//     const sales = await Sale.find({
+//       status: "complete",
+//       createdAt: { $gte: start, $lte: end },
+//     })
+//       .select({
+//         invoiceId: 1,
+//         totalItem: 1,
+//         grossTotalRound: 1,
+//         total: 1,
+//         vat: 1,
+//         status: 1,
+//         paidAmount: 1,
+//         billerId: 1,
+//         totalReceived: 1,
+//         createdAt: 1,
+//         changeAmount: 1,
+//         customerId: 1,
+//         tp: 1,
+//         discount: 1
+//       })
+//       .populate("billerId", "name")
+//       .populate("customerId", "phone");
+//     res.send(sales);
+//     // console.log(sales);
+//     // // res.send('removed');
+//   })
+// );
 saleRouter.get(
   "/export/:start/:end",
   expressAsyncHandler(async (req, res) => {
@@ -910,34 +947,81 @@ saleRouter.get(
     const end = req.params.end
       ? endOfDay(new Date(req.params.end))
       : endOfDay(new Date.now());
-    // console.log(start, end, new Date());
-    const sales = await Sale.find({
-      status: "complete",
-      createdAt: { $gte: start, $lte: end },
-    })
-      .select({
-        invoiceId: 1,
-        totalItem: 1,
-        grossTotalRound: 1,
-        total: 1,
-        vat: 1,
-        status: 1,
-        paidAmount: 1,
-        billerId: 1,
-        totalReceived: 1,
-        createdAt: 1,
-        changeAmount: 1,
-        customerId: 1,
-        tp: 1,
-        discount: 1
-      })
-      .populate("billerId", "name")
-      .populate("customerId", "phone");
-    res.send(sales);
-    // console.log(sales);
-    // // res.send('removed');
+
+    try {
+      const sales = await Sale.aggregate([
+        {
+          $match: {
+            status: "complete",
+            createdAt: { $gte: start, $lte: end },
+          },
+        },
+        {
+          $lookup: {
+            from: "users", // Replace with the actual collection name for users
+            localField: "billerId",
+            foreignField: "_id",
+            as: "biller",
+          },
+        },
+        {
+          $lookup: {
+            from: "customers", // Replace with the actual collection name for customers
+            localField: "customerId",
+            foreignField: "_id",
+            as: "customer",
+          },
+        },
+        {
+          $unwind: "$biller",
+        },
+        {
+          $unwind: "$customer",
+        },
+        {
+          $project: {
+            invoiceId: 1,
+            totalItem: 1,
+            grossTotalRound: 1,
+            total: 1,
+            vat: 1,
+            status: 1,
+            paidAmount: 1,
+            totalReceived: 1,
+            createdAt: 1,
+            changeAmount: 1,
+            tp: 1,
+            discount: 1,
+            productTpSum: {
+              $sum: {
+                $map: {
+                  input: "$products",
+                  as: "product",
+                  in: {
+                    $multiply: [
+                      { $toDouble: "$$product.tp" },
+                      { $toDouble: "$$product.qty" },
+                    ],
+                  },
+                },
+              },
+            },
+            "biller.name": "$biller.name", // Include biller name in the result
+            "customer.phone": "$customer.phone", // Include customer phone in the result
+          },
+        },
+      ]);
+
+      res.send(sales);
+    } catch (error) {
+      console.error("Error fetching sales data:", error);
+      res.status(500).send({ error: "An error occurred while fetching sales data." });
+    }
   })
 );
+
+
+
 // GET export sales
 saleRouter.get(
   "/exportDel/:start/:end",
