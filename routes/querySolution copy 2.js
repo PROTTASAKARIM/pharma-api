@@ -10,6 +10,7 @@
     {
         $unwind: '$products'
     },
+    //?grn
     {
         $lookup: {
             from: "grns",
@@ -93,6 +94,9 @@
         }
     },
 
+    //? grn qty sum 
+    //? grn Qty sum
+    //?grn sum 
     {
         $addFields: {
             grnPQty: {
@@ -157,6 +161,306 @@
         }
     },
 
+    //?grn  new Date("2023-09-30T17:59:59.999Z")
+    //? rtv  new Date("2023-09-30T17:59:59.999Z")
+    {
+        $lookup: {
+            from: "rtvs",
+            let: { article_code: "$products.article_code" },
+            pipeline: [
+                {
+                    $match: {
+                        $expr: {
+                            $and: [
+                                {
+                                    $gte: ["$createdAt", new Date("2023-08-31T18:00:00.000Z")]
+                                },
+                                {
+                                    $lt: ["$createdAt", new Date("2023-09-30T17:59:59.999Z")]
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    $addFields: {
+                        products: {
+                            $filter: {
+                                input: "$products",
+                                as: "product",
+                                cond: {
+                                    $eq: ["$$product.article_code", "$$article_code"]
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    $match: {
+                        "products": { $gt: [] }
+                    }
+                }
+            ],
+            as: "rtvs"
+        }
+    },
+    {
+        $lookup: {
+            from: "rtvs",
+            let: { article_code: "$products.article_code" },
+            pipeline: [
+                {
+                    $match: {
+                        $expr: {
+                            $and: [
+                                // {
+                                //   $gte: ["$createdAt",  new Date("2023-09-30T17:59:59.999Z")]
+                                // },
+                                {
+                                    $lt: ["$createdAt", new Date("2023-09-30T17:59:59.999Z")]
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    $addFields: {
+                        products: {
+                            $filter: {
+                                input: "$products",
+                                as: "product",
+                                cond: {
+                                    $eq: ["$$product.article_code", "$$article_code"]
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    $match: {
+                        "products": { $gt: [] }
+                    }
+                }
+            ],
+            as: "rtvsPrevious"
+        }
+    },
+
+    {
+        $addFields: {
+            rtvPQty: {
+                $reduce: {
+                    input: "$rtvsPrevious",
+                    initialValue: 0,
+                    in: {
+                        $sum: [
+                            "$$value",
+                            {
+                                $sum: {
+                                    $map: {
+                                        input: "$$this.products",
+                                        as: "product",
+                                        in: {
+                                            $toInt: {
+                                                $ifNull: [ // Handle null or invalid values
+                                                    { $toDouble: "$$product.qty" }, // Convert to double without trimming
+                                                    0 // Default value if conversion fails
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+
+        }
+    },
+    {
+        $addFields: {
+            rtvQty: {
+                $reduce: {
+                    input: "$rtvs",
+                    initialValue: 0,
+                    in: {
+                        $sum: [
+                            "$$value",
+                            {
+                                $sum: {
+                                    $map: {
+                                        input: "$$this.products",
+                                        as: "product",
+                                        in: {
+                                            $toInt: {
+                                                $ifNull: [ // Handle null or invalid values
+                                                    { $toDouble: "$$product.qty" }, // Convert to double without trimming
+                                                    0 // Default value if conversion fails
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+
+        }
+    },
+    //?rtv  new Date("2023-09-30T17:59:59.999Z") 
+    //?damage  new Date("2023-09-30T17:59:59.999Z") 
+    {
+        $lookup: {
+            from: "damages",
+            let: { article_code: "$products.article_code" },
+            pipeline: [
+                {
+                    $match: {
+                        $expr: {
+                            $and: [
+                                // {
+                                //   $gte: ["$createdAt",  new Date("2023-09-30T17:59:59.999Z")]
+                                // },
+                                {
+                                    $lt: ["$createdAt", new Date("2023-09-30T17:59:59.999Z")]
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    $addFields: {
+                        products: {
+                            $filter: {
+                                input: "$products",
+                                as: "product",
+                                cond: {
+                                    $eq: ["$$product.article_code", "$$article_code"]
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    $match: {
+                        "products": { $gt: [] }
+                    }
+                }
+            ],
+            as: "damagesPrevious"
+        }
+    },
+    {
+        $lookup: {
+            from: "damages",
+            let: { article_code: "$products.article_code" },
+            pipeline: [
+                {
+                    $match: {
+                        $expr: {
+                            $and: [
+                                {
+                                    $gte: ["$createdAt", new Date("2023-08-31T18:00:00.000Z")]
+                                },
+                                {
+                                    $lt: ["$createdAt", new Date("2023-09-30T17:59:59.999Z")]
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    $addFields: {
+                        products: {
+                            $filter: {
+                                input: "$products",
+                                as: "product",
+                                cond: {
+                                    $eq: ["$$product.article_code", "$$article_code"]
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    $match: {
+                        "products": { $gt: [] }
+                    }
+                }
+            ],
+            as: "damages"
+        }
+    },
+
+    {
+        $addFields: {
+            damagePQty: {
+                $reduce: {
+                    input: "$damagesPrevious",
+                    initialValue: 0,
+                    in: {
+                        $sum: [
+                            "$$value",
+                            {
+                                $sum: {
+                                    $map: {
+                                        input: "$$this.products",
+                                        as: "product",
+                                        in: {
+                                            $toInt: {
+                                                $ifNull: [ // Handle null or invalid values
+                                                    { $toDouble: "$$product.qty" }, // Convert to double without trimming
+                                                    0 // Default value if conversion fails
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+
+        }
+    },
+    {
+        $addFields: {
+            damageQty: {
+                $reduce: {
+                    input: "$damages",
+                    initialValue: 0,
+                    in: {
+                        $sum: [
+                            "$$value",
+                            {
+                                $sum: {
+                                    $map: {
+                                        input: "$$this.products",
+                                        as: "product",
+                                        in: {
+                                            $toInt: {
+                                                $ifNull: [ // Handle null or invalid values
+                                                    { $toDouble: "$$product.qty" }, // Convert to double without trimming
+                                                    0 // Default value if conversion fails
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+
+        }
+    },
+    //?damage  new Date("2023-09-30T17:59:59.999Z")
+    //?sale  new Date("2023-09-30T17:59:59.999Z") 
     {
         $lookup: {
             from: "sales",
@@ -450,6 +754,158 @@
 
         }
     },
+
+    //?sale  new Date("2023-09-30T17:59:59.999Z")
+    //?tpn  new Date("2023-09-30T17:59:59.999Z")
+    {
+        $lookup: {
+            from: "tpns",
+            let: { article_code: "$products.article_code" },
+            pipeline: [
+                {
+                    $match: {
+                        $expr: {
+                            $and: [
+                                // {
+                                //   $gte: ["$createdAt",  new Date("2023-09-30T17:59:59.999Z")]
+                                // },
+                                {
+                                    $lt: ["$createdAt", new Date("2023-09-30T17:59:59.999Z")]
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    $addFields: {
+                        products: {
+                            $filter: {
+                                input: "$products",
+                                as: "product",
+                                cond: {
+                                    $eq: ["$$product.article_code", "$$article_code"]
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    $match: {
+                        "products": { $gt: [] }
+                    }
+                }
+            ],
+            as: "tpnsPrevious"
+        }
+    },
+    {
+        $lookup: {
+            from: "tpns",
+            let: { article_code: "$products.article_code" },
+            pipeline: [
+                {
+                    $match: {
+                        $expr: {
+                            $and: [
+                                {
+                                    $gte: ["$createdAt", new Date("2023-08-31T18:00:00.000Z")]
+                                },
+                                {
+                                    $lt: ["$createdAt", new Date("2023-09-30T17:59:59.999Z")]
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    $addFields: {
+                        products: {
+                            $filter: {
+                                input: "$products",
+                                as: "product",
+                                cond: {
+                                    $eq: ["$$product.article_code", "$$article_code"]
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    $match: {
+                        "products": { $gt: [] }
+                    }
+                }
+            ],
+            as: "tpns"
+        }
+    },
+
+    {
+        $addFields: {
+            tpnPQty: {
+                $reduce: {
+                    input: "$tpnsPrevious",
+                    initialValue: 0,
+                    in: {
+                        $sum: [
+                            "$$value",
+                            {
+                                $sum: {
+                                    $map: {
+                                        input: "$$this.products",
+                                        as: "product",
+                                        in: {
+                                            $toInt: {
+                                                $ifNull: [ // Handle null or invalid values
+                                                    { $toDouble: "$$product.qty" }, // Convert to double without trimming
+                                                    0 // Default value if conversion fails
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+
+        }
+    },
+    {
+        $addFields: {
+            tpnQty: {
+                $reduce: {
+                    input: "$tpns",
+                    initialValue: 0,
+                    in: {
+                        $sum: [
+                            "$$value",
+                            {
+                                $sum: {
+                                    $map: {
+                                        input: "$$this.products",
+                                        as: "product",
+                                        in: {
+                                            $toInt: {
+                                                $ifNull: [ // Handle null or invalid values
+                                                    { $toDouble: "$$product.qty" }, // Convert to double without trimming
+                                                    0 // Default value if conversion fails
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+
+        }
+    },
+
+
     {
         $lookup: {
             from: "groups",
@@ -470,12 +926,28 @@
             group: 1,
             tp: 1,
             mrp: 1,
+
             grnPQty: 1,
             grnQty: 1,
+
+
+            rtvQty: 1,
+
+            rtvPQty: 1,
+
             saleQty: 1,
+
             salePQty: 1,
             saleRPQty: 1,
             saleRQty: 1,
+
+            tpnQty: 1,
+
+            tpnPQty: 1,
+
+            damageQty: 1,
+
+            damagePQty: 1,
         },
     },
 

@@ -1,0 +1,171 @@
+[
+    {
+        $match: {
+            $expr: {
+                $and: [
+                    {
+                        $gte: ["$createdAt", new Date("2023-05-02T18:00:00.000Z")]
+                    },
+                    {
+                        $lte: ["$createdAt", new Date("2023-10-10T17:59:59.999Z")]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        $unwind: "$products",
+    },
+
+    {
+        $group: {
+            _id: "$products.id",
+            article_code: { $first: "$products.article_code" },
+            totalQuantity: { $sum: { $toDouble: "$products.qty" } },
+            totalMrp: { $sum: { $multiply: [{ $toDouble: "$products.mrp" }, { $toDouble: "$products.qty" }] } },
+            totalTP: { $sum: { $multiply: [{ $toDouble: "$products.tp" }, { $toDouble: "$products.qty" }] } },
+            name: { $first: "$products.name" },
+            mrp: { $avg: "$products.mrp" },
+            tp: { $avg: "$products.tp" },
+        },
+    },
+]
+[
+    {
+        $match: {
+            $expr: {
+                $and: [
+                    {
+                        $gte: ["$createdAt", new Date("2023-02-28T18:00:00.000Z")]
+                    },
+                    {
+                        $lt: ["$createdAt", new Date("2023-08-31T17:59:59.999Z")]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        $unwind: "$products",
+    },
+    {
+        $group: {
+            _id: "$products.id",
+            article_code: { $first: "$products.article_code" },
+            totalQuantity: { $sum: { $toDouble: "$products.qty" } },
+            totalMrp: {
+                $sum: {
+                    $multiply: [
+                        {
+                            $ifNull: [
+                                { $toDouble: "$products.mrp" }, // Convert to number if it's a string
+                                0 // Default value if it's not a number or is null
+                            ]
+                        },
+                        { $toDouble: "$products.qty" }
+                    ]
+                }
+            },
+            totalTP: {
+                $sum: {
+                    $multiply: [
+                        {
+                            $ifNull: [
+                                { $toDouble: "$products.tp" }, // Convert to number if it's a string
+                                0 // Default value if it's not a number or is null
+                            ]
+                        },
+                        { $toDouble: "$products.qty" }
+                    ]
+                }
+            },
+            name: { $first: "$products.name" },
+            mrp: {
+                $avg: {
+                    $ifNull: [
+                        { $toDouble: "$products.mrp" }, // Convert to number if it's a string
+                        0 // Default value if it's not a number or is null
+                    ]
+                }
+            },
+            tp: {
+                $avg: {
+                    $ifNull: [
+                        { $toDouble: "$products.tp" }, // Convert to number if it's a string
+                        0 // Default value if it's not a number or is null
+                    ]
+                }
+            }
+        },
+    }
+]
+[
+    {
+        $match: {
+            $expr: {
+                $and: [
+                    {
+                        $gte: ["$createdAt", new Date("2023-02-28T18:00:00.000Z")]
+                    },
+                    {
+                        $lt: ["$createdAt", new Date("2023-08-31T17:59:59.999Z")]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        $unwind: "$returnProducts",
+    },
+    {
+        $group: {
+            _id: "$returnProducts._id",
+            article_code: { $first: "$returnProducts.article_code" },
+            totalQuantity: { $sum: { $toDouble: "$returnProducts.qty" } },
+            totalMrp: {
+                $sum: {
+                    $multiply: [
+                        {
+                            $ifNull: [
+                                { $toDouble: "$returnProducts.mrp" }, // Convert to number if it's a string
+                                0 // Default value if it's not a number or is null
+                            ]
+                        },
+                        { $toDouble: "$returnProducts.qty" }
+                    ]
+                }
+            },
+            totalTP: {
+                $sum: {
+                    $multiply: [
+                        {
+                            $ifNull: [
+                                { $toDouble: "$returnProducts.tp" }, // Convert to number if it's a string
+                                0 // Default value if it's not a number or is null
+                            ]
+                        },
+                        { $toDouble: "$returnProducts.qty" }
+                    ]
+                }
+            },
+            name: { $first: "$returnProducts.name" },
+            mrp: {
+                $avg: {
+                    $ifNull: [
+                        { $toDouble: "$returnProducts.mrp" }, // Convert to number if it's a string
+                        0 // Default value if it's not a number or is null
+                    ]
+                }
+            },
+            tp: {
+                $avg: {
+                    $ifNull: [
+                        { $toDouble: "$returnProducts.tp" }, // Convert to number if it's a string
+                        0 // Default value if it's not a number or is null
+                    ]
+                }
+            }
+        },
+    }
+]
+

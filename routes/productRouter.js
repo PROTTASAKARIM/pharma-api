@@ -6663,7 +6663,7 @@ router.get(
     const end = req.params.end
       ? endOfDay(new Date(req.params.end))
       : endOfDay(new Date());
-    console.log("line5559", "start", start, "end", end)
+    console.log("line6666", "start", start, "end", end)
     try {
 
 
